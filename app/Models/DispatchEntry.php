@@ -20,6 +20,7 @@ class DispatchEntry extends Model
         "vehicle_id",
         "trip_code_id",
         "driver_id",
+        "driver2_id",
         "brand",
         "bus_number",
         "route",
@@ -56,6 +57,11 @@ class DispatchEntry extends Model
     public function driver(): BelongsTo
     {
         return $this->belongsTo(Driver::class);
+    }
+
+    public function driver2(): BelongsTo
+    {
+        return $this->belongsTo(Driver::class, 'driver2_id');
     }
 
     public function smsLogs(): HasMany

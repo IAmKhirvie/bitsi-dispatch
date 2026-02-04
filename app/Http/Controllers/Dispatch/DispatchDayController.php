@@ -22,6 +22,7 @@ class DispatchDayController extends Controller
             'entries.vehicle',
             'entries.tripCode',
             'entries.driver',
+            'entries.driver2',
             'summary',
             'creator',
         ])

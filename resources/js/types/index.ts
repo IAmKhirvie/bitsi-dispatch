@@ -108,6 +108,7 @@ export interface DispatchEntry {
     vehicle_id: number | null;
     trip_code_id: number | null;
     driver_id: number | null;
+    driver2_id: number | null;
     brand: string | null;
     bus_number: string | null;
     route: string | null;
@@ -123,6 +124,7 @@ export interface DispatchEntry {
     vehicle?: Vehicle;
     trip_code?: TripCode;
     driver?: Driver;
+    driver2?: Driver;
     dispatch_day?: DispatchDay;
     created_at: string;
     updated_at: string;
