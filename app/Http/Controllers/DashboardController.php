@@ -31,7 +31,7 @@ class DashboardController extends Controller
             'active_drivers' => Driver::where('is_active', true)->count(),
         ];
 
-        $recentEntries = DispatchEntry::with(['dispatchDay', 'vehicle', 'tripCode', 'driver'])
+        $recentEntries = DispatchEntry::with(['dispatchDay', 'vehicle', 'tripCode', 'driver', 'driver2'])
             ->latest()
             ->take(10)
             ->get();

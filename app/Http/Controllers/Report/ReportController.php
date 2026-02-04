@@ -58,6 +58,7 @@ class ReportController extends Controller
             'entries.vehicle',
             'entries.tripCode',
             'entries.driver',
+            'entries.driver2',
             'summary',
         ])
             ->whereDate('service_date', $date)

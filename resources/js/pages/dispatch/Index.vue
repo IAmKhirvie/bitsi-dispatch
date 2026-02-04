@@ -59,6 +59,7 @@ const addForm = useForm({
     trip_code_id: null as number | null,
     vehicle_id: null as number | null,
     driver_id: null as number | null,
+    driver2_id: null as number | null,
     brand: '',
     bus_number: '',
     route: '',
@@ -77,6 +78,7 @@ const editForm = useForm({
     trip_code_id: null as number | null,
     vehicle_id: null as number | null,
     driver_id: null as number | null,
+    driver2_id: null as number | null,
     brand: '',
     bus_number: '',
     route: '',
@@ -133,6 +135,7 @@ function openEditDialog(entry: DispatchEntry) {
     editForm.trip_code_id = entry.trip_code_id;
     editForm.vehicle_id = entry.vehicle_id;
     editForm.driver_id = entry.driver_id;
+    editForm.driver2_id = entry.driver2_id;
     editForm.brand = entry.brand || '';
     editForm.bus_number = entry.bus_number || '';
     editForm.route = entry.route || '';
@@ -294,12 +297,20 @@ const summary = computed(() => props.dispatchDay?.summary);
                                         <p v-if="addForm.errors.vehicle_id" class="text-xs text-red-500">{{ addForm.errors.vehicle_id }}</p>
                                     </div>
                                     <div class="space-y-2">
-                                        <Label>Driver</Label>
+                                        <Label>Driver 1</Label>
                                         <select v-model="addForm.driver_id" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
                                             <option :value="null">-- Select Driver --</option>
                                             <option v-for="d in drivers" :key="d.id" :value="d.id">{{ d.name }}</option>
                                         </select>
                                         <p v-if="addForm.errors.driver_id" class="text-xs text-red-500">{{ addForm.errors.driver_id }}</p>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <Label>Driver 2</Label>
+                                        <select v-model="addForm.driver2_id" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                                            <option :value="null">-- Select Driver --</option>
+                                            <option v-for="d in drivers" :key="d.id" :value="d.id">{{ d.name }}</option>
+                                        </select>
+                                        <p v-if="addForm.errors.driver2_id" class="text-xs text-red-500">{{ addForm.errors.driver2_id }}</p>
                                     </div>
                                     <div class="space-y-2">
                                         <Label>Brand</Label>
@@ -377,7 +388,8 @@ const summary = computed(() => props.dispatchDay?.summary);
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Sched. Dep.</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Actual Dep.</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Dir.</th>
-                                    <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Driver</th>
+                                    <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Driver 1</th>
+                                    <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Driver 2</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Status</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Remarks</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Actions</th>
@@ -385,7 +397,7 @@ const summary = computed(() => props.dispatchDay?.summary);
                             </thead>
                             <tbody>
                                 <tr v-if="entries.length === 0">
-                                    <td colspan="15" class="px-3 py-8 text-center text-sm text-muted-foreground">
+                                    <td colspan="16" class="px-3 py-8 text-center text-sm text-muted-foreground">
                                         No entries yet. Click "Add Entry" to start dispatching.
                                     </td>
                                 </tr>
@@ -408,6 +420,7 @@ const summary = computed(() => props.dispatchDay?.summary);
                                         <span v-else>--</span>
                                     </td>
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ entry.driver?.name || '--' }}</td>
+                                    <td class="whitespace-nowrap px-3 py-1.5">{{ entry.driver2?.name || '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">
                                         <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium"
                                             :class="statusClasses[entry.status] || statusClasses.scheduled">
@@ -456,8 +469,15 @@ const summary = computed(() => props.dispatchDay?.summary);
                                 </select>
                             </div>
                             <div class="space-y-2">
-                                <Label>Driver</Label>
+                                <Label>Driver 1</Label>
                                 <select v-model="editForm.driver_id" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                                    <option :value="null">-- Select Driver --</option>
+                                    <option v-for="d in drivers" :key="d.id" :value="d.id">{{ d.name }}</option>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <Label>Driver 2</Label>
+                                <select v-model="editForm.driver2_id" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
                                     <option :value="null">-- Select Driver --</option>
                                     <option v-for="d in drivers" :key="d.id" :value="d.id">{{ d.name }}</option>
                                 </select>
