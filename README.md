@@ -12,8 +12,8 @@ A real-time bus dispatch management system for **Bicol Isarog Transport System, 
 | Frontend         | Vue 3 (Composition API) + TypeScript           |
 | SPA Router       | Inertia.js v2                                  |
 | CSS              | Tailwind CSS + shadcn-vue (Radix-based)       |
-| Database         | SQLite (zero config)                           |
-| Queue            | SQLite (database driver)                       |
+| Database         | MySQL 8+ (recommended) or SQLite (zero config) |
+| Queue            | Database driver (works with both MySQL & SQLite)|
 | Icons            | Lucide Vue                                     |
 | Maps             | Leaflet.js + OpenStreetMap                     |
 | SMS              | Semaphore API (Philippine provider)            |
@@ -51,13 +51,14 @@ A real-time bus dispatch management system for **Bicol Isarog Transport System, 
 | **Node.js** | >= 18.x  | https://nodejs.org/                                          |
 | **npm**     | >= 9.x   | (comes with Node.js)                                         |
 | **Git**     | >= 2.x   | https://git-scm.com/downloads                                |
+| **MySQL**   | >= 8.0   | https://dev.mysql.com/downloads/installer/ (or use XAMPP)    |
 
 ### Required PHP Extensions
 
 Make sure these extensions are enabled in your `php.ini`:
 
-- `pdo_sqlite`
-- `sqlite3`
+- `pdo_mysql` (for MySQL)
+- `pdo_sqlite` and `sqlite3` (only if using SQLite)
 - `mbstring`
 - `openssl`
 - `fileinfo`
@@ -67,26 +68,30 @@ Make sure these extensions are enabled in your `php.ini`:
 
 ### Windows-Specific Setup
 
-1. **Install PHP via XAMPP (easiest)**
+1. **Install XAMPP (easiest — includes PHP + MySQL)**
    - Download XAMPP from https://www.apachefriends.org/
    - After install, add PHP to your PATH: `C:\xampp\php`
-   - Verify: `php -v`
+   - Open XAMPP Control Panel and **start MySQL**
+   - Verify: `php -v` and `mysql --version`
 
-2. **Or install PHP standalone**
-   - Download from https://windows.php.net/download/
-   - Extract to `C:\php`
-   - Copy `php.ini-development` to `php.ini`
-   - Uncomment these lines in `php.ini`:
-     ```ini
-     extension=pdo_sqlite
-     extension=sqlite3
-     extension=mbstring
-     extension=openssl
-     extension=fileinfo
-     extension=gd
-     extension=zip
-     ```
-   - Add `C:\php` to your System PATH
+2. **Or install PHP + MySQL standalone**
+   - **PHP:** Download from https://windows.php.net/download/
+     - Extract to `C:\php`
+     - Copy `php.ini-development` to `php.ini`
+     - Uncomment these lines in `php.ini`:
+       ```ini
+       extension=pdo_mysql
+       extension=pdo_sqlite
+       extension=sqlite3
+       extension=mbstring
+       extension=openssl
+       extension=fileinfo
+       extension=gd
+       extension=zip
+       ```
+     - Add `C:\php` to your System PATH
+   - **MySQL:** Download from https://dev.mysql.com/downloads/installer/
+     - Use the default settings (root user, port 3306)
 
 3. **Install Composer**
    - Download and run the installer from https://getcomposer.org/Composer-Setup.exe
@@ -99,14 +104,16 @@ Make sure these extensions are enabled in your `php.ini`:
 
 ```bash
 # Using Homebrew
-brew install php composer node
+brew install php mysql composer node
+brew services start mysql
 ```
 
 ### Linux (Ubuntu/Debian) Setup
 
 ```bash
 sudo apt update
-sudo apt install php php-sqlite3 php-mbstring php-xml php-zip php-gd composer nodejs npm
+sudo apt install php php-mysql php-sqlite3 php-mbstring php-xml php-zip php-gd composer nodejs npm mysql-server
+sudo systemctl start mysql
 ```
 
 ---
@@ -146,10 +153,43 @@ copy .env.example .env       # Windows CMD
 php artisan key:generate
 ```
 
-### 6. Create database and seed sample data
+### 6. Set up the database
+
+#### Option A: MySQL (Recommended)
 
 ```bash
-# Create the SQLite database file
+# 1. Start MySQL (if not already running)
+# XAMPP: Open XAMPP Control Panel and start MySQL
+# Homebrew (macOS): brew services start mysql
+# Linux: sudo systemctl start mysql
+
+# 2. Create the database
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS bitsi_dispatch;"
+
+# If your MySQL has a password:
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS bitsi_dispatch;"
+
+# 3. Make sure .env has these settings (already set by default):
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=bitsi_dispatch
+# DB_USERNAME=root
+# DB_PASSWORD=
+
+# 4. Run migrations and seed
+php artisan migrate:fresh --seed
+```
+
+#### Option B: SQLite (Zero Config)
+
+If you don't have MySQL, you can use SQLite:
+
+```bash
+# 1. Edit .env — comment out MySQL and uncomment SQLite:
+# DB_CONNECTION=sqlite
+
+# 2. Create the SQLite database file
 # macOS / Linux:
 touch database/database.sqlite
 
@@ -159,7 +199,7 @@ type nul > database\database.sqlite
 # Windows PowerShell:
 New-Item database\database.sqlite -ItemType File
 
-# Run migrations and seed
+# 3. Run migrations and seed
 php artisan migrate:fresh --seed
 ```
 
@@ -311,25 +351,64 @@ taskkill /PID <PID_NUMBER> /F
 Stop-Process -Id (Get-NetTCPConnection -LocalPort 8000).OwningProcess -Force
 ```
 
-### SQLite "database does not exist"
+### MySQL "Access denied" or "Connection refused"
 
-Create the file manually:
+Make sure MySQL is running:
 
 ```bash
-# macOS / Linux
-touch database/database.sqlite
-
-# Windows
-type nul > database\database.sqlite
+# XAMPP: Open Control Panel and start MySQL
+# macOS: brew services start mysql
+# Linux: sudo systemctl start mysql
 ```
 
-Then run `php artisan migrate:fresh --seed`.
+Check your `.env` credentials match your MySQL setup. Default is `root` with no password.
+
+If you set a password during MySQL installation, update `.env`:
+
+```env
+DB_PASSWORD=your_mysql_password
+```
+
+### MySQL "Unknown database 'bitsi_dispatch'"
+
+Create the database first:
+
+```bash
+mysql -u root -e "CREATE DATABASE bitsi_dispatch;"
+# Or with password:
+mysql -u root -p -e "CREATE DATABASE bitsi_dispatch;"
+```
+
+### Switching from SQLite to MySQL
+
+1. Update `.env`:
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=bitsi_dispatch
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+2. Create the MySQL database: `mysql -u root -e "CREATE DATABASE bitsi_dispatch;"`
+3. Run `php artisan migrate:fresh --seed`
+
+### Switching from MySQL to SQLite
+
+1. Update `.env`:
+   ```env
+   DB_CONNECTION=sqlite
+   # Comment out or remove DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD
+   ```
+2. Create the file: `touch database/database.sqlite` (or `type nul > database\database.sqlite` on Windows)
+3. Run `php artisan migrate:fresh --seed`
 
 ### PHP extension missing
 
-Check your extensions with `php -m`. If `pdo_sqlite` or `sqlite3` is missing, enable them in `php.ini`:
+Check your extensions with `php -m`. Enable missing ones in `php.ini`:
 
 ```ini
+extension=pdo_mysql
 extension=pdo_sqlite
 extension=sqlite3
 ```
