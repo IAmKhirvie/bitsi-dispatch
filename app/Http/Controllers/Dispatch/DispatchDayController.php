@@ -25,7 +25,7 @@ class DispatchDayController extends Controller
             'summary',
             'creator',
         ])
-            ->where('service_date', $date)
+            ->whereDate('service_date', $date)
             ->first();
 
         return Inertia::render('dispatch/Index', [
@@ -44,14 +44,18 @@ class DispatchDayController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        DispatchDay::firstOrCreate(
-            ['service_date' => $validated['service_date']],
-            [
+        $date = $validated['service_date'];
+
+        $existing = DispatchDay::whereDate('service_date', $date)->first();
+
+        if (! $existing) {
+            DispatchDay::create([
+                'service_date' => $date,
                 'created_by' => $request->user()->id,
                 'notes' => $validated['notes'] ?? null,
-            ]
-        );
+            ]);
+        }
 
-        return redirect()->route('dispatch.index', ['date' => $validated['service_date']]);
+        return redirect()->route('dispatch.index', ['date' => $date]);
     }
 }

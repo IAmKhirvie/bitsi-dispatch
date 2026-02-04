@@ -41,6 +41,6 @@ class DispatchDay extends Model
 
     public function scopeForDate(Builder $query, string $date): Builder
     {
-        return $query->where("service_date", $date);
+        return $query->whereDate("service_date", $date);
     }
 }

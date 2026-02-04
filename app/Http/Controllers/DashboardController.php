@@ -17,7 +17,7 @@ class DashboardController extends Controller
         $today = today();
 
         $todayDispatch = DispatchDay::with('summary')
-            ->where('service_date', $today)
+            ->whereDate('service_date', $today)
             ->first();
 
         $stats = [

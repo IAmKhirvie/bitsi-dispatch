@@ -21,7 +21,8 @@ class ReportController extends Controller
         $dateTo = $request->input('date_to', now()->toDateString());
 
         $summaries = DailySummary::whereHas('dispatchDay', function ($q) use ($dateFrom, $dateTo) {
-            $q->whereBetween('service_date', [$dateFrom, $dateTo]);
+            $q->whereDate('service_date', '>=', $dateFrom)
+              ->whereDate('service_date', '<=', $dateTo);
         })
             ->with('dispatchDay')
             ->get()
@@ -59,7 +60,7 @@ class ReportController extends Controller
             'entries.driver',
             'summary',
         ])
-            ->where('service_date', $date)
+            ->whereDate('service_date', $date)
             ->firstOrFail();
 
         return Inertia::render('reports/Daily', [
@@ -69,14 +70,14 @@ class ReportController extends Controller
 
     public function exportExcel(string $date)
     {
-        $dispatchDay = DispatchDay::where('service_date', $date)->firstOrFail();
+        $dispatchDay = DispatchDay::whereDate('service_date', $date)->firstOrFail();
         return Excel::download(new DispatchExport($dispatchDay), "dispatch-{$date}.xlsx");
     }
 
     public function exportPdf(string $date)
     {
         $dispatchDay = DispatchDay::with(['entries.tripCode', 'entries.driver', 'summary'])
-            ->where('service_date', $date)
+            ->whereDate('service_date', $date)
             ->firstOrFail();
 
         $pdf = Pdf::loadView('exports.dispatch-pdf', compact('dispatchDay'));
