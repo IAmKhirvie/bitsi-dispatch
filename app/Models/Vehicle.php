@@ -22,7 +22,6 @@ class Vehicle extends Model
         "bus_type",
         "plate_number",
         "status",
-        "gps_device_id",
         "pms_unit",
         "pms_threshold",
         "current_pms_value",
@@ -45,16 +44,6 @@ class Vehicle extends Model
     public function dispatchEntries(): HasMany
     {
         return $this->hasMany(DispatchEntry::class);
-    }
-
-    public function positions(): HasMany
-    {
-        return $this->hasMany(Position::class);
-    }
-
-    public function latestPosition(): HasOne
-    {
-        return $this->hasOne(Position::class)->latestOfMany("recorded_at");
     }
 
     public function scopeActive(Builder $query): Builder

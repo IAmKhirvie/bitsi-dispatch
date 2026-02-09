@@ -3,9 +3,21 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogClose,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { type BreadcrumbItem, type Driver, type DriverStatus, type PaginatedData } from '@/types';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { Plus, Pencil, Trash2, Search } from 'lucide-vue-next';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { MessageSquare, Pencil, Phone, Plus, Search, Send, Trash2 } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -18,8 +30,29 @@ const props = defineProps<{
     filters: { search?: string; status?: string };
 }>();
 
+const page = usePage();
+const flash = ref<{
+    success?: string;
+    error?: string;
+}>(page.props.flash as any || {});
+
+// Clear flash messages after 3 seconds
+if (flash.value.success || flash.value.error) {
+    setTimeout(() => {
+        flash.value = {};
+    }, 3000);
+}
+
 const search = ref(props.filters.search || '');
 const statusFilter = ref(props.filters.status || '');
+
+// Custom SMS dialog state
+const selectedDriver = ref<Driver | null>(null);
+const customMessage = ref('');
+const isSendingSms = ref(false);
+const showScheduleDialog = ref(false);
+const schedulePreview = ref<any>(null);
+const isLoadingSchedule = ref(false);
 
 let searchTimeout: ReturnType<typeof setTimeout>;
 
@@ -52,6 +85,68 @@ function setStatus(driver: Driver, status: DriverStatus) {
     }, {
         preserveState: true,
         preserveScroll: true,
+    });
+}
+
+async function sendScheduleSms(driver: Driver) {
+    if (!driver.phone) {
+        flash.value = { error: `Driver ${driver.name} has no phone number.` };
+        return;
+    }
+
+    router.post(`/admin/drivers/${driver.id}/send-schedule-sms`, {}, {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+            flash.value = { success: `Schedule SMS sent to ${driver.name}.` };
+        },
+        onError: (errors: any) => {
+            flash.value = { error: Object.values(errors)[0] as string || 'Failed to send SMS.' };
+        },
+    });
+}
+
+async function openSchedulePreview(driver: Driver) {
+    selectedDriver.value = driver;
+    schedulePreview.value = null;
+    isLoadingSchedule.value = true;
+    showScheduleDialog.value = true;
+
+    try {
+        const response = await fetch(`/admin/drivers/${driver.id}/schedule-preview`);
+        const data = await response.json();
+        schedulePreview.value = data;
+        isLoadingSchedule.value = false;
+    } catch (error) {
+        schedulePreview.value = { success: false, message: 'Failed to load schedule.' };
+        isLoadingSchedule.value = false;
+    }
+}
+
+function sendCustomSms() {
+    if (!selectedDriver.value || !customMessage.value.trim()) {
+        return;
+    }
+
+    isSendingSms.value = true;
+
+    router.post(`/admin/drivers/${selectedDriver.value.id}/send-custom-sms`, {
+        message: customMessage.value,
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+            flash.value = { success: `SMS sent to ${selectedDriver.value?.name}.` };
+            customMessage.value = '';
+            showScheduleDialog.value = false;
+            selectedDriver.value = null;
+        },
+        onError: (errors: any) => {
+            flash.value = { error: Object.values(errors)[0] as string || 'Failed to send SMS.' };
+        },
+        onFinish: () => {
+            isSendingSms.value = false;
+        },
     });
 }
 
@@ -99,6 +194,14 @@ const allStatuses: DriverStatus[] = ['available', 'dispatched', 'on_route', 'on_
                 </Button>
             </div>
 
+            <!-- Flash Messages -->
+            <div v-if="flash.success" class="rounded-md bg-green-50 p-3 text-sm text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                {{ flash.success }}
+            </div>
+            <div v-if="flash.error" class="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                {{ flash.error }}
+            </div>
+
             <!-- Filters -->
             <div class="flex flex-wrap items-center gap-3">
                 <div class="relative flex-1 min-w-[200px] max-w-sm">
@@ -127,16 +230,22 @@ const allStatuses: DriverStatus[] = ['available', 'dispatched', 'on_route', 'on_
                                     <th class="px-4 py-3 text-left font-medium text-muted-foreground">Active</th>
                                     <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
                                     <th class="px-4 py-3 text-left font-medium text-muted-foreground">Quick Status</th>
+                                    <th class="px-4 py-3 text-left font-medium text-muted-foreground">SMS</th>
                                     <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-if="drivers.data.length === 0">
-                                    <td colspan="7" class="px-4 py-8 text-center text-muted-foreground">No drivers found.</td>
+                                    <td colspan="8" class="px-4 py-8 text-center text-muted-foreground">No drivers found.</td>
                                 </tr>
                                 <tr v-for="driver in drivers.data" :key="driver.id" class="border-b last:border-0 hover:bg-muted/30 transition-colors">
                                     <td class="px-4 py-3 font-medium">{{ driver.name }}</td>
-                                    <td class="px-4 py-3">{{ driver.phone || '--' }}</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center gap-1">
+                                            <Phone v-if="driver.phone" class="h-3 w-3 text-muted-foreground" />
+                                            {{ driver.phone || '--' }}
+                                        </div>
+                                    </td>
                                     <td class="px-4 py-3">{{ driver.license_number || '--' }}</td>
                                     <td class="px-4 py-3">
                                         <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
@@ -164,6 +273,31 @@ const allStatuses: DriverStatus[] = ['available', 'dispatched', 'on_route', 'on_
                                             >
                                                 {{ statusConfig[s].label }}
                                             </button>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center gap-1">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                class="h-7 text-xs"
+                                                :disabled="!driver.phone"
+                                                :title="!driver.phone ? 'No phone number' : `Send today's schedule via SMS`"
+                                                @click="sendScheduleSms(driver)"
+                                            >
+                                                <MessageSquare class="mr-1 h-3 w-3" />
+                                                Schedule
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                class="h-7 w-7"
+                                                :disabled="!driver.phone"
+                                                :title="!driver.phone ? 'No phone number' : 'Send custom SMS'"
+                                                @click="openSchedulePreview(driver)"
+                                            >
+                                                <Send class="h-3 w-3" />
+                                            </Button>
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">
@@ -212,5 +346,68 @@ const allStatuses: DriverStatus[] = ['available', 'dispatched', 'on_route', 'on_
                 </div>
             </div>
         </div>
+
+        <!-- SMS Dialog -->
+        <Dialog v-model:open="showScheduleDialog">
+            <DialogContent class="max-w-md">
+                <DialogHeader>
+                    <DialogTitle v-if="selectedDriver">
+                        Send SMS to {{ selectedDriver.name }}
+                    </DialogTitle>
+                    <DialogDescription v-if="selectedDriver">
+                        <span v-if="selectedDriver.phone">{{ selectedDriver.phone }}</span>
+                        <span v-else class="text-red-500">No phone number</span>
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div v-if="isLoadingSchedule" class="py-4 text-center text-muted-foreground">
+                    Loading schedule...
+                </div>
+
+                <div v-else-if="schedulePreview?.success" class="space-y-4">
+                    <!-- Schedule Preview -->
+                    <div class="rounded-md bg-muted p-3 text-xs font-mono whitespace-pre-wrap">{{ schedulePreview.message_preview }}</div>
+
+                    <!-- Custom Message -->
+                    <div class="space-y-2">
+                        <Label for="custom-message">Or send a custom message:</Label>
+                        <Textarea
+                            id="custom-message"
+                            v-model="customMessage"
+                            placeholder="Type your custom message here..."
+                            rows="3"
+                            maxlength="160"
+                            class="resize-none"
+                        />
+                        <p class="text-xs text-muted-foreground text-right">{{ customMessage.length }}/160</p>
+                    </div>
+                </div>
+
+                <div v-else class="py-4 text-center text-muted-foreground">
+                    {{ schedulePreview?.message || 'No schedule available.' }}
+                </div>
+
+                <DialogFooter>
+                    <DialogClose as-child>
+                        <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button
+                        v-if="selectedDriver?.phone && !customMessage"
+                        @click="sendScheduleSms(selectedDriver)"
+                    >
+                        <Send class="mr-2 h-4 w-4" />
+                        Send Schedule
+                    </Button>
+                    <Button
+                        v-if="customMessage"
+                        @click="sendCustomSms"
+                        :disabled="isSendingSms || !customMessage.trim()"
+                    >
+                        <Send class="mr-2 h-4 w-4" />
+                        {{ isSendingSms ? 'Sending...' : 'Send Custom' }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </AppLayout>
 </template>

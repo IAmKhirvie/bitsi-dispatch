@@ -23,7 +23,6 @@ const form = useForm({
     bus_type: props.vehicle.bus_type,
     plate_number: props.vehicle.plate_number,
     status: props.vehicle.status,
-    gps_device_id: props.vehicle.gps_device_id || '',
     pms_unit: props.vehicle.pms_unit,
     pms_threshold: props.vehicle.pms_threshold,
     current_pms_value: props.vehicle.current_pms_value,
@@ -87,11 +86,6 @@ function submit() {
                                         <option value="Lutaw">Lutaw</option>
                                     </select>
                                     <p v-if="form.errors.status" class="text-xs text-red-500">{{ form.errors.status }}</p>
-                                </div>
-                                <div class="space-y-2">
-                                    <Label for="gps_device_id">GPS Device ID</Label>
-                                    <Input id="gps_device_id" v-model="form.gps_device_id" placeholder="Optional" />
-                                    <p v-if="form.errors.gps_device_id" class="text-xs text-red-500">{{ form.errors.gps_device_id }}</p>
                                 </div>
                             </div>
 

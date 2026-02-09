@@ -19,7 +19,6 @@ const form = useForm({
     bus_type: '',
     plate_number: '',
     status: 'OK',
-    gps_device_id: '',
     pms_unit: 'km',
     pms_threshold: 10000,
     current_pms_value: 0,
@@ -83,11 +82,6 @@ function submit() {
                                         <option value="Lutaw">Lutaw</option>
                                     </select>
                                     <p v-if="form.errors.status" class="text-xs text-red-500">{{ form.errors.status }}</p>
-                                </div>
-                                <div class="space-y-2">
-                                    <Label for="gps_device_id">GPS Device ID</Label>
-                                    <Input id="gps_device_id" v-model="form.gps_device_id" placeholder="Optional" />
-                                    <p v-if="form.errors.gps_device_id" class="text-xs text-red-500">{{ form.errors.gps_device_id }}</p>
                                 </div>
                             </div>
 
