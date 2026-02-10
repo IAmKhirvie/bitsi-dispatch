@@ -62,11 +62,12 @@
                                 <td class="px-4 py-3 font-semibold">{{ $tc->code }}</td>
                                 <td class="px-4 py-3">{{ $tc->operator }}</td>
                                 <td class="px-4 py-3">{{ $tc->origin_terminal }} - {{ $tc->destination_terminal }}</td>
-                                <td class="px-4 py-3">{{ $tc->bus_type }}</td>
+                                <td class="px-4 py-3">{{ $tc->bus_type?->value ?? $tc->bus_type }}</td>
                                 <td class="px-4 py-3">{{ $tc->scheduled_departure_time ? Str::substr($tc->scheduled_departure_time, 0, 5) : '--' }}</td>
                                 <td class="px-4 py-3">
-                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $tc->direction === 'SB' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' }}">
-                                        {{ $tc->direction }}
+                                    @php $tcDir = $tc->direction?->value ?? $tc->direction; @endphp
+                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $tcDir === 'SB' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' }}">
+                                        {{ $tcDir }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">

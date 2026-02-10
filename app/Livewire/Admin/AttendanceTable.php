@@ -105,13 +105,24 @@ class AttendanceTable extends Component
             ->latest()
             ->paginate(15);
 
+        $statsRaw = DriverAttendance::forDate($this->date)
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = 'on_time' THEN 1 ELSE 0 END) as on_time,
+                SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late,
+                SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent,
+                SUM(CASE WHEN status = 'excused' THEN 1 ELSE 0 END) as excused
+            ")
+            ->first();
+
         $stats = [
-            'total' => DriverAttendance::forDate($this->date)->count(),
-            'pending' => DriverAttendance::forDate($this->date)->pending()->count(),
-            'on_time' => DriverAttendance::forDate($this->date)->where('status', 'on_time')->count(),
-            'late' => DriverAttendance::forDate($this->date)->late()->count(),
-            'absent' => DriverAttendance::forDate($this->date)->absent()->count(),
-            'excused' => DriverAttendance::forDate($this->date)->where('status', 'excused')->count(),
+            'total' => (int) ($statsRaw->total ?? 0),
+            'pending' => (int) ($statsRaw->pending ?? 0),
+            'on_time' => (int) ($statsRaw->on_time ?? 0),
+            'late' => (int) ($statsRaw->late ?? 0),
+            'absent' => (int) ($statsRaw->absent ?? 0),
+            'excused' => (int) ($statsRaw->excused ?? 0),
         ];
 
         return view('livewire.admin.attendance-table', compact('attendances', 'stats'));

@@ -17,24 +17,7 @@ class DispatchDayController extends Controller
     {
         $date = $request->input('date', today()->toDateString());
 
-        $dispatchDay = DispatchDay::with([
-            'entries.vehicle',
-            'entries.tripCode',
-            'entries.driver',
-            'entries.driver2',
-            'summary',
-            'creator',
-        ])
-            ->whereDate('service_date', $date)
-            ->first();
-
-        return view('dispatch.index', [
-            'dispatchDay' => $dispatchDay,
-            'date' => $date,
-            'tripCodes' => TripCode::where('is_active', true)->orderBy('code')->get(),
-            'vehicles' => Vehicle::where('status', 'OK')->orderBy('bus_number')->get(),
-            'drivers' => Driver::where('is_active', true)->orderBy('name')->get(),
-        ]);
+        return view('dispatch.index', ['date' => $date]);
     }
 
     public function store(Request $request): RedirectResponse

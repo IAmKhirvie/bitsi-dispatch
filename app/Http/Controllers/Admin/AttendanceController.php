@@ -20,36 +20,9 @@ class AttendanceController extends Controller
     /**
      * Display attendance records list.
      */
-    public function index(Request $request): View
+    public function index(): View
     {
-        $date = $request->input('date', today()->toDateString());
-
-        $attendances = DriverAttendance::with(['driver', 'dispatchEntry', 'dispatchEntry.tripCode', 'markedBy'])
-            ->forDate($date)
-            ->orderBy('check_in_time')
-            ->paginate(20)
-            ->withQueryString();
-
-        return view('admin.attendances.index', [
-            'attendances' => $attendances,
-            'date' => $date,
-            'statistics' => $this->getStatistics($date),
-        ]);
-    }
-
-    /**
-     * Get attendance statistics for a date.
-     */
-    protected function getStatistics(string $date): array
-    {
-        return [
-            'total' => DriverAttendance::forDate($date)->count(),
-            'on_time' => DriverAttendance::forDate($date)->where('status', 'on_time')->count(),
-            'late' => DriverAttendance::forDate($date)->where('status', 'late')->count(),
-            'absent' => DriverAttendance::forDate($date)->where('status', 'absent')->count(),
-            'pending' => DriverAttendance::forDate($date)->where('status', 'pending')->count(),
-            'excused' => DriverAttendance::forDate($date)->where('status', 'excused')->count(),
-        ];
+        return view('admin.attendances.index');
     }
 
     /**
@@ -119,7 +92,6 @@ class AttendanceController extends Controller
             ]
         );
 
-        // Create alert
         AttendanceAlert::createAlert(
             $validated['driver_id'],
             $validated['dispatch_entry_id'],
@@ -156,7 +128,6 @@ class AttendanceController extends Controller
             ]
         );
 
-        // Create alert
         AttendanceAlert::createAlert(
             $validated['driver_id'],
             $validated['dispatch_entry_id'],

@@ -110,7 +110,7 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     @php
-                                        $driverStatus = $driver->status ?? 'available';
+                                        $driverStatus = $driver->status?->value ?? 'available';
                                         $config = $statusConfig[$driverStatus] ?? $statusConfig['available'];
                                     @endphp
                                     <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $config['badge'] }}">
@@ -122,7 +122,7 @@
                                         @foreach ($allStatuses as $s)
                                             <button
                                                 wire:click="updateStatus({{ $driver->id }}, '{{ $s }}')"
-                                                class="rounded px-2 py-1 text-xs font-medium transition-colors {{ ($driver->status ?? 'available') === $s ? $statusConfig[$s]['btnActive'] : 'bg-muted text-muted-foreground hover:bg-muted/80' }}"
+                                                class="rounded px-2 py-1 text-xs font-medium transition-colors {{ ($driver->status?->value ?? 'available') === $s ? $statusConfig[$s]['btnActive'] : 'bg-muted text-muted-foreground hover:bg-muted/80' }}"
                                                 title="Set {{ $statusConfig[$s]['label'] }}"
                                             >
                                                 {{ $statusConfig[$s]['label'] }}

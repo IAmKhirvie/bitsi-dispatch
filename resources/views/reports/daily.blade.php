@@ -122,9 +122,10 @@
                                     <td class="px-4 py-2 font-semibold">{{ $entry->bus_number ?? '--' }}</td>
                                     <td class="px-4 py-2">{{ $entry->route ?? '--' }}</td>
                                     <td class="px-4 py-2">
-                                        @if($entry->direction)
-                                            <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium {{ $entry->direction === 'SB' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' }}">
-                                                {{ $entry->direction }}
+                                        @php $dir = $entry->direction?->value ?? $entry->direction; @endphp
+                                        @if($dir)
+                                            <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium {{ $dir === 'SB' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' }}">
+                                                {{ $dir }}
                                             </span>
                                         @else
                                             --
@@ -134,8 +135,9 @@
                                     <td class="px-4 py-2">{{ $entry->actual_departure ? Str::substr($entry->actual_departure, 0, 5) : '--' }}</td>
                                     <td class="px-4 py-2">{{ $entry->driver->name ?? '--' }}</td>
                                     <td class="px-4 py-2">
-                                        <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium {{ $statusClasses[$entry->status] ?? $statusClasses['scheduled'] }}">
-                                            {{ ucwords(str_replace('_', ' ', $entry->status)) }}
+                                        @php $entryStatus = $entry->status?->value ?? $entry->status ?? 'scheduled'; @endphp
+                                        <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium {{ $statusClasses[$entryStatus] ?? $statusClasses['scheduled'] }}">
+                                            {{ ucwords(str_replace('_', ' ', $entryStatus)) }}
                                         </span>
                                     </td>
                                     <td class="max-w-[150px] truncate px-4 py-2" title="{{ $entry->remarks ?? '' }}">{{ $entry->remarks ?? '--' }}</td>

@@ -47,14 +47,14 @@
                 <td>{{ $entry->bus_number }}</td>
                 <td>{{ $entry->tripCode?->code }}</td>
                 <td>{{ $entry->route }}</td>
-                <td>{{ $entry->bus_type }}</td>
+                <td>{{ $entry->bus_type?->value ?? $entry->bus_type }}</td>
                 <td>{{ $entry->departure_terminal }}</td>
                 <td>{{ $entry->arrival_terminal }}</td>
                 <td>{{ $entry->scheduled_departure }}</td>
                 <td>{{ $entry->actual_departure }}</td>
-                <td>{{ $entry->direction }}</td>
+                <td>{{ $entry->direction?->value ?? $entry->direction }}</td>
                 <td>{{ $entry->driver?->name }}</td>
-                <td>{{ is_string($entry->status) ? $entry->status : $entry->status->value }}</td>
+                <td>{{ $entry->status?->value ?? $entry->status }}</td>
                 <td>{{ $entry->remarks }}</td>
             </tr>
             @endforeach

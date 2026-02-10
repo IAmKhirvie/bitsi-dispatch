@@ -123,8 +123,9 @@
                                 <td class="px-4 py-2">{{ $entry->route ?? '--' }}</td>
                                 <td class="px-4 py-2">
                                     @if ($entry->direction)
-                                        <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium {{ $entry->direction === 'SB' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' }}">
-                                            {{ $entry->direction }}
+                                        @php $dir = $entry->direction?->value ?? $entry->direction; @endphp
+                                        <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium {{ $dir === 'SB' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' }}">
+                                            {{ $dir }}
                                         </span>
                                     @else
                                         --

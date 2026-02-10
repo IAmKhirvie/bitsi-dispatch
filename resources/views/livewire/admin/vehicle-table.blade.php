@@ -74,11 +74,12 @@
                             <tr class="border-b last:border-0 hover:bg-muted/30 transition-colors">
                                 <td class="px-4 py-3 font-semibold">{{ $vehicle->bus_number }}</td>
                                 <td class="px-4 py-3">{{ $vehicle->brand }}</td>
-                                <td class="px-4 py-3">{{ $vehicle->bus_type }}</td>
+                                <td class="px-4 py-3">{{ $vehicle->bus_type?->value ?? $vehicle->bus_type }}</td>
                                 <td class="px-4 py-3">{{ $vehicle->plate_number }}</td>
                                 <td class="px-4 py-3">
-                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $vehicleStatusClasses[$vehicle->status] ?? 'bg-gray-100 text-gray-700' }}">
-                                        {{ $vehicle->status }}
+                                    @php $vStatus = $vehicle->status?->value ?? $vehicle->status ?? 'OK'; @endphp
+                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $vehicleStatusClasses[$vStatus] ?? 'bg-gray-100 text-gray-700' }}">
+                                        {{ $vStatus }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">

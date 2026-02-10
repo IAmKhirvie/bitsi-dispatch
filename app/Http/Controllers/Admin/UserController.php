@@ -12,22 +12,9 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    public function index(Request $request): View
+    public function index(): View
     {
-        $users = User::query()
-            ->when($request->search, fn ($q, $s) => $q->where(function ($q2) use ($s) {
-                $q2->where('name', 'like', "%{$s}%")
-                    ->orWhere('email', 'like', "%{$s}%");
-            }))
-            ->when($request->role, fn ($q, $r) => $q->where('role', $r))
-            ->orderBy('name')
-            ->paginate(15)
-            ->withQueryString();
-
-        return view('admin.users.index', [
-            'users' => $users,
-            'filters' => $request->only(['search', 'role']),
-        ]);
+        return view('admin.users.index');
     }
 
     public function create(): View
@@ -38,11 +25,11 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'min:2', 'max:255', 'regex:/^[a-zA-ZÀ-ÿ\s.\-]+$/'],
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => 'required|string|in:admin,operations_manager,dispatcher',
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'string', 'regex:/^09\d{9}$/'],
             'is_active' => 'boolean',
         ]);
 
@@ -61,11 +48,11 @@ class UserController extends Controller
     public function update(Request $request, User $user): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'min:2', 'max:255', 'regex:/^[a-zA-ZÀ-ÿ\s.\-]+$/'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
             'role' => 'required|string|in:admin,operations_manager,dispatcher',
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'string', 'regex:/^09\d{9}$/'],
             'is_active' => 'boolean',
         ]);
 

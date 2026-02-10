@@ -19,14 +19,31 @@ class DashboardController extends Controller
             ->whereDate('service_date', $today)
             ->first();
 
+        $tripStats = $todayDispatch
+            ? $todayDispatch->entries()
+                ->selectRaw("
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = 'departed' THEN 1 ELSE 0 END) as departed,
+                    SUM(CASE WHEN status = 'on_route' THEN 1 ELSE 0 END) as on_route,
+                    SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled
+                ")
+                ->first()
+            : null;
+
+        $vehicleStats = Vehicle::selectRaw("
+            SUM(CASE WHEN status = 'OK' THEN 1 ELSE 0 END) as active,
+            SUM(CASE WHEN status = 'UR' THEN 1 ELSE 0 END) as under_repair,
+            SUM(CASE WHEN current_pms_value >= pms_threshold THEN 1 ELSE 0 END) as pms_warning
+        ")->first();
+
         $stats = [
-            'today_trips' => $todayDispatch?->entries()->count() ?? 0,
-            'departed' => $todayDispatch?->entries()->where('status', 'departed')->count() ?? 0,
-            'on_route' => $todayDispatch?->entries()->where('status', 'on_route')->count() ?? 0,
-            'cancelled' => $todayDispatch?->entries()->where('status', 'cancelled')->count() ?? 0,
-            'active_vehicles' => Vehicle::where('status', 'OK')->count(),
-            'under_repair' => Vehicle::where('status', 'UR')->count(),
-            'pms_warning' => Vehicle::whereColumn('current_pms_value', '>=', 'pms_threshold')->count(),
+            'today_trips' => (int) ($tripStats->total ?? 0),
+            'departed' => (int) ($tripStats->departed ?? 0),
+            'on_route' => (int) ($tripStats->on_route ?? 0),
+            'cancelled' => (int) ($tripStats->cancelled ?? 0),
+            'active_vehicles' => (int) ($vehicleStats->active ?? 0),
+            'under_repair' => (int) ($vehicleStats->under_repair ?? 0),
+            'pms_warning' => (int) ($vehicleStats->pms_warning ?? 0),
             'active_drivers' => Driver::where('is_active', true)->count(),
         ];
 
