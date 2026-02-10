@@ -8,12 +8,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $users = User::query()
             ->when($request->search, fn ($q, $s) => $q->where(function ($q2) use ($s) {
@@ -25,15 +24,15 @@ class UserController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return Inertia::render('admin/Users/Index', [
+        return view('admin.users.index', [
             'users' => $users,
             'filters' => $request->only(['search', 'role']),
         ]);
     }
 
-    public function create(): Response
+    public function create(): View
     {
-        return Inertia::render('admin/Users/Create');
+        return view('admin.users.create');
     }
 
     public function store(Request $request): RedirectResponse
@@ -52,9 +51,9 @@ class UserController extends Controller
         return redirect()->route('admin.users.index');
     }
 
-    public function edit(User $user): Response
+    public function edit(User $user): View
     {
-        return Inertia::render('admin/Users/Edit', [
+        return view('admin.users.edit', [
             'user' => $user,
         ]);
     }

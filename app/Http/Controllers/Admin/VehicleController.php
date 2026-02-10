@@ -7,12 +7,11 @@ use App\Models\Vehicle;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class VehicleController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $vehicles = Vehicle::query()
             ->when($request->search, fn ($q, $s) => $q->where(function ($q2) use ($s) {
@@ -30,15 +29,15 @@ class VehicleController extends Controller
                 'pms_percentage' => $vehicle->pms_percentage,
             ]));
 
-        return Inertia::render('admin/Vehicles/Index', [
+        return view('admin.vehicles.index', [
             'vehicles' => $vehicles,
             'filters' => $request->only(['search', 'status', 'bus_type']),
         ]);
     }
 
-    public function create(): Response
+    public function create(): View
     {
-        return Inertia::render('admin/Vehicles/Create');
+        return view('admin.vehicles.create');
     }
 
     public function store(Request $request): RedirectResponse
@@ -61,9 +60,9 @@ class VehicleController extends Controller
         return redirect()->route('admin.vehicles.index');
     }
 
-    public function edit(Vehicle $vehicle): Response
+    public function edit(Vehicle $vehicle): View
     {
-        return Inertia::render('admin/Vehicles/Edit', [
+        return view('admin.vehicles.edit', [
             'vehicle' => array_merge($vehicle->toArray(), [
                 'is_pms_warning' => $vehicle->is_pms_warning,
                 'pms_percentage' => $vehicle->pms_percentage,

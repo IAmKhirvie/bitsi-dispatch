@@ -13,15 +13,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class AttendanceController extends Controller
 {
     /**
      * Display attendance records list.
      */
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $date = $request->input('date', today()->toDateString());
 
@@ -31,7 +30,7 @@ class AttendanceController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return Inertia::render('admin/Attendances/Index', [
+        return view('admin.attendances.index', [
             'attendances' => $attendances,
             'date' => $date,
             'statistics' => $this->getStatistics($date),
@@ -56,13 +55,13 @@ class AttendanceController extends Controller
     /**
      * Display attendance settings page.
      */
-    public function settings(Request $request): Response
+    public function settings(Request $request): View
     {
         AttendanceSetting::initializeDefaults();
 
         $settings = AttendanceSetting::getAll();
 
-        return Inertia::render('admin/settings/AttendanceSettings', [
+        return view('admin.settings.attendance-settings', [
             'settings' => [
                 'late_threshold_minutes' => $settings['late_threshold_minutes'] ?? '15',
                 'pre_departure_alert_minutes' => $settings['pre_departure_alert_minutes'] ?? '15',

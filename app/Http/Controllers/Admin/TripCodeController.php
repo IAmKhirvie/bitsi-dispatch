@@ -7,12 +7,11 @@ use App\Models\TripCode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class TripCodeController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $tripCodes = TripCode::query()
             ->when($request->search, fn ($q, $s) => $q->where(function ($q2) use ($s) {
@@ -27,15 +26,15 @@ class TripCodeController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return Inertia::render('admin/TripCodes/Index', [
+        return view('admin.trip-codes.index', [
             'tripCodes' => $tripCodes,
             'filters' => $request->only(['search', 'direction', 'active']),
         ]);
     }
 
-    public function create(): Response
+    public function create(): View
     {
-        return Inertia::render('admin/TripCodes/Create');
+        return view('admin.trip-codes.create');
     }
 
     public function store(Request $request): RedirectResponse
@@ -56,9 +55,9 @@ class TripCodeController extends Controller
         return redirect()->route('admin.trip-codes.index');
     }
 
-    public function edit(TripCode $tripCode): Response
+    public function edit(TripCode $tripCode): View
     {
-        return Inertia::render('admin/TripCodes/Edit', [
+        return view('admin.trip-codes.edit', [
             'tripCode' => $tripCode,
         ]);
     }

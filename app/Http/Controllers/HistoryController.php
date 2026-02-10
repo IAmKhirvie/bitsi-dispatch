@@ -4,12 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\DispatchEntry;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class HistoryController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $entries = DispatchEntry::query()
             ->with(['dispatchDay', 'vehicle', 'tripCode', 'driver'])
@@ -30,7 +29,7 @@ class HistoryController extends Controller
             ->paginate(25)
             ->withQueryString();
 
-        return Inertia::render('history/Index', [
+        return view('history.index', [
             'entries' => $entries,
             'filters' => $request->only([
                 'date_from', 'date_to', 'bus_number', 'trip_code',

@@ -9,12 +9,11 @@ use App\Models\TripCode;
 use App\Models\Vehicle;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class DispatchDayController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $date = $request->input('date', today()->toDateString());
 
@@ -29,7 +28,7 @@ class DispatchDayController extends Controller
             ->whereDate('service_date', $date)
             ->first();
 
-        return Inertia::render('dispatch/Index', [
+        return view('dispatch.index', [
             'dispatchDay' => $dispatchDay,
             'date' => $date,
             'tripCodes' => TripCode::where('is_active', true)->orderBy('code')->get(),

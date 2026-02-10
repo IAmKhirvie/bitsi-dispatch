@@ -12,10 +12,9 @@ use App\Http\Controllers\Dispatch\DispatchEntryController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\Report\ReportController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome');
+    return view('welcome');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -81,4 +80,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';

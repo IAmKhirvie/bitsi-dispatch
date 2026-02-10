@@ -9,13 +9,12 @@ use App\Models\DispatchDay;
 use App\Models\DispatchEntry;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $dateFrom = $request->input('date_from', now()->startOfMonth()->toDateString());
         $dateTo = $request->input('date_to', now()->toDateString());
@@ -42,7 +41,7 @@ class ReportController extends Controller
             'cargo_trips' => $summaries->sum('cargo_trips'),
         ];
 
-        return Inertia::render('reports/Index', [
+        return view('reports.index', [
             'summaries' => $summaries->values(),
             'totals' => $totals,
             'filters' => [
@@ -52,7 +51,7 @@ class ReportController extends Controller
         ]);
     }
 
-    public function daily(string $date): Response
+    public function daily(string $date): View
     {
         $dispatchDay = DispatchDay::with([
             'entries.vehicle',
@@ -64,7 +63,7 @@ class ReportController extends Controller
             ->whereDate('service_date', $date)
             ->firstOrFail();
 
-        return Inertia::render('reports/Daily', [
+        return view('reports.daily', [
             'dispatchDay' => $dispatchDay,
         ]);
     }

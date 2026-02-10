@@ -7,12 +7,11 @@ use App\Models\DispatchEntry;
 use App\Models\Driver;
 use App\Models\TripCode;
 use App\Models\Vehicle;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(): Response
+    public function __invoke(): View
     {
         $today = today();
 
@@ -36,7 +35,7 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        return Inertia::render('Dashboard', [
+        return view('dashboard', [
             'stats' => $stats,
             'todaySummary' => $todayDispatch?->summary,
             'recentEntries' => $recentEntries,

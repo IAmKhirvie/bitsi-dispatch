@@ -6,12 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Driver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class DriverController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $drivers = Driver::query()
             ->when($request->search, fn ($q, $s) => $q->where(function ($q2) use ($s) {
@@ -25,15 +24,15 @@ class DriverController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return Inertia::render('admin/Drivers/Index', [
+        return view('admin.drivers.index', [
             'drivers' => $drivers,
             'filters' => $request->only(['search', 'active', 'status']),
         ]);
     }
 
-    public function create(): Response
+    public function create(): View
     {
-        return Inertia::render('admin/Drivers/Create');
+        return view('admin.drivers.create');
     }
 
     public function store(Request $request): RedirectResponse
@@ -51,9 +50,9 @@ class DriverController extends Controller
         return redirect()->route('admin.drivers.index');
     }
 
-    public function edit(Driver $driver): Response
+    public function edit(Driver $driver): View
     {
-        return Inertia::render('admin/Drivers/Edit', [
+        return view('admin.drivers.edit', [
             'driver' => $driver,
         ]);
     }
