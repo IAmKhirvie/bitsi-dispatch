@@ -1,225 +1,153 @@
-# BITSI Dispatch
+# BITSI Dispatch v1.2
 
-A real-time bus dispatch management system for **Bicol Isarog Transport System, Inc. (BITSI)**. Digitizes the daily bus status report into a modern web application with dispatch board, reports, GPS tracking, driver management, and SMS notifications.
+A real-time bus dispatch management system for **Bicol Isarog Transport System, Inc. (BITSI)**. Digitizes the daily bus status report into a modern web application with a live dispatch board, driver and vehicle management, attendance tracking, SMS notifications, and daily reports with Excel/PDF export.
 
 ---
 
 ## Tech Stack
 
-| Layer            | Technology                                    |
-| ---------------- | --------------------------------------------- |
-| Backend          | Laravel 12 (PHP 8.2+)                         |
-| Frontend         | Vue 3 (Composition API) + TypeScript           |
-| SPA Router       | Inertia.js v2                                  |
-| CSS              | Tailwind CSS + shadcn-vue (Radix-based)       |
+| Layer            | Technology                                     |
+| ---------------- | ---------------------------------------------- |
+| Backend          | Laravel 12 (PHP 8.2+)                          |
+| Frontend         | Blade templates + Livewire 3                   |
+| Auth             | Laravel Fortify + Jetstream (2FA support)      |
+| CSS              | Tailwind CSS 3.4                               |
 | Database         | MySQL 8+ (recommended) or SQLite (zero config) |
-| Queue            | Database driver (works with both MySQL & SQLite)|
-| Icons            | Lucide Vue                                     |
-| Maps             | Leaflet.js + OpenStreetMap                     |
-| SMS              | Semaphore API (Philippine provider)            |
-| Excel Export     | maatwebsite/excel                              |
-| PDF Export       | barryvdh/laravel-dompdf                        |
-| Build Tool       | Vite                                           |
+| Queue            | Database driver                                |
+| Permissions      | Spatie laravel-permission                       |
+| SMS              | Semaphore API (Philippine provider)             |
+| Excel Export     | maatwebsite/excel                               |
+| PDF Export       | barryvdh/laravel-dompdf                         |
+| Build Tool       | Vite 6                                          |
 
 ---
 
 ## Features
 
-- **Dispatch Board** — Excel-like editable table for daily bus dispatch management
-- **Trip Code Auto-fill** — Select a trip code and all fields populate automatically
+### Dispatch Operations
+- **Live Dispatch Board** — Editable table powered by Livewire for real-time dispatch coordination
+- **Trip Code Auto-fill** — Select a trip code and all fields (route, bus type, schedule) populate automatically
+- **Dual Driver Support** — Assign Driver 1 and Driver 2 per dispatch entry
+- **Dispatch Status Tracking** — Scheduled, Departed, On Route, Delayed, Cancelled, Arrived
+
+### Fleet Management
 - **Driver Management** — Quick status toggles (Available, Dispatched, On Route, On Leave)
 - **Vehicle Management** — Track bus status (OK, Under Repair, PMS, In Transit, Lutaw/Idle)
 - **PMS Tracking** — Preventive Maintenance Schedule monitoring by kilometers or trips
+
+### Attendance & Notifications
+- **Driver Attendance** — Mark late/absent drivers with configurable thresholds and alerts
+- **SMS Notifications** — Auto-notify drivers via Semaphore when assigned or status changes
+
+### Reporting
 - **Daily Reports** — Summary cards, destination breakdowns, daily tables with totals
 - **Excel & PDF Export** — Export dispatch reports per day
-- **GPS Tracking Map** — Real-time bus positions on Leaflet/OpenStreetMap
-- **SMS Notifications** — Auto-notify drivers via Semaphore when assigned or status changes
-- **Role-based Access** — Admin, Operations Manager, Dispatcher
-- **Audit Logging** — Tracks all CRUD operations with old/new values
 - **Historical Records** — Search and filter past dispatch entries
+
+### Administration
+- **Role-based Access** — Admin, Operations Manager, Dispatcher
+- **User Management** — Full CRUD with role assignment and active/inactive toggle
+- **Audit Logging** — Tracks all CRUD operations with old/new values
+- **Two-Factor Authentication** — Jetstream 2FA support
 
 ---
 
 ## Prerequisites
 
-### All Platforms (Windows, macOS, Linux)
-
-| Software    | Version  | Download                                                     |
-| ----------- | -------- | ------------------------------------------------------------ |
-| **PHP**     | >= 8.2   | https://www.php.net/downloads                                |
-| **Composer**| >= 2.x   | https://getcomposer.org/download/                            |
-| **Node.js** | >= 18.x  | https://nodejs.org/                                          |
-| **npm**     | >= 9.x   | (comes with Node.js)                                         |
-| **Git**     | >= 2.x   | https://git-scm.com/downloads                                |
-| **MySQL**   | >= 8.0   | https://dev.mysql.com/downloads/installer/ (or use XAMPP)    |
+| Software     | Version  |
+| ------------ | -------- |
+| **PHP**      | >= 8.2   |
+| **Composer** | >= 2.x   |
+| **Node.js**  | >= 18.x  |
+| **npm**      | >= 9.x   |
+| **Git**      | >= 2.x   |
+| **MySQL**    | >= 8.0   |
 
 ### Required PHP Extensions
 
-Make sure these extensions are enabled in your `php.ini`:
+- `pdo_mysql` (for MySQL) or `pdo_sqlite` + `sqlite3` (for SQLite)
+- `mbstring`, `openssl`, `fileinfo`, `gd` or `imagick`, `xml`, `zip`
 
-- `pdo_mysql` (for MySQL)
-- `pdo_sqlite` and `sqlite3` (only if using SQLite)
-- `mbstring`
-- `openssl`
-- `fileinfo`
-- `gd` or `imagick`
-- `xml`
-- `zip`
+### Platform Setup
 
-### Windows-Specific Setup
+<details>
+<summary><strong>Windows (XAMPP recommended)</strong></summary>
 
-1. **Install XAMPP (easiest — includes PHP + MySQL)**
-   - Download XAMPP from https://www.apachefriends.org/
-   - After install, add PHP to your PATH: `C:\xampp\php`
-   - Open XAMPP Control Panel and **start MySQL**
-   - Verify: `php -v` and `mysql --version`
+1. Download XAMPP from https://www.apachefriends.org/
+2. Add PHP to PATH: `C:\xampp\php`
+3. Start MySQL from XAMPP Control Panel
+4. Install Composer from https://getcomposer.org/Composer-Setup.exe
+5. Install Node.js LTS from https://nodejs.org/
+</details>
 
-2. **Or install PHP + MySQL standalone**
-   - **PHP:** Download from https://windows.php.net/download/
-     - Extract to `C:\php`
-     - Copy `php.ini-development` to `php.ini`
-     - Uncomment these lines in `php.ini`:
-       ```ini
-       extension=pdo_mysql
-       extension=pdo_sqlite
-       extension=sqlite3
-       extension=mbstring
-       extension=openssl
-       extension=fileinfo
-       extension=gd
-       extension=zip
-       ```
-     - Add `C:\php` to your System PATH
-   - **MySQL:** Download from https://dev.mysql.com/downloads/installer/
-     - Use the default settings (root user, port 3306)
-
-3. **Install Composer**
-   - Download and run the installer from https://getcomposer.org/Composer-Setup.exe
-
-4. **Install Node.js**
-   - Download the LTS installer from https://nodejs.org/
-   - The installer automatically adds Node.js and npm to PATH
-
-### macOS Setup
+<details>
+<summary><strong>macOS</strong></summary>
 
 ```bash
-# Using Homebrew
 brew install php mysql composer node
 brew services start mysql
 ```
+</details>
 
-### Linux (Ubuntu/Debian) Setup
+<details>
+<summary><strong>Linux (Ubuntu/Debian)</strong></summary>
 
 ```bash
 sudo apt update
 sudo apt install php php-mysql php-sqlite3 php-mbstring php-xml php-zip php-gd composer nodejs npm mysql-server
 sudo systemctl start mysql
 ```
+</details>
 
 ---
 
 ## Installation
 
-### 1. Clone the repository
-
 ```bash
-git clone https://github.com/YOUR_USERNAME/bitsi-dispatch.git
+# 1. Clone the repository
+git clone https://github.com/IAmKhirvie/bitsi-dispatch.git
 cd bitsi-dispatch
-```
 
-### 2. Install PHP dependencies
-
-```bash
+# 2. Install dependencies
 composer install
-```
-
-### 3. Install Node.js dependencies
-
-```bash
 npm install
-```
 
-### 4. Environment setup
+# 3. Environment setup
+cp .env.example .env          # macOS / Linux
+copy .env.example .env         # Windows CMD
 
-```bash
-# Copy the example environment file
-cp .env.example .env        # macOS / Linux
-copy .env.example .env       # Windows CMD
-```
-
-### 5. Generate application key
-
-```bash
+# 4. Generate application key
 php artisan key:generate
 ```
 
-### 6. Set up the database
+### Database Setup
 
-#### Option A: MySQL (Recommended)
+**Option A: MySQL (Recommended)**
 
 ```bash
-# 1. Start MySQL (if not already running)
-# XAMPP: Open XAMPP Control Panel and start MySQL
-# Homebrew (macOS): brew services start mysql
-# Linux: sudo systemctl start mysql
-
-# 2. Create the database
 mysql -u root -e "CREATE DATABASE IF NOT EXISTS bitsi_dispatch;"
-
-# If your MySQL has a password:
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS bitsi_dispatch;"
-
-# 3. Make sure .env has these settings (already set by default):
-# DB_CONNECTION=mysql
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=bitsi_dispatch
-# DB_USERNAME=root
-# DB_PASSWORD=
-
-# 4. Run migrations and seed
+# Update .env: DB_CONNECTION=mysql, DB_DATABASE=bitsi_dispatch
 php artisan migrate:fresh --seed
 ```
 
-#### Option B: SQLite (Zero Config)
-
-If you don't have MySQL, you can use SQLite:
+**Option B: SQLite (Zero Config)**
 
 ```bash
-# 1. Edit .env — comment out MySQL and uncomment SQLite:
-# DB_CONNECTION=sqlite
-
-# 2. Create the SQLite database file
-# macOS / Linux:
-touch database/database.sqlite
-
-# Windows CMD:
-type nul > database\database.sqlite
-
-# Windows PowerShell:
-New-Item database\database.sqlite -ItemType File
-
-# 3. Run migrations and seed
+touch database/database.sqlite                    # macOS / Linux
+type nul > database\database.sqlite               # Windows CMD
+# Update .env: DB_CONNECTION=sqlite
 php artisan migrate:fresh --seed
 ```
 
-### 7. Build frontend assets
+### Build & Run
 
 ```bash
+# Build frontend assets
 npm run build
-```
 
-### 8. Start the development server
-
-```bash
+# Start development server (runs Laravel + Queue + Vite + Logs concurrently)
 composer run dev
 ```
-
-This starts 4 services concurrently:
-- **Laravel server** at http://127.0.0.1:8000
-- **Vite dev server** (HMR for frontend)
-- **Queue worker** (processes SMS jobs)
-- **Log watcher** (real-time log output)
 
 Open http://127.0.0.1:8000 in your browser.
 
@@ -233,26 +161,20 @@ Open http://127.0.0.1:8000 in your browser.
 | Operations Manager  | opsmanager@bitsi.com    | password   |
 | Dispatcher          | dispatcher@bitsi.com    | password   |
 
-> **Note:** Admin users can access all management pages (Users, Vehicles, Drivers, Trip Codes) via the sidebar.
+> Admin users can access all management pages (Users, Vehicles, Drivers, Trip Codes, Attendance) via the sidebar.
 
 ---
 
 ## SMS Setup (Optional)
 
-SMS notifications are powered by [Semaphore](https://semaphore.co/), a Philippine SMS API provider.
-
-1. Sign up at https://semaphore.co
-2. Get your API key from the dashboard
-3. Add to your `.env`:
+SMS notifications are powered by [Semaphore](https://semaphore.co/).
 
 ```env
 SEMAPHORE_API_KEY=your_api_key_here
 SEMAPHORE_SENDER_NAME=BITSI
 ```
 
-When configured, the system will automatically send SMS to drivers when:
-- They are assigned to a dispatch entry
-- A dispatch entry status is updated
+When configured, the system automatically sends SMS to drivers when assigned to a dispatch or when status changes. Admins can also send custom SMS from the driver management page.
 
 ---
 
@@ -261,54 +183,58 @@ When configured, the system will automatically send SMS to drivers when:
 ```
 bitsi-dispatch/
 ├── app/
-│   ├── Enums/              # PHP enums (UserRole, BusType, DriverStatus, etc.)
-│   ├── Exports/            # Excel export classes
+│   ├── Enums/                 # 8 PHP enums (UserRole, BusType, DriverStatus, etc.)
+│   ├── Exports/               # Excel export classes
 │   ├── Http/Controllers/
-│   │   ├── Admin/          # User, Vehicle, Driver, TripCode CRUD
-│   │   ├── Api/            # GPS position API
-│   │   ├── Dispatch/       # Dispatch day & entry management
-│   │   └── Report/         # Reports & exports
-│   ├── Jobs/               # SendSmsJob (queued)
-│   ├── Models/             # Eloquent models
-│   ├── Observers/          # DispatchEntryObserver (auto SMS + summary)
-│   ├── Services/           # SemaphoreService, SummaryService, DispatchService
-│   └── Traits/             # Auditable trait
+│   │   ├── Admin/             # User, Vehicle, Driver, TripCode, Attendance CRUD
+│   │   ├── Api/               # Driver attendance API
+│   │   ├── Dispatch/          # Dispatch day & entry management
+│   │   ├── Report/            # Reports & exports
+│   │   └── Settings/          # Profile & password
+│   ├── Jobs/                  # SendSmsJob (queued)
+│   ├── Livewire/              # 9 Livewire components
+│   │   ├── Admin/             # UserTable, DriverTable, VehicleTable, etc.
+│   │   ├── Report/            # ReportSummaryTable
+│   │   ├── DispatchBoard.php  # Live dispatch board
+│   │   └── HistoryTable.php   # Historical records search
+│   ├── Models/                # 13 Eloquent models
+│   ├── Observers/             # DispatchEntryObserver (auto SMS + summary)
+│   ├── Services/              # SemaphoreService, SummaryService, DispatchService
+│   └── Traits/                # Auditable trait
 ├── database/
-│   ├── migrations/         # 12 migration files
-│   └── seeders/            # Sample data seeder
+│   ├── migrations/            # 21 migration files
+│   └── seeders/               # Sample data seeder
 ├── resources/
-│   ├── js/
-│   │   ├── components/     # Vue components (sidebar, nav, UI)
-│   │   ├── layouts/        # App layout
-│   │   ├── pages/          # All Vue pages
-│   │   │   ├── admin/      # Admin CRUD pages
-│   │   │   ├── dispatch/   # Dispatch board
-│   │   │   ├── history/    # Historical records
-│   │   │   ├── reports/    # Reports & analytics
-│   │   │   └── tracking/   # GPS tracking map
-│   │   └── types/          # TypeScript interfaces
-│   └── views/
-│       └── exports/        # PDF Blade templates
+│   ├── views/
+│   │   ├── admin/             # Admin CRUD views with shared _form partials
+│   │   ├── dispatch/          # Dispatch board
+│   │   ├── reports/           # Report views
+│   │   ├── history/           # Historical records
+│   │   ├── livewire/          # Livewire component templates
+│   │   ├── layouts/           # App & guest layouts
+│   │   └── exports/           # PDF Blade templates
+│   ├── js/                    # app.js (dark mode)
+│   └── css/                   # Tailwind CSS
 └── routes/
-    └── web.php             # All application routes
+    └── web.php                # All application routes
 ```
 
 ---
 
-## Available Routes
+## Routes
 
-| Section       | URL                    | Description                        |
-| ------------- | ---------------------- | ---------------------------------- |
-| Landing Page  | `/`                    | Public BITSI landing page          |
-| Dashboard     | `/dashboard`           | Overview stats and quick actions   |
-| Dispatch      | `/dispatch`            | Daily dispatch board               |
-| Tracking      | `/tracking`            | Real-time GPS map                  |
-| Reports       | `/reports`             | Trip analytics and exports         |
-| History       | `/history`             | Search past dispatch entries       |
-| Users         | `/admin/users`         | User management (Admin only)       |
-| Trip Codes    | `/admin/trip-codes`    | Trip code management (Admin only)  |
-| Vehicles      | `/admin/vehicles`      | Vehicle/bus management (Admin only)|
-| Drivers       | `/admin/drivers`       | Driver management (Admin only)     |
+| Section       | URL                      | Description                        |
+| ------------- | ------------------------ | ---------------------------------- |
+| Landing Page  | `/`                      | Public BITSI landing page          |
+| Dashboard     | `/dashboard`             | Overview stats and quick actions   |
+| Dispatch      | `/dispatch`              | Daily dispatch board (Livewire)    |
+| Reports       | `/reports`               | Trip analytics and exports         |
+| History       | `/history`               | Search past dispatch entries       |
+| Users         | `/admin/users`           | User management (Admin)            |
+| Trip Codes    | `/admin/trip-codes`      | Trip code management (Admin)       |
+| Vehicles      | `/admin/vehicles`        | Vehicle/bus management (Admin)     |
+| Drivers       | `/admin/drivers`         | Driver management (Admin)          |
+| Attendance    | `/admin/attendance`      | Driver attendance (Admin)          |
 
 ---
 
@@ -335,94 +261,58 @@ php artisan optimize:clear
 
 ## Troubleshooting
 
-### "Address already in use" on port 8000
-
-Another process is using port 8000. Kill it:
+<details>
+<summary><strong>"Address already in use" on port 8000</strong></summary>
 
 ```bash
 # macOS / Linux
 lsof -ti:8000 | xargs kill -9
 
-# Windows CMD
-netstat -ano | findstr :8000
-taskkill /PID <PID_NUMBER> /F
-
 # Windows PowerShell
 Stop-Process -Id (Get-NetTCPConnection -LocalPort 8000).OwningProcess -Force
 ```
+</details>
 
-### MySQL "Access denied" or "Connection refused"
+<details>
+<summary><strong>MySQL "Access denied" or "Connection refused"</strong></summary>
 
-Make sure MySQL is running:
+Make sure MySQL is running. Check `.env` credentials match your MySQL setup.
 
 ```bash
-# XAMPP: Open Control Panel and start MySQL
+# XAMPP: Open Control Panel → Start MySQL
 # macOS: brew services start mysql
 # Linux: sudo systemctl start mysql
 ```
+</details>
 
-Check your `.env` credentials match your MySQL setup. Default is `root` with no password.
+<details>
+<summary><strong>Switching between MySQL and SQLite</strong></summary>
 
-If you set a password during MySQL installation, update `.env`:
+Update `DB_CONNECTION` in `.env` to `mysql` or `sqlite`, create the database if needed, then run `php artisan migrate:fresh --seed`.
+</details>
 
-```env
-DB_PASSWORD=your_mysql_password
-```
+---
 
-### MySQL "Unknown database 'bitsi_dispatch'"
+## Changelog
 
-Create the database first:
+### v1.2 (2026-02-10)
+- Migrated frontend from Vue 3 / Inertia.js to Blade / Livewire 3
+- Added Laravel Jetstream authentication with 2FA support
+- Added Spatie laravel-permission for role-based access
+- Added driver attendance management with alerts and configurable thresholds
+- Added Force SMS and custom SMS features for drivers
+- Added dual driver support (Driver 1 & Driver 2) per dispatch entry
+- Removed GPS tracking feature
+- Removed code duplication across controllers, views, and enums
+- Extracted shared form partials and validation rules
+- Added enum-driven badge classes and filter dropdowns
 
-```bash
-mysql -u root -e "CREATE DATABASE bitsi_dispatch;"
-# Or with password:
-mysql -u root -p -e "CREATE DATABASE bitsi_dispatch;"
-```
+### v1.1
+- Initial Vue 3 / Inertia.js implementation
+- Dispatch board, reports, GPS tracking, SMS notifications
 
-### Switching from SQLite to MySQL
-
-1. Update `.env`:
-   ```env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=bitsi_dispatch
-   DB_USERNAME=root
-   DB_PASSWORD=
-   ```
-2. Create the MySQL database: `mysql -u root -e "CREATE DATABASE bitsi_dispatch;"`
-3. Run `php artisan migrate:fresh --seed`
-
-### Switching from MySQL to SQLite
-
-1. Update `.env`:
-   ```env
-   DB_CONNECTION=sqlite
-   # Comment out or remove DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD
-   ```
-2. Create the file: `touch database/database.sqlite` (or `type nul > database\database.sqlite` on Windows)
-3. Run `php artisan migrate:fresh --seed`
-
-### PHP extension missing
-
-Check your extensions with `php -m`. Enable missing ones in `php.ini`:
-
-```ini
-extension=pdo_mysql
-extension=pdo_sqlite
-extension=sqlite3
-```
-
-On Windows with XAMPP, the `php.ini` is at `C:\xampp\php\php.ini`.
-
-### Node.js / npm errors on Windows
-
-Make sure Node.js is in your PATH. Open a new terminal after installation. Verify with:
-
-```bash
-node -v
-npm -v
-```
+### v1.0
+- Project scaffolding and database design
 
 ---
 
