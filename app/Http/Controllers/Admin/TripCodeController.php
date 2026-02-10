@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\BusType;
+use App\Enums\Direction;
 use App\Http\Controllers\Controller;
 use App\Models\TripCode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 use Illuminate\View\View;
 
 class TripCodeController extends Controller
@@ -23,16 +26,9 @@ class TripCodeController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge($this->validationRules(), [
             'code' => 'required|string|min:2|max:50|unique:trip_codes,code',
-            'operator' => 'required|string|min:2|max:255',
-            'origin_terminal' => 'required|string|min:2|max:255',
-            'destination_terminal' => 'required|string|min:2|max:255',
-            'bus_type' => 'required|string|in:regular,deluxe,super_deluxe,elite,sleeper,single_seater,skybus',
-            'scheduled_departure_time' => 'required|date_format:H:i',
-            'direction' => 'required|string|in:SB,NB',
-            'is_active' => 'boolean',
-        ]);
+        ]));
 
         TripCode::create($validated);
 
@@ -48,16 +44,9 @@ class TripCodeController extends Controller
 
     public function update(Request $request, TripCode $tripCode): RedirectResponse
     {
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge($this->validationRules(), [
             'code' => ['required', 'string', 'min:2', 'max:50', Rule::unique('trip_codes', 'code')->ignore($tripCode->id)],
-            'operator' => 'required|string|min:2|max:255',
-            'origin_terminal' => 'required|string|min:2|max:255',
-            'destination_terminal' => 'required|string|min:2|max:255',
-            'bus_type' => 'required|string|in:regular,deluxe,super_deluxe,elite,sleeper,single_seater,skybus',
-            'scheduled_departure_time' => 'required|date_format:H:i',
-            'direction' => 'required|string|in:SB,NB',
-            'is_active' => 'boolean',
-        ]);
+        ]));
 
         $tripCode->update($validated);
 
@@ -76,5 +65,18 @@ class TripCodeController extends Controller
         $tripCode->update(['is_active' => ! $tripCode->is_active]);
 
         return redirect()->back();
+    }
+
+    private function validationRules(): array
+    {
+        return [
+            'operator' => 'required|string|min:2|max:255',
+            'origin_terminal' => 'required|string|min:2|max:255',
+            'destination_terminal' => 'required|string|min:2|max:255',
+            'bus_type' => ['required', 'string', new Enum(BusType::class)],
+            'scheduled_departure_time' => 'required|date_format:H:i',
+            'direction' => ['required', 'string', new Enum(Direction::class)],
+            'is_active' => 'boolean',
+        ];
     }
 }

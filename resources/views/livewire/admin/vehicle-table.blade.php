@@ -1,3 +1,5 @@
+@php use App\Enums\VehicleStatus; @endphp
+
 <div class="flex h-full flex-1 flex-col gap-4 p-4">
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -34,23 +36,11 @@
             class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
             <option value="">All Statuses</option>
-            <option value="OK">OK</option>
-            <option value="UR">Under Repair (UR)</option>
-            <option value="PMS">PMS</option>
-            <option value="In Transit">In Transit</option>
-            <option value="Lutaw">Lutaw</option>
+            @foreach (VehicleStatus::cases() as $status)
+                <option value="{{ $status->value }}">{{ $status->label() }}</option>
+            @endforeach
         </select>
     </div>
-
-    @php
-        $vehicleStatusClasses = [
-            'OK' => 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-            'UR' => 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
-            'PMS' => 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
-            'In Transit' => 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-            'Lutaw' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
-        ];
-    @endphp
 
     {{-- Table --}}
     <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
@@ -74,12 +64,12 @@
                             <tr class="border-b last:border-0 hover:bg-muted/30 transition-colors">
                                 <td class="px-4 py-3 font-semibold">{{ $vehicle->bus_number }}</td>
                                 <td class="px-4 py-3">{{ $vehicle->brand }}</td>
-                                <td class="px-4 py-3">{{ $vehicle->bus_type?->value ?? $vehicle->bus_type }}</td>
+                                <td class="px-4 py-3">{{ $vehicle->bus_type?->label() ?? $vehicle->bus_type }}</td>
                                 <td class="px-4 py-3">{{ $vehicle->plate_number }}</td>
                                 <td class="px-4 py-3">
-                                    @php $vStatus = $vehicle->status?->value ?? $vehicle->status ?? 'OK'; @endphp
-                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $vehicleStatusClasses[$vStatus] ?? 'bg-gray-100 text-gray-700' }}">
-                                        {{ $vStatus }}
+                                    @php $vStatus = $vehicle->status ?? VehicleStatus::OK; @endphp
+                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $vStatus->badgeClass() }}">
+                                        {{ $vStatus->label() }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
