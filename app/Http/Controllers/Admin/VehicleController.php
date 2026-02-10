@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\BusType;
+use App\Enums\PmsUnit;
+use App\Enums\VehicleStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 use Illuminate\View\View;
 
 class VehicleController extends Controller
@@ -23,18 +27,10 @@ class VehicleController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge($this->validationRules(), [
             'bus_number' => 'required|string|min:2|max:20|unique:vehicles,bus_number',
-            'brand' => 'required|string|min:2|max:100',
-            'bus_type' => 'required|string|in:regular,deluxe,super_deluxe,elite,sleeper,single_seater,skybus',
             'plate_number' => ['required', 'string', 'min:4', 'max:20', 'regex:/^[A-Z0-9\- ]+$/i', 'unique:vehicles,plate_number'],
-            'status' => 'required|string|in:OK,UR,PMS,In Transit,Lutaw',
-            'gps_device_id' => 'nullable|string|max:100',
-            'pms_unit' => 'required|string|in:kilometers,trips',
-            'pms_threshold' => 'required|integer|min:0',
-            'current_pms_value' => 'required|integer|min:0',
-            'last_pms_date' => 'nullable|date',
-        ]);
+        ]));
 
         Vehicle::create($validated);
 
@@ -53,18 +49,10 @@ class VehicleController extends Controller
 
     public function update(Request $request, Vehicle $vehicle): RedirectResponse
     {
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge($this->validationRules(), [
             'bus_number' => ['required', 'string', 'min:2', 'max:20', Rule::unique('vehicles', 'bus_number')->ignore($vehicle->id)],
-            'brand' => 'required|string|min:2|max:100',
-            'bus_type' => 'required|string|in:regular,deluxe,super_deluxe,elite,sleeper,single_seater,skybus',
             'plate_number' => ['required', 'string', 'min:4', 'max:20', 'regex:/^[A-Z0-9\- ]+$/i', Rule::unique('vehicles', 'plate_number')->ignore($vehicle->id)],
-            'status' => 'required|string|in:OK,UR,PMS,In Transit,Lutaw',
-            'gps_device_id' => 'nullable|string|max:100',
-            'pms_unit' => 'required|string|in:kilometers,trips',
-            'pms_threshold' => 'required|integer|min:0',
-            'current_pms_value' => 'required|integer|min:0',
-            'last_pms_date' => 'nullable|date',
-        ]);
+        ]));
 
         $vehicle->update($validated);
 
@@ -76,5 +64,19 @@ class VehicleController extends Controller
         $vehicle->delete();
 
         return redirect()->route('admin.vehicles.index');
+    }
+
+    private function validationRules(): array
+    {
+        return [
+            'brand' => 'required|string|min:2|max:100',
+            'bus_type' => ['required', 'string', new Enum(BusType::class)],
+            'status' => ['required', 'string', new Enum(VehicleStatus::class)],
+            'gps_device_id' => 'nullable|string|max:100',
+            'pms_unit' => ['required', 'string', new Enum(PmsUnit::class)],
+            'pms_threshold' => 'required|integer|min:0',
+            'current_pms_value' => 'required|integer|min:0',
+            'last_pms_date' => 'nullable|date',
+        ];
     }
 }

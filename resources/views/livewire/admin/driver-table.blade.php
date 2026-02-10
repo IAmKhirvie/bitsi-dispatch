@@ -1,3 +1,5 @@
+@php use App\Enums\DriverStatus; @endphp
+
 <div class="flex h-full flex-1 flex-col gap-4 p-4">
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -39,38 +41,11 @@
             class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
             <option value="">All Statuses</option>
-            <option value="available">Available</option>
-            <option value="dispatched">Dispatched</option>
-            <option value="on_route">On Route</option>
-            <option value="on_leave">On Leave</option>
+            @foreach (DriverStatus::cases() as $status)
+                <option value="{{ $status->value }}">{{ $status->label() }}</option>
+            @endforeach
         </select>
     </div>
-
-    @php
-        $statusConfig = [
-            'available' => [
-                'label' => 'Available',
-                'badge' => 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-                'btnActive' => 'bg-green-600 text-white hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600',
-            ],
-            'dispatched' => [
-                'label' => 'Dispatched',
-                'badge' => 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-                'btnActive' => 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600',
-            ],
-            'on_route' => [
-                'label' => 'On Route',
-                'badge' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300',
-                'btnActive' => 'bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600',
-            ],
-            'on_leave' => [
-                'label' => 'On Leave',
-                'badge' => 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
-                'btnActive' => 'bg-orange-600 text-white hover:bg-orange-700 dark:bg-orange-700 dark:hover:bg-orange-600',
-            ],
-        ];
-        $allStatuses = ['available', 'dispatched', 'on_route', 'on_leave'];
-    @endphp
 
     {{-- Table --}}
     <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
@@ -109,23 +84,20 @@
                                     </button>
                                 </td>
                                 <td class="px-4 py-3">
-                                    @php
-                                        $driverStatus = $driver->status?->value ?? 'available';
-                                        $config = $statusConfig[$driverStatus] ?? $statusConfig['available'];
-                                    @endphp
-                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $config['badge'] }}">
-                                        {{ $config['label'] }}
+                                    @php $driverStatus = $driver->status ?? DriverStatus::Available; @endphp
+                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $driverStatus->badgeClass() }}">
+                                        {{ $driverStatus->label() }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-1">
-                                        @foreach ($allStatuses as $s)
+                                        @foreach (DriverStatus::cases() as $s)
                                             <button
-                                                wire:click="updateStatus({{ $driver->id }}, '{{ $s }}')"
-                                                class="rounded px-2 py-1 text-xs font-medium transition-colors {{ ($driver->status?->value ?? 'available') === $s ? $statusConfig[$s]['btnActive'] : 'bg-muted text-muted-foreground hover:bg-muted/80' }}"
-                                                title="Set {{ $statusConfig[$s]['label'] }}"
+                                                wire:click="updateStatus({{ $driver->id }}, '{{ $s->value }}')"
+                                                class="rounded px-2 py-1 text-xs font-medium transition-colors {{ ($driver->status ?? DriverStatus::Available) === $s ? $s->buttonActiveClass() : 'bg-muted text-muted-foreground hover:bg-muted/80' }}"
+                                                title="Set {{ $s->label() }}"
                                             >
-                                                {{ $statusConfig[$s]['label'] }}
+                                                {{ $s->label() }}
                                             </button>
                                         @endforeach
                                     </div>

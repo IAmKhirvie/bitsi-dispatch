@@ -1,3 +1,5 @@
+@php use App\Enums\UserRole; @endphp
+
 <div class="flex h-full flex-1 flex-col gap-4 p-4">
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -34,9 +36,9 @@
             class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
             <option value="">All Roles</option>
-            <option value="admin">Admin</option>
-            <option value="operations_manager">Operations Manager</option>
-            <option value="dispatcher">Dispatcher</option>
+            @foreach (UserRole::cases() as $role)
+                <option value="{{ $role->value }}">{{ $role->label() }}</option>
+            @endforeach
         </select>
     </div>
 
@@ -61,16 +63,9 @@
                                 <td class="px-4 py-3 font-medium">{{ $user->name }}</td>
                                 <td class="px-4 py-3">{{ $user->email }}</td>
                                 <td class="px-4 py-3">
-                                    @php
-                                        $roleClasses = [
-                                            'admin' => 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
-                                            'operations_manager' => 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-                                            'dispatcher' => 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-                                        ];
-                                        $badgeClass = $roleClasses[$user->role] ?? 'bg-gray-100 text-gray-700';
-                                    @endphp
-                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $badgeClass }}">
-                                        {{ ucwords(str_replace('_', ' ', $user->role)) }}
+                                    @php $userRole = UserRole::tryFrom($user->role); @endphp
+                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $userRole?->badgeClass() ?? 'bg-gray-100 text-gray-700' }}">
+                                        {{ $userRole?->label() ?? ucwords(str_replace('_', ' ', $user->role)) }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">{{ $user->phone ?? '--' }}</td>
