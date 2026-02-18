@@ -1,4 +1,4 @@
-<div class="flex h-full flex-1 flex-col gap-4 p-4">
+<div class="flex h-full flex-1 flex-col gap-4 p-4" wire:poll.10s>
     @php
         $statusClasses = [
             'scheduled' => 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
@@ -18,6 +18,10 @@
             <p class="text-sm text-muted-foreground">Manage daily bus dispatch operations</p>
         </div>
         <div class="flex items-center gap-3">
+            <span class="text-xs text-muted-foreground" title="Auto-refreshes every 10 seconds">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 inline h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                Live
+            </span>
             <div class="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 <input
@@ -38,23 +42,23 @@
                 <div class="text-xs text-muted-foreground">Total</div>
             </div>
             <div class="rounded-lg border bg-card p-3 text-center">
-                <div class="text-lg font-bold text-blue-600">{{ $summary->sb_trips ?? 0 }}</div>
+                <div class="text-lg font-bold text-blue-600">{{ $summary->tripCount('sb') }}</div>
                 <div class="text-xs text-muted-foreground">SB</div>
             </div>
             <div class="rounded-lg border bg-card p-3 text-center">
-                <div class="text-lg font-bold text-purple-600">{{ $summary->nb_trips ?? 0 }}</div>
+                <div class="text-lg font-bold text-purple-600">{{ $summary->tripCount('nb') }}</div>
                 <div class="text-xs text-muted-foreground">NB</div>
             </div>
             <div class="rounded-lg border bg-card p-3 text-center">
-                <div class="text-lg font-bold">{{ $summary->naga_trips ?? 0 }}</div>
+                <div class="text-lg font-bold">{{ $summary->tripCount('naga') }}</div>
                 <div class="text-xs text-muted-foreground">Naga</div>
             </div>
             <div class="rounded-lg border bg-card p-3 text-center">
-                <div class="text-lg font-bold">{{ $summary->legazpi_trips ?? 0 }}</div>
+                <div class="text-lg font-bold">{{ $summary->tripCount('legazpi') }}</div>
                 <div class="text-xs text-muted-foreground">Legazpi</div>
             </div>
             <div class="rounded-lg border bg-card p-3 text-center">
-                <div class="text-lg font-bold">{{ $summary->sorsogon_trips ?? 0 }}</div>
+                <div class="text-lg font-bold">{{ $summary->tripCount('sorsogon') }}</div>
                 <div class="text-xs text-muted-foreground">Sorsogon</div>
             </div>
         </div>

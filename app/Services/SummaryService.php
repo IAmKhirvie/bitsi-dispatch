@@ -4,37 +4,54 @@ namespace App\Services;
 
 use App\Models\DailySummary;
 use App\Models\DispatchDay;
+use Illuminate\Support\Facades\DB;
 
 class SummaryService
 {
+    private const DESTINATION_MATCHERS = [
+        'naga' => ['naga'],
+        'legazpi' => ['legazpi'],
+        'sorsogon' => ['sorsogon'],
+        'virac' => ['virac'],
+        'masbate' => ['masbate'],
+        'tabaco' => ['tabaco'],
+        'visayas' => ['tacloban', 'catbalogan', 'samar'],
+    ];
+
     public function generateForDay(DispatchDay $day): DailySummary
     {
-        $entries = $day->entries()
-            ->where('status', '!=', 'cancelled')
-            ->get();
+        return DB::transaction(function () use ($day) {
+            $entries = $day->entries()
+                ->where('status', '!=', 'cancelled')
+                ->get();
 
-        $data = [
-            'dispatch_day_id' => $day->id,
-            'total_trips' => $entries->count(),
-            'sb_trips' => $entries->where('direction', 'SB')->count(),
-            'nb_trips' => $entries->where('direction', 'NB')->count(),
-            'naga_trips' => $entries->filter(fn ($e) => str_contains(strtolower($e->route ?? ''), 'naga'))->count(),
-            'legazpi_trips' => $entries->filter(fn ($e) => str_contains(strtolower($e->route ?? ''), 'legazpi'))->count(),
-            'sorsogon_trips' => $entries->filter(fn ($e) => str_contains(strtolower($e->route ?? ''), 'sorsogon'))->count(),
-            'virac_trips' => $entries->filter(fn ($e) => str_contains(strtolower($e->route ?? ''), 'virac'))->count(),
-            'masbate_trips' => $entries->filter(fn ($e) => str_contains(strtolower($e->route ?? ''), 'masbate'))->count(),
-            'tabaco_trips' => $entries->filter(fn ($e) => str_contains(strtolower($e->route ?? ''), 'tabaco'))->count(),
-            'visayas_trips' => $entries->filter(fn ($e) =>
-                str_contains(strtolower($e->route ?? ''), 'tacloban') ||
-                str_contains(strtolower($e->route ?? ''), 'catbalogan') ||
-                str_contains(strtolower($e->route ?? ''), 'samar')
-            )->count(),
-            'cargo_trips' => $entries->filter(fn ($e) => str_contains(strtolower($e->remarks ?? ''), 'cargo'))->count(),
-        ];
+            $summary = DailySummary::updateOrCreate(
+                ['dispatch_day_id' => $day->id],
+                ['total_trips' => $entries->count()]
+            );
 
-        return DailySummary::updateOrCreate(
-            ['dispatch_day_id' => $day->id],
-            $data
-        );
+            // Build category counts
+            $counts = [
+                'sb' => $entries->where('direction', 'SB')->count(),
+                'nb' => $entries->where('direction', 'NB')->count(),
+                'cargo' => $entries->filter(fn ($e) => str_contains(strtolower($e->remarks ?? ''), 'cargo'))->count(),
+            ];
+
+            foreach (self::DESTINATION_MATCHERS as $category => $keywords) {
+                $counts[$category] = $entries->filter(fn ($e) =>
+                    collect($keywords)->contains(fn ($kw) => str_contains(strtolower($e->route ?? ''), $kw))
+                )->count();
+            }
+
+            // Upsert all items
+            foreach ($counts as $category => $tripCount) {
+                $summary->items()->updateOrCreate(
+                    ['category' => $category],
+                    ['trip_count' => $tripCount]
+                );
+            }
+
+            return $summary->load('items');
+        });
     }
 }

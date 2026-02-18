@@ -23,6 +23,12 @@ trait Auditable
         static::deleted(function ($model) {
             self::logAudit($model, 'deleted', $model->getAttributes(), null);
         });
+
+        if (method_exists(static::class, 'restoring')) {
+            static::restored(function ($model) {
+                self::logAudit($model, 'restored', null, $model->getAttributes());
+            });
+        }
     }
 
     private static function logAudit($model, string $action, ?array $old, ?array $new): void

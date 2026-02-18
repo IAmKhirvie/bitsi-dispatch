@@ -10,10 +10,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Vehicle extends Model
 {
     use HasFactory;
+    use SoftDeletes;
     use \App\Traits\Auditable;
 
     protected $fillable = [
@@ -56,6 +58,12 @@ class Vehicle extends Model
         return $this->current_pms_value >= $this->pms_threshold;
     }
 
+    public function getIsPmsApproachingAttribute(): bool
+    {
+        $pct = $this->pms_percentage;
+        return $pct >= 80 && $pct < 100;
+    }
+
     public function getPmsPercentageAttribute(): float
     {
         if ($this->pms_threshold === 0) {
@@ -63,5 +71,11 @@ class Vehicle extends Model
         }
 
         return round(($this->current_pms_value / $this->pms_threshold) * 100, 1);
+    }
+
+    public function scopePmsAlert(Builder $query): Builder
+    {
+        return $query->where('pms_threshold', '>', 0)
+            ->whereRaw('current_pms_value >= pms_threshold * 0.8');
     }
 }

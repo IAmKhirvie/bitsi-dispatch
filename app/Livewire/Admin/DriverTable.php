@@ -12,10 +12,12 @@ class DriverTable extends Component
 
     public string $search = '';
     public string $statusFilter = '';
+    public bool $showTrashed = false;
 
     protected $queryString = [
         'search' => ['except' => ''],
         'statusFilter' => ['except' => '', 'as' => 'status'],
+        'showTrashed' => ['except' => false, 'as' => 'trashed'],
     ];
 
     public function updatingSearch(): void
@@ -28,10 +30,21 @@ class DriverTable extends Component
         $this->resetPage();
     }
 
+    public function updatingShowTrashed(): void
+    {
+        $this->resetPage();
+    }
+
     public function deleteDriver(int $driverId): void
     {
         Driver::findOrFail($driverId)->delete();
         session()->flash('status', 'Driver deleted successfully.');
+    }
+
+    public function restoreDriver(int $driverId): void
+    {
+        Driver::onlyTrashed()->findOrFail($driverId)->restore();
+        session()->flash('status', 'Driver restored successfully.');
     }
 
     public function toggleActive(int $driverId): void
@@ -48,6 +61,7 @@ class DriverTable extends Component
     public function render()
     {
         $drivers = Driver::query()
+            ->when($this->showTrashed, fn ($q) => $q->onlyTrashed())
             ->when($this->search, fn ($q) => $q->where(function ($q) {
                 $q->where('name', 'like', "%{$this->search}%")
                   ->orWhere('phone', 'like', "%{$this->search}%")

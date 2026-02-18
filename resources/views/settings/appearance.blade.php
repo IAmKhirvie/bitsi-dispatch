@@ -10,9 +10,6 @@
                 <a href="{{ route('profile.edit') }}" class="flex-1 rounded-md px-3 py-1.5 text-center text-sm font-medium {{ request()->routeIs('profile.edit') ? 'bg-background text-foreground shadow' : 'text-muted-foreground hover:text-foreground' }}">
                     Profile
                 </a>
-                <a href="{{ route('password.edit') }}" class="flex-1 rounded-md px-3 py-1.5 text-center text-sm font-medium {{ request()->routeIs('password.edit') ? 'bg-background text-foreground shadow' : 'text-muted-foreground hover:text-foreground' }}">
-                    Password
-                </a>
                 <a href="{{ route('appearance') }}" class="flex-1 rounded-md px-3 py-1.5 text-center text-sm font-medium {{ request()->routeIs('appearance') ? 'bg-background text-foreground shadow' : 'text-muted-foreground hover:text-foreground' }}">
                     Appearance
                 </a>

@@ -4,9 +4,8 @@
 
 @section('content')
     <div class="flex h-full flex-1 flex-col gap-6 p-4">
-        {{-- Stat Cards --}}
+        {{-- Trip Stat Cards (All Roles) --}}
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {{-- Today's Trips --}}
             <div class="rounded-xl border bg-card text-card-foreground shadow">
                 <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
                     <h3 class="text-sm font-medium">Today's Trips</h3>
@@ -17,8 +16,6 @@
                     <p class="text-xs text-muted-foreground">Total dispatched trips today</p>
                 </div>
             </div>
-
-            {{-- Departed --}}
             <div class="rounded-xl border bg-card text-card-foreground shadow">
                 <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
                     <h3 class="text-sm font-medium">Departed</h3>
@@ -29,8 +26,6 @@
                     <p class="text-xs text-muted-foreground">Buses that have departed</p>
                 </div>
             </div>
-
-            {{-- On Route --}}
             <div class="rounded-xl border bg-card text-card-foreground shadow">
                 <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
                     <h3 class="text-sm font-medium">On Route</h3>
@@ -41,8 +36,6 @@
                     <p class="text-xs text-muted-foreground">Currently in transit</p>
                 </div>
             </div>
-
-            {{-- Cancelled --}}
             <div class="rounded-xl border bg-card text-card-foreground shadow">
                 <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
                     <h3 class="text-sm font-medium">Cancelled</h3>
@@ -53,8 +46,11 @@
                     <p class="text-xs text-muted-foreground">Cancelled trips today</p>
                 </div>
             </div>
+        </div>
 
-            {{-- Active Vehicles --}}
+        {{-- Vehicle Stat Cards (Admin + Ops Manager) --}}
+        @role('admin|operations_manager')
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div class="rounded-xl border bg-card text-card-foreground shadow">
                 <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
                     <h3 class="text-sm font-medium">Active Vehicles</h3>
@@ -65,8 +61,6 @@
                     <p class="text-xs text-muted-foreground">Vehicles in service</p>
                 </div>
             </div>
-
-            {{-- Under Repair --}}
             <div class="rounded-xl border bg-card text-card-foreground shadow">
                 <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
                     <h3 class="text-sm font-medium">Under Repair</h3>
@@ -77,8 +71,6 @@
                     <p class="text-xs text-muted-foreground">Vehicles under repair</p>
                 </div>
             </div>
-
-            {{-- PMS Warning --}}
             <div class="rounded-xl border bg-card text-card-foreground shadow">
                 <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
                     <h3 class="text-sm font-medium">PMS Warning</h3>
@@ -89,8 +81,6 @@
                     <p class="text-xs text-muted-foreground">Vehicles needing maintenance</p>
                 </div>
             </div>
-
-            {{-- Active Drivers --}}
             <div class="rounded-xl border bg-card text-card-foreground shadow">
                 <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
                     <h3 class="text-sm font-medium">Active Drivers</h3>
@@ -102,8 +92,124 @@
                 </div>
             </div>
         </div>
+        @endrole
 
-        {{-- Today's Summary + Quick Actions --}}
+        {{-- PMS Maintenance Alerts (Admin + Ops Manager) --}}
+        @role('admin|operations_manager')
+        @if ($pmsAlerts->isNotEmpty())
+            <div class="rounded-xl border border-orange-200 bg-orange-50/50 text-card-foreground shadow dark:border-orange-900 dark:bg-orange-950/20">
+                <div class="p-6 pb-3">
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <h3 class="font-semibold">Maintenance Alerts</h3>
+                    </div>
+                    <p class="text-sm text-muted-foreground">Vehicles approaching or exceeding PMS threshold</p>
+                </div>
+                <div class="px-6 pb-6">
+                    <div class="space-y-3">
+                        @foreach ($pmsAlerts as $vehicle)
+                            @php
+                                $pct = $vehicle->pms_percentage;
+                                $isOverdue = $pct >= 100;
+                            @endphp
+                            <div class="flex items-center justify-between gap-4 rounded-lg border bg-card p-3">
+                                <div class="flex items-center gap-3">
+                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold {{ $isOverdue ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' : 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' }}">
+                                        {{ $isOverdue ? 'OVERDUE' : 'WARNING' }}
+                                    </span>
+                                    <div>
+                                        <span class="font-semibold">Bus {{ $vehicle->bus_number }}</span>
+                                        <span class="text-sm text-muted-foreground"> - {{ $vehicle->brand }}</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <div class="text-sm font-medium">{{ number_format($vehicle->current_pms_value) }} / {{ number_format($vehicle->pms_threshold) }}</div>
+                                        <div class="h-1.5 w-24 rounded-full bg-gray-200 dark:bg-gray-700">
+                                            <div class="h-1.5 rounded-full {{ $isOverdue ? 'bg-red-500' : 'bg-orange-500' }}" style="width: {{ min($pct, 100) }}%"></div>
+                                        </div>
+                                    </div>
+                                    <span class="text-sm font-bold {{ $isOverdue ? 'text-red-600' : 'text-orange-600' }}">{{ $pct }}%</span>
+                                    <a href="{{ route('admin.vehicles.edit', $vehicle) }}" class="text-xs text-blue-600 hover:underline dark:text-blue-400">View</a>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        @endif
+        @endrole
+
+        {{-- Admin-only: Audit Log + SMS Summary Row --}}
+        @role('admin')
+        <div class="grid gap-4 lg:grid-cols-2">
+            {{-- Recent Audit Logs --}}
+            <div class="rounded-xl border bg-card text-card-foreground shadow">
+                <div class="flex items-center justify-between p-6 pb-3">
+                    <div>
+                        <h3 class="font-semibold leading-none tracking-tight">Recent Activity</h3>
+                        <p class="text-sm text-muted-foreground">Last 5 audit log entries</p>
+                    </div>
+                    <a href="{{ route('admin.audit-logs.index') }}" class="text-xs text-blue-600 hover:underline dark:text-blue-400">View All</a>
+                </div>
+                <div class="p-6 pt-0">
+                    @if ($recentAuditLogs->isEmpty())
+                        <p class="text-sm text-muted-foreground">No recent activity.</p>
+                    @else
+                        <div class="space-y-3">
+                            @foreach ($recentAuditLogs as $log)
+                                <div class="flex items-center justify-between text-sm">
+                                    <div class="flex items-center gap-2">
+                                        @php
+                                            $actionClasses = [
+                                                'created' => 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+                                                'updated' => 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+                                                'deleted' => 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+                                                'restored' => 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
+                                            ];
+                                        @endphp
+                                        <span class="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium {{ $actionClasses[$log->action] ?? 'bg-gray-100 text-gray-700' }}">
+                                            {{ ucfirst($log->action) }}
+                                        </span>
+                                        <span class="font-medium">{{ $log->user?->name ?? 'System' }}</span>
+                                        <span class="text-muted-foreground">{{ class_basename($log->auditable_type) }} #{{ $log->auditable_id }}</span>
+                                    </div>
+                                    <span class="text-xs text-muted-foreground">{{ $log->created_at->diffForHumans() }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- SMS Summary --}}
+            <div class="rounded-xl border bg-card text-card-foreground shadow">
+                <div class="flex items-center justify-between p-6 pb-3">
+                    <div>
+                        <h3 class="font-semibold leading-none tracking-tight">SMS Summary</h3>
+                        <p class="text-sm text-muted-foreground">Today's SMS delivery stats</p>
+                    </div>
+                    <a href="{{ route('admin.sms-logs.index') }}" class="text-xs text-blue-600 hover:underline dark:text-blue-400">View All</a>
+                </div>
+                <div class="p-6 pt-0">
+                    @if ($smsStats)
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="rounded-lg bg-green-50 p-4 text-center dark:bg-green-900/20">
+                                <div class="text-2xl font-bold text-green-600">{{ $smsStats['sent_today'] }}</div>
+                                <p class="text-xs text-muted-foreground">Sent Today</p>
+                            </div>
+                            <div class="rounded-lg bg-red-50 p-4 text-center dark:bg-red-900/20">
+                                <div class="text-2xl font-bold text-red-600">{{ $smsStats['failed_today'] }}</div>
+                                <p class="text-xs text-muted-foreground">Failed Today</p>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+        @endrole
+
+        {{-- Today's Summary + Quick Actions (All Roles) --}}
         @if($todaySummary)
             <div class="grid gap-4 lg:grid-cols-2">
                 <div class="rounded-xl border bg-card text-card-foreground shadow">
@@ -116,11 +222,11 @@
                             <div class="space-y-3">
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-muted-foreground">SB Trips</span>
-                                    <span class="font-semibold">{{ $todaySummary->sb_trips }}</span>
+                                    <span class="font-semibold">{{ $todaySummary->tripCount('sb') }}</span>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-muted-foreground">NB Trips</span>
-                                    <span class="font-semibold">{{ $todaySummary->nb_trips }}</span>
+                                    <span class="font-semibold">{{ $todaySummary->tripCount('nb') }}</span>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-muted-foreground">Total Trips</span>
@@ -130,35 +236,35 @@
                             <div class="space-y-3">
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-muted-foreground">Naga</span>
-                                    <span class="font-semibold">{{ $todaySummary->naga_trips }}</span>
+                                    <span class="font-semibold">{{ $todaySummary->tripCount('naga') }}</span>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-muted-foreground">Legazpi</span>
-                                    <span class="font-semibold">{{ $todaySummary->legazpi_trips }}</span>
+                                    <span class="font-semibold">{{ $todaySummary->tripCount('legazpi') }}</span>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-muted-foreground">Sorsogon</span>
-                                    <span class="font-semibold">{{ $todaySummary->sorsogon_trips }}</span>
+                                    <span class="font-semibold">{{ $todaySummary->tripCount('sorsogon') }}</span>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-muted-foreground">Virac</span>
-                                    <span class="font-semibold">{{ $todaySummary->virac_trips }}</span>
+                                    <span class="font-semibold">{{ $todaySummary->tripCount('virac') }}</span>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-muted-foreground">Masbate</span>
-                                    <span class="font-semibold">{{ $todaySummary->masbate_trips }}</span>
+                                    <span class="font-semibold">{{ $todaySummary->tripCount('masbate') }}</span>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-muted-foreground">Tabaco</span>
-                                    <span class="font-semibold">{{ $todaySummary->tabaco_trips }}</span>
+                                    <span class="font-semibold">{{ $todaySummary->tripCount('tabaco') }}</span>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-muted-foreground">Visayas</span>
-                                    <span class="font-semibold">{{ $todaySummary->visayas_trips }}</span>
+                                    <span class="font-semibold">{{ $todaySummary->tripCount('visayas') }}</span>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-muted-foreground">Cargo</span>
-                                    <span class="font-semibold">{{ $todaySummary->cargo_trips }}</span>
+                                    <span class="font-semibold">{{ $todaySummary->tripCount('cargo') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -176,19 +282,20 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg>
                             Go to Dispatch Board
                         </a>
+                        @role('admin|operations_manager')
                         <a href="{{ route('reports.index') }}" class="inline-flex w-full items-center justify-start rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
                             View Reports
                         </a>
                         <a href="{{ route('history.index') }}" class="inline-flex w-full items-center justify-start rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
                             View History
                         </a>
+                        @endrole
                     </div>
                 </div>
             </div>
         @else
-            {{-- Quick Actions when no summary --}}
             <div class="rounded-xl border bg-card text-card-foreground shadow">
                 <div class="p-6">
                     <h3 class="font-semibold leading-none tracking-tight">Quick Actions</h3>
@@ -199,14 +306,16 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg>
                         Go to Dispatch Board
                     </a>
+                    @role('admin|operations_manager')
                     <a href="{{ route('reports.index') }}" class="inline-flex items-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground">
                         View Reports
                     </a>
+                    @endrole
                 </div>
             </div>
         @endif
 
-        {{-- Recent Dispatch Entries --}}
+        {{-- Recent Dispatch Entries (All Roles) --}}
         <div class="rounded-xl border bg-card text-card-foreground shadow">
             <div class="p-6">
                 <h3 class="font-semibold leading-none tracking-tight">Recent Dispatch Entries</h3>

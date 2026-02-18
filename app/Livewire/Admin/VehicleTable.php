@@ -12,10 +12,12 @@ class VehicleTable extends Component
 
     public string $search = '';
     public string $statusFilter = '';
+    public bool $showTrashed = false;
 
     protected $queryString = [
         'search' => ['except' => ''],
         'statusFilter' => ['except' => '', 'as' => 'status'],
+        'showTrashed' => ['except' => false, 'as' => 'trashed'],
     ];
 
     public function updatingSearch(): void
@@ -28,15 +30,27 @@ class VehicleTable extends Component
         $this->resetPage();
     }
 
+    public function updatingShowTrashed(): void
+    {
+        $this->resetPage();
+    }
+
     public function deleteVehicle(int $vehicleId): void
     {
         Vehicle::findOrFail($vehicleId)->delete();
         session()->flash('status', 'Vehicle deleted successfully.');
     }
 
+    public function restoreVehicle(int $vehicleId): void
+    {
+        Vehicle::onlyTrashed()->findOrFail($vehicleId)->restore();
+        session()->flash('status', 'Vehicle restored successfully.');
+    }
+
     public function render()
     {
         $vehicles = Vehicle::query()
+            ->when($this->showTrashed, fn ($q) => $q->onlyTrashed())
             ->when($this->search, fn ($q) => $q->where(function ($q) {
                 $q->where('bus_number', 'like', "%{$this->search}%")
                   ->orWhere('brand', 'like', "%{$this->search}%")

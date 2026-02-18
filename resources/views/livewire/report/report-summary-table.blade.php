@@ -109,13 +109,13 @@
                             <tr class="border-b last:border-0 transition-colors hover:bg-muted/30">
                                 <td class="px-4 py-3 font-medium">{{ $row->dispatchDay->service_date ?? '' }}</td>
                                 <td class="px-4 py-3 text-right font-semibold">{{ $row->total_trips }}</td>
-                                <td class="px-4 py-3 text-right">{{ $row->sb_trips }}</td>
-                                <td class="px-4 py-3 text-right">{{ $row->nb_trips }}</td>
-                                <td class="px-4 py-3 text-right">{{ $row->naga_trips }}</td>
-                                <td class="px-4 py-3 text-right">{{ $row->legazpi_trips }}</td>
-                                <td class="px-4 py-3 text-right">{{ $row->sorsogon_trips }}</td>
-                                <td class="px-4 py-3 text-right">{{ $row->virac_trips }}</td>
-                                <td class="px-4 py-3 text-right">{{ $row->visayas_trips }}</td>
+                                <td class="px-4 py-3 text-right">{{ $row->tripCount('sb') }}</td>
+                                <td class="px-4 py-3 text-right">{{ $row->tripCount('nb') }}</td>
+                                <td class="px-4 py-3 text-right">{{ $row->tripCount('naga') }}</td>
+                                <td class="px-4 py-3 text-right">{{ $row->tripCount('legazpi') }}</td>
+                                <td class="px-4 py-3 text-right">{{ $row->tripCount('sorsogon') }}</td>
+                                <td class="px-4 py-3 text-right">{{ $row->tripCount('virac') }}</td>
+                                <td class="px-4 py-3 text-right">{{ $row->tripCount('visayas') }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-1">
                                         <a href="{{ route('reports.daily', $row->dispatchDay->service_date ?? '') }}" class="inline-flex items-center rounded-md px-2.5 py-1.5 text-sm font-medium hover:bg-accent hover:text-accent-foreground">View</a>

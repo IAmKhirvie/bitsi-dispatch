@@ -65,18 +65,18 @@
     <table class="summary">
         <tr>
             <td>Total: {{ $dispatchDay->summary->total_trips }}</td>
-            <td>SB: {{ $dispatchDay->summary->sb_trips }}</td>
-            <td>NB: {{ $dispatchDay->summary->nb_trips }}</td>
-            <td>Naga: {{ $dispatchDay->summary->naga_trips }}</td>
-            <td>Legazpi: {{ $dispatchDay->summary->legazpi_trips }}</td>
-            <td>Sorsogon: {{ $dispatchDay->summary->sorsogon_trips }}</td>
+            <td>SB: {{ $dispatchDay->summary->tripCount('sb') }}</td>
+            <td>NB: {{ $dispatchDay->summary->tripCount('nb') }}</td>
+            <td>Naga: {{ $dispatchDay->summary->tripCount('naga') }}</td>
+            <td>Legazpi: {{ $dispatchDay->summary->tripCount('legazpi') }}</td>
+            <td>Sorsogon: {{ $dispatchDay->summary->tripCount('sorsogon') }}</td>
         </tr>
         <tr>
-            <td>Virac: {{ $dispatchDay->summary->virac_trips }}</td>
-            <td>Masbate: {{ $dispatchDay->summary->masbate_trips }}</td>
-            <td>Tabaco: {{ $dispatchDay->summary->tabaco_trips }}</td>
-            <td>Visayas: {{ $dispatchDay->summary->visayas_trips }}</td>
-            <td>Cargo: {{ $dispatchDay->summary->cargo_trips }}</td>
+            <td>Virac: {{ $dispatchDay->summary->tripCount('virac') }}</td>
+            <td>Masbate: {{ $dispatchDay->summary->tripCount('masbate') }}</td>
+            <td>Tabaco: {{ $dispatchDay->summary->tripCount('tabaco') }}</td>
+            <td>Visayas: {{ $dispatchDay->summary->tripCount('visayas') }}</td>
+            <td>Cargo: {{ $dispatchDay->summary->tripCount('cargo') }}</td>
             <td></td>
         </tr>
     </table>

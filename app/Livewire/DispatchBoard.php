@@ -241,7 +241,7 @@ class DispatchBoard extends Component
 
     public function render()
     {
-        $dispatchDay = DispatchDay::with(['entries' => fn ($q) => $q->orderBy('sort_order')->with(['tripCode', 'vehicle', 'driver', 'driver2']), 'summary'])
+        $dispatchDay = DispatchDay::with(['entries' => fn ($q) => $q->orderBy('sort_order')->with(['tripCode', 'vehicle', 'driver', 'driver2']), 'summary.items'])
             ->where('service_date', $this->date)
             ->first();
 

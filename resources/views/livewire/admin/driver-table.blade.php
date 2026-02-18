@@ -45,6 +45,13 @@
                 <option value="{{ $status->value }}">{{ $status->label() }}</option>
             @endforeach
         </select>
+        <button
+            wire:click="$toggle('showTrashed')"
+            class="inline-flex h-9 items-center rounded-md border px-3 text-sm font-medium transition-colors {{ $showTrashed ? 'border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-400' : 'border-input bg-transparent hover:bg-accent hover:text-accent-foreground' }}"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="mr-1.5 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            {{ $showTrashed ? 'Showing Deleted' : 'Show Deleted' }}
+        </button>
     </div>
 
     {{-- Table --}}
@@ -65,7 +72,7 @@
                     </thead>
                     <tbody>
                         @forelse ($drivers as $driver)
-                            <tr class="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                            <tr class="border-b last:border-0 hover:bg-muted/30 transition-colors {{ $driver->trashed() ? 'opacity-60' : '' }}">
                                 <td class="px-4 py-3 font-medium">{{ $driver->name }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-1">
@@ -104,17 +111,28 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-2">
-                                        <a href="{{ route('admin.drivers.edit', $driver) }}"
-                                           class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-8">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                                        </a>
-                                        <button
-                                            wire:click="deleteDriver({{ $driver->id }})"
-                                            wire:confirm="Are you sure you want to delete driver {{ $driver->name }}?"
-                                            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-8 text-red-500 hover:text-red-700"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                        </button>
+                                        @if ($driver->trashed())
+                                            <button
+                                                wire:click="restoreDriver({{ $driver->id }})"
+                                                wire:confirm="Restore driver {{ $driver->name }}?"
+                                                class="inline-flex items-center rounded-md bg-green-50 px-2.5 py-1.5 text-xs font-medium text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                                Restore
+                                            </button>
+                                        @else
+                                            <a href="{{ route('admin.drivers.edit', $driver) }}"
+                                               class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-8">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                                            </a>
+                                            <button
+                                                wire:click="deleteDriver({{ $driver->id }})"
+                                                wire:confirm="Are you sure you want to delete driver {{ $driver->name }}?"
+                                                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-8 text-red-500 hover:text-red-700"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                                            </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

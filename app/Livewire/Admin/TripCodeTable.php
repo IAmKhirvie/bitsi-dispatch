@@ -12,10 +12,12 @@ class TripCodeTable extends Component
 
     public string $search = '';
     public string $directionFilter = '';
+    public bool $showTrashed = false;
 
     protected $queryString = [
         'search' => ['except' => ''],
         'directionFilter' => ['except' => '', 'as' => 'direction'],
+        'showTrashed' => ['except' => false, 'as' => 'trashed'],
     ];
 
     public function updatingSearch(): void
@@ -28,10 +30,21 @@ class TripCodeTable extends Component
         $this->resetPage();
     }
 
+    public function updatingShowTrashed(): void
+    {
+        $this->resetPage();
+    }
+
     public function deleteTripCode(int $tripCodeId): void
     {
         TripCode::findOrFail($tripCodeId)->delete();
         session()->flash('status', 'Trip code deleted successfully.');
+    }
+
+    public function restoreTripCode(int $tripCodeId): void
+    {
+        TripCode::onlyTrashed()->findOrFail($tripCodeId)->restore();
+        session()->flash('status', 'Trip code restored successfully.');
     }
 
     public function toggleActive(int $tripCodeId): void
@@ -43,6 +56,7 @@ class TripCodeTable extends Component
     public function render()
     {
         $tripCodes = TripCode::query()
+            ->when($this->showTrashed, fn ($q) => $q->onlyTrashed())
             ->when($this->search, fn ($q) => $q->where(function ($q) {
                 $q->where('code', 'like', "%{$this->search}%")
                   ->orWhere('operator', 'like', "%{$this->search}%")

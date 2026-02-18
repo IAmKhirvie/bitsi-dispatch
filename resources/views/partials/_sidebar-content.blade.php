@@ -176,6 +176,36 @@
                     <span>Attendance</span>
                 </a>
             </li>
+
+            {{-- Audit Logs --}}
+            <li class="group/menu-item relative" data-sidebar="menu-item">
+                <a
+                    href="{{ route('admin.audit-logs.index') }}"
+                    data-sidebar="menu-button"
+                    data-size="default"
+                    data-active="{{ request()->routeIs('admin.audit-logs.*') ? 'true' : 'false' }}"
+                    class="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 h-8 text-sm data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground"
+                >
+                    {{-- FileText icon --}}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                    <span>Audit Logs</span>
+                </a>
+            </li>
+
+            {{-- SMS Logs --}}
+            <li class="group/menu-item relative" data-sidebar="menu-item">
+                <a
+                    href="{{ route('admin.sms-logs.index') }}"
+                    data-sidebar="menu-button"
+                    data-size="default"
+                    data-active="{{ request()->routeIs('admin.sms-logs.*') ? 'true' : 'false' }}"
+                    class="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 h-8 text-sm data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground"
+                >
+                    {{-- MessageSquare icon --}}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>SMS Logs</span>
+                </a>
+            </li>
         </ul>
     </div>
     @endrole
@@ -195,13 +225,7 @@
                 >
                     {{-- User Avatar --}}
                     <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
-                        @if(Auth::user()->avatar)
-                            <img class="aspect-square h-full w-full" src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" />
-                        @else
-                            <span class="flex h-full w-full items-center justify-center rounded-lg bg-muted text-black dark:text-white text-xs font-medium">
-                                {{ collect(explode(' ', Auth::user()->name))->map(fn($n) => strtoupper(substr($n, 0, 1)))->take(2)->implode('') }}
-                            </span>
-                        @endif
+                        <img class="aspect-square h-full w-full object-cover" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
                     </span>
 
                     <div class="grid flex-1 text-left text-sm leading-tight">
@@ -230,13 +254,7 @@
                     <div class="p-0 font-normal">
                         <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                             <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
-                                @if(Auth::user()->avatar)
-                                    <img class="aspect-square h-full w-full" src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" />
-                                @else
-                                    <span class="flex h-full w-full items-center justify-center rounded-lg bg-muted text-black dark:text-white text-xs font-medium">
-                                        {{ collect(explode(' ', Auth::user()->name))->map(fn($n) => strtoupper(substr($n, 0, 1)))->take(2)->implode('') }}
-                                    </span>
-                                @endif
+                                <img class="aspect-square h-full w-full object-cover" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
                             </span>
                             <div class="grid flex-1 text-left text-sm leading-tight">
                                 <span class="truncate font-medium">{{ Auth::user()->name }}</span>

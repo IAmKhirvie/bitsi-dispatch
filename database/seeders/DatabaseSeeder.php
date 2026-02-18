@@ -9,6 +9,7 @@ use App\Enums\PmsUnit;
 use App\Enums\UserRole;
 use App\Enums\VehicleStatus;
 use App\Models\DailySummary;
+use App\Models\DailySummaryItem;
 use App\Models\DispatchDay;
 use App\Models\DispatchEntry;
 use App\Models\Driver;
@@ -145,21 +146,22 @@ class DatabaseSeeder extends Seeder
         }
 
         // Daily summary (use updateOrCreate since observer auto-generates on entry creation)
-        DailySummary::updateOrCreate(
+        $summary = DailySummary::updateOrCreate(
             ['dispatch_day_id' => $dispatchDay->id],
-            [
-                'total_trips' => 8,
-                'sb_trips' => 5,
-                'nb_trips' => 3,
-                'naga_trips' => 3,
-                'legazpi_trips' => 2,
-                'sorsogon_trips' => 1,
-                'virac_trips' => 0,
-                'masbate_trips' => 0,
-                'tabaco_trips' => 0,
-                'visayas_trips' => 1,
-                'cargo_trips' => 0,
-            ]
+            ['total_trips' => 8]
         );
+
+        $summaryItems = [
+            'sb' => 5, 'nb' => 3, 'naga' => 3, 'legazpi' => 2,
+            'sorsogon' => 1, 'virac' => 0, 'masbate' => 0,
+            'tabaco' => 0, 'visayas' => 1, 'cargo' => 0,
+        ];
+
+        foreach ($summaryItems as $category => $count) {
+            DailySummaryItem::updateOrCreate(
+                ['daily_summary_id' => $summary->id, 'category' => $category],
+                ['trip_count' => $count]
+            );
+        }
     }
 }

@@ -63,6 +63,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('drivers/{driver}/send-custom-sms', [DriverNotificationController::class, 'sendCustomSms'])->name('drivers.send-custom-sms');
         Route::get('drivers/{driver}/schedule-preview', [DriverNotificationController::class, 'getSchedulePreview'])->name('drivers.schedule-preview');
 
+        // Audit Logs
+        Route::get('audit-logs', fn () => view('admin.audit-logs.index'))->name('audit-logs.index');
+
+        // SMS Logs
+        Route::get('sms-logs', fn () => view('admin.sms-logs.index'))->name('sms-logs.index');
+
         // Attendance Management
         Route::prefix('attendance')->name('attendance.')->group(function () {
             Route::get('/', [AttendanceController::class, 'index'])->name('index');

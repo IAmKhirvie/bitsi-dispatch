@@ -38,31 +38,31 @@
                 </div>
                 <div class="rounded-xl border bg-card text-card-foreground shadow">
                     <div class="p-6 text-center">
-                        <div class="text-2xl font-bold text-blue-600">{{ $summary->sb_trips }}</div>
+                        <div class="text-2xl font-bold text-blue-600">{{ $summary->tripCount('sb') }}</div>
                         <div class="text-xs text-muted-foreground">Southbound</div>
                     </div>
                 </div>
                 <div class="rounded-xl border bg-card text-card-foreground shadow">
                     <div class="p-6 text-center">
-                        <div class="text-2xl font-bold text-purple-600">{{ $summary->nb_trips }}</div>
+                        <div class="text-2xl font-bold text-purple-600">{{ $summary->tripCount('nb') }}</div>
                         <div class="text-xs text-muted-foreground">Northbound</div>
                     </div>
                 </div>
                 <div class="rounded-xl border bg-card text-card-foreground shadow">
                     <div class="p-6 text-center">
-                        <div class="text-2xl font-bold">{{ $summary->naga_trips }}</div>
+                        <div class="text-2xl font-bold">{{ $summary->tripCount('naga') }}</div>
                         <div class="text-xs text-muted-foreground">Naga</div>
                     </div>
                 </div>
                 <div class="rounded-xl border bg-card text-card-foreground shadow">
                     <div class="p-6 text-center">
-                        <div class="text-2xl font-bold">{{ $summary->legazpi_trips }}</div>
+                        <div class="text-2xl font-bold">{{ $summary->tripCount('legazpi') }}</div>
                         <div class="text-xs text-muted-foreground">Legazpi</div>
                     </div>
                 </div>
                 <div class="rounded-xl border bg-card text-card-foreground shadow">
                     <div class="p-6 text-center">
-                        <div class="text-2xl font-bold">{{ $summary->sorsogon_trips }}</div>
+                        <div class="text-2xl font-bold">{{ $summary->tripCount('sorsogon') }}</div>
                         <div class="text-xs text-muted-foreground">Sorsogon</div>
                     </div>
                 </div>
@@ -71,11 +71,11 @@
             {{-- Destination Breakdown --}}
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 @foreach([
-                    ['name' => 'Virac', 'count' => $summary->virac_trips],
-                    ['name' => 'Masbate', 'count' => $summary->masbate_trips],
-                    ['name' => 'Tabaco', 'count' => $summary->tabaco_trips],
-                    ['name' => 'Visayas', 'count' => $summary->visayas_trips],
-                    ['name' => 'Cargo', 'count' => $summary->cargo_trips],
+                    ['name' => 'Virac', 'count' => $summary->tripCount('virac')],
+                    ['name' => 'Masbate', 'count' => $summary->tripCount('masbate')],
+                    ['name' => 'Tabaco', 'count' => $summary->tripCount('tabaco')],
+                    ['name' => 'Visayas', 'count' => $summary->tripCount('visayas')],
+                    ['name' => 'Cargo', 'count' => $summary->tripCount('cargo')],
                 ] as $dest)
                     <div class="rounded-xl border bg-card text-card-foreground shadow">
                         <div class="p-6 text-center">

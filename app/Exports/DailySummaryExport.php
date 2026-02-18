@@ -28,16 +28,16 @@ class DailySummaryExport implements FromCollection, WithHeadings, WithMapping, S
         return [
             $summary->dispatchDay?->service_date?->format('Y-m-d') ?? '',
             $summary->total_trips,
-            $summary->sb_trips,
-            $summary->nb_trips,
-            $summary->naga_trips,
-            $summary->legazpi_trips,
-            $summary->sorsogon_trips,
-            $summary->virac_trips,
-            $summary->masbate_trips,
-            $summary->tabaco_trips,
-            $summary->visayas_trips,
-            $summary->cargo_trips,
+            $summary->tripCount('sb'),
+            $summary->tripCount('nb'),
+            $summary->tripCount('naga'),
+            $summary->tripCount('legazpi'),
+            $summary->tripCount('sorsogon'),
+            $summary->tripCount('virac'),
+            $summary->tripCount('masbate'),
+            $summary->tripCount('tabaco'),
+            $summary->tripCount('visayas'),
+            $summary->tripCount('cargo'),
         ];
     }
 }
