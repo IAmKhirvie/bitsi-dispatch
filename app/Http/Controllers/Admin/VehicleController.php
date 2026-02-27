@@ -36,7 +36,9 @@ class VehicleController extends Controller
         $validated['pms_threshold'] = (int) str_replace(',', '', $validated['pms_threshold']);
         $validated['current_pms_value'] = (int) str_replace(',', '', $validated['current_pms_value']);
 
-        Vehicle::create($validated);
+        $vehicle = Vehicle::create($validated);
+        $vehicle->recalculateNextPmsDate();
+        $vehicle->save();
 
         return redirect()->route('admin.vehicles.index');
     }
@@ -47,6 +49,7 @@ class VehicleController extends Controller
             'vehicle' => array_merge($vehicle->toArray(), [
                 'is_pms_warning' => $vehicle->is_pms_warning,
                 'pms_percentage' => $vehicle->pms_percentage,
+                'next_pms_date' => $vehicle->next_pms_date?->format('Y-m-d'),
             ]),
         ]);
     }
@@ -63,6 +66,8 @@ class VehicleController extends Controller
         $validated['current_pms_value'] = (int) str_replace(',', '', $validated['current_pms_value']);
 
         $vehicle->update($validated);
+        $vehicle->recalculateNextPmsDate();
+        $vehicle->save();
 
         return redirect()->route('admin.vehicles.index');
     }
@@ -80,11 +85,13 @@ class VehicleController extends Controller
             'brand' => 'required|string|min:2|max:100',
             'bus_type' => ['required', 'string', new Enum(BusType::class)],
             'status' => ['required', 'string', new Enum(VehicleStatus::class)],
-            'gps_device_id' => 'nullable|string|max:100',
+            'current_location' => 'nullable|string|max:255',
+            'total_kilometers' => 'nullable|integer|min:0',
             'pms_unit' => ['required', 'string', new Enum(PmsUnit::class)],
             'pms_threshold' => 'required|string|regex:/^[0-9,]+$/',
             'current_pms_value' => 'required|string|regex:/^[0-9,]+$/',
             'last_pms_date' => 'nullable|date',
+            'pms_interval_months' => 'nullable|integer|min:1|max:24',
         ];
     }
 }

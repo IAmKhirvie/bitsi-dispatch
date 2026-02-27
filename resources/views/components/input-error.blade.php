@@ -1,7 +1,9 @@
-@props(['field' => $for ?? null, 'bag' => 'default'])
+@props(['field' => null, 'for' => null, 'bag' => 'default'])
 
-@if($field)
-    @error($field, $bag)
+@php $errorField = $field ?? $for; @endphp
+
+@if ($errorField)
+    @error($errorField, $bag)
         <p {{ $attributes->merge(['class' => 'text-sm text-destructive']) }}>{{ $message }}</p>
     @enderror
 @endif

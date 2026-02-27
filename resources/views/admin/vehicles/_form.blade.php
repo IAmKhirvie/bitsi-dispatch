@@ -61,6 +61,23 @@
             <p class="text-xs text-red-500">{{ $message }}</p>
         @enderror
     </div>
+    <div class="space-y-2">
+        <label for="current_location" class="text-sm font-medium leading-none">Current Location</label>
+        <input id="current_location" name="current_location" type="text" value="{{ old('current_location', $v->current_location ?? '') }}" placeholder="e.g. Tabaco Terminal" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+        @error('current_location')
+            <p class="text-xs text-red-500">{{ $message }}</p>
+        @enderror
+    </div>
+</div>
+
+<div class="grid grid-cols-2 gap-4">
+    <div class="space-y-2">
+        <label for="total_kilometers" class="text-sm font-medium leading-none">Total Kilometers (Odometer)</label>
+        <input id="total_kilometers" name="total_kilometers" type="number" value="{{ old('total_kilometers', $v->total_kilometers ?? 0) }}" min="0" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+        @error('total_kilometers')
+            <p class="text-xs text-red-500">{{ $message }}</p>
+        @enderror
+    </div>
 </div>
 
 <div class="border-t pt-4">
@@ -108,14 +125,29 @@
             @enderror
         </div>
     </div>
-    <div class="mt-4 space-y-2">
-        <label for="last_pms_date" class="text-sm font-medium leading-none">Last PMS Date</label>
-        <div class="relative max-w-xs">
-            <input id="last_pms_date" name="last_pms_date" type="date" value="{{ old('last_pms_date', $v->last_pms_date ?? '') }}" 
-                class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pr-10 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
-            <svg xmlns="http://www.w3.org/2000/svg" class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+    <div class="mt-4 grid grid-cols-2 gap-4">
+        <div class="space-y-2">
+            <label for="last_pms_date" class="text-sm font-medium leading-none">Last PMS Date</label>
+            <div class="relative">
+                <input id="last_pms_date" name="last_pms_date" type="date" value="{{ old('last_pms_date', $v->last_pms_date ?? '') }}"
+                    class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pr-10 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <label for="pms_interval_months" class="text-sm font-medium leading-none">PMS Interval (Months)</label>
+            <input id="pms_interval_months" name="pms_interval_months" type="number" value="{{ old('pms_interval_months', $v->pms_interval_months ?? '') }}" min="1" max="24" placeholder="e.g. 3" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+            <p class="text-xs text-muted-foreground">How often PMS should be performed (in months)</p>
+            @error('pms_interval_months')
+                <p class="text-xs text-red-500">{{ $message }}</p>
+            @enderror
         </div>
     </div>
+    @if ($isEdit && $v->next_pms_date)
+        <div class="mt-3 rounded-md bg-blue-50 p-3 text-sm text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+            Next scheduled PMS: <strong>{{ \Carbon\Carbon::parse($v->next_pms_date)->format('M d, Y') }}</strong>
+        </div>
+    @endif
 </div>
 
 <script>

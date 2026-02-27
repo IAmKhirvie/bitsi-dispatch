@@ -41,6 +41,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/daily/{date}', [ReportController::class, 'daily'])->name('daily');
         Route::get('/export/excel/{date}', [ReportController::class, 'exportExcel'])->name('export-excel');
         Route::get('/export/pdf/{date}', [ReportController::class, 'exportPdf'])->name('export-pdf');
+        Route::get('/export/weekly-excel', [ReportController::class, 'exportWeeklyExcel'])->name('export-weekly-excel');
+        Route::get('/export/monthly-excel', [ReportController::class, 'exportMonthlyExcel'])->name('export-monthly-excel');
     });
 
     // History

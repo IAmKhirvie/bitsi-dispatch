@@ -61,7 +61,10 @@
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Plate No.</th>
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
+                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Total KM</th>
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">PMS</th>
+                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Next PMS</th>
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Idle Days</th>
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                         </tr>
@@ -85,6 +88,8 @@
                                         {{ $vStatus->label() }}
                                     </span>
                                 </td>
+                                <td class="px-4 py-3">{{ $vehicle->current_location ?? '--' }}</td>
+                                <td class="px-4 py-3">{{ $vehicle->total_kilometers ? number_format($vehicle->total_kilometers) : '--' }}</td>
                                 <td class="px-4 py-3">
                                     @php
                                         $pmsBarColor = $isPmsOver ? 'bg-red-600' : ($pmsPercentage >= 80 ? 'bg-orange-500' : ($pmsPercentage >= 60 ? 'bg-yellow-500' : 'bg-green-500'));
@@ -102,6 +107,15 @@
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
                                         @endif
                                     </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    @if ($vehicle->next_pms_date)
+                                        <span class="{{ $vehicle->is_pms_schedule_due ? 'text-red-500 font-medium' : ($vehicle->is_pms_schedule_approaching ? 'text-orange-500' : '') }}">
+                                            {{ $vehicle->next_pms_date->format('M d, Y') }}
+                                        </span>
+                                    @else
+                                        --
+                                    @endif
                                 </td>
                                 <td class="px-4 py-3">
                                     <span class="{{ ($vehicle->idle_days ?? 0) > 7 ? 'text-red-500 font-medium' : '' }}">
@@ -137,7 +151,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-4 py-8 text-center text-muted-foreground">No vehicles found.</td>
+                                <td colspan="11" class="px-4 py-8 text-center text-muted-foreground">No vehicles found.</td>
                             </tr>
                         @endforelse
                     </tbody>
