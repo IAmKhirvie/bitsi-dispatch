@@ -204,10 +204,16 @@ class SmsLogTable extends Component
             ->latest()
             ->paginate(20);
 
+        $todayCounts = SmsLog::whereDate('created_at', today())
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+
         $todayStats = [
-            'sent' => SmsLog::where('status', 'sent')->whereDate('created_at', today())->count(),
-            'failed' => SmsLog::where('status', 'failed')->whereDate('created_at', today())->count(),
-            'pending' => SmsLog::where('status', 'pending')->whereDate('created_at', today())->count(),
+            'sent' => $todayCounts['sent'] ?? 0,
+            'failed' => $todayCounts['failed'] ?? 0,
+            'pending' => $todayCounts['pending'] ?? 0,
         ];
 
         return view('livewire.admin.sms-log-table', compact('logs', 'todayStats'));

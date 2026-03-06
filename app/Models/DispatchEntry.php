@@ -72,6 +72,11 @@ class DispatchEntry extends Model
         return $this->hasMany(SmsLog::class);
     }
 
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(DriverAttendance::class);
+    }
+
     public function fillFromTripCode(TripCode $tripCode): self
     {
         $this->trip_code_id = $tripCode->id;

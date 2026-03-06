@@ -150,13 +150,15 @@ class AttendanceController extends Controller
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $attendance = DriverAttendance::find($validated['attendance_id']);
-        $attendance->update([
-            'status' => $validated['status'],
-            'minutes_late' => $validated['minutes_late'] ?? 0,
-            'notes' => $validated['notes'] ?? $attendance->notes,
-            'marked_by' => auth()->id(),
-        ]);
+        DB::transaction(function () use ($validated) {
+            $attendance = DriverAttendance::lockForUpdate()->findOrFail($validated['attendance_id']);
+            $attendance->update([
+                'status' => $validated['status'],
+                'minutes_late' => $validated['minutes_late'] ?? 0,
+                'notes' => $validated['notes'] ?? $attendance->notes,
+                'marked_by' => auth()->id(),
+            ]);
+        });
 
         return back()->with('success', 'Attendance record updated.');
     }

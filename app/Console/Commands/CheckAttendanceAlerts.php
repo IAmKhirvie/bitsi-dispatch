@@ -91,6 +91,7 @@ class CheckAttendanceAlerts extends Command
                 $query->where('attendance_date', $dispatchDay->service_date)
                     ->whereNotNull('check_in_time');
             })
+            ->with(['driver', 'driver2'])
             ->get();
 
         foreach ($entries as $entry) {
@@ -153,6 +154,7 @@ class CheckAttendanceAlerts extends Command
                 $query->where('attendance_date', $dispatchDay->service_date)
                     ->whereNotNull('check_in_time');
             })
+            ->with(['driver', 'driver2'])
             ->get();
 
         foreach ($entries as $entry) {
@@ -223,6 +225,7 @@ class CheckAttendanceAlerts extends Command
                 $query->where('attendance_date', $dispatchDay->service_date)
                     ->whereNotNull('check_in_time');
             })
+            ->with(['driver', 'driver2'])
             ->get();
 
         foreach ($entries as $entry) {
