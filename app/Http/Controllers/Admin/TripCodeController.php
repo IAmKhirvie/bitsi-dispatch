@@ -27,7 +27,11 @@ class TripCodeController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate(array_merge($this->validationRules(), [
+<<<<<<< HEAD
             'code' => ['required', 'string', 'min:2', 'max:50', Rule::unique('trip_codes', 'code')->where('direction', $request->input('direction'))],
+=======
+            'code' => 'required|string|min:2|max:50|unique:trip_codes,code',
+>>>>>>> f3e9eb09b15a2f6335fdb45f7d301596e236cf82
         ]));
 
         TripCode::create($validated);

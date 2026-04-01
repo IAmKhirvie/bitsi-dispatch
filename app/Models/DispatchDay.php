@@ -28,7 +28,11 @@ class DispatchDay extends Model
 
     public function entries(): HasMany
     {
+<<<<<<< HEAD
         return $this->hasMany(DispatchEntry::class);
+=======
+        return $this->hasMany(DispatchEntry::class)->orderBy("sort_order");
+>>>>>>> f3e9eb09b15a2f6335fdb45f7d301596e236cf82
     }
 
     public function creator(): BelongsTo

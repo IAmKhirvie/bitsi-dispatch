@@ -74,6 +74,7 @@ class DatabaseSeeder extends Seeder
             ['bus_number' => '1010', 'brand' => 'Hino', 'bus_type' => BusType::Regular, 'plate_number' => 'BCD 7890', 'status' => VehicleStatus::OK, 'pms_threshold' => 15000, 'current_pms_value' => 10500],
         ])->map(fn($v) => Vehicle::create($v));
 
+<<<<<<< HEAD
         // Trip Codes — Seeded from TripScheduleSeeder (hardcoded from TRIP SCHEDULE.xlsx)
         $this->call(TripScheduleSeeder::class);
 
@@ -82,6 +83,32 @@ class DatabaseSeeder extends Seeder
             ->orderBy('scheduled_departure_time')
             ->limit(20)
             ->get();
+=======
+        // Trip Codes — Southbound (Cubao → Bicol destinations)
+        $tripCodes = collect([
+            ['code' => 'SB-001', 'operator' => 'BITSI', 'origin_terminal' => 'Cubao', 'destination_terminal' => 'Naga', 'bus_type' => BusType::Regular, 'scheduled_departure_time' => '06:00', 'direction' => Direction::SB],
+            ['code' => 'SB-002', 'operator' => 'BITSI', 'origin_terminal' => 'Cubao', 'destination_terminal' => 'Naga', 'bus_type' => BusType::Deluxe, 'scheduled_departure_time' => '08:00', 'direction' => Direction::SB],
+            ['code' => 'SB-003', 'operator' => 'BITSI', 'origin_terminal' => 'Cubao', 'destination_terminal' => 'Legazpi', 'bus_type' => BusType::Regular, 'scheduled_departure_time' => '07:00', 'direction' => Direction::SB],
+            ['code' => 'SB-004', 'operator' => 'BITSI', 'origin_terminal' => 'Cubao', 'destination_terminal' => 'Legazpi', 'bus_type' => BusType::SuperDeluxe, 'scheduled_departure_time' => '20:00', 'direction' => Direction::SB],
+            ['code' => 'SB-005', 'operator' => 'BITSI', 'origin_terminal' => 'Cubao', 'destination_terminal' => 'Sorsogon', 'bus_type' => BusType::Regular, 'scheduled_departure_time' => '18:00', 'direction' => Direction::SB],
+            ['code' => 'SB-006', 'operator' => 'BITSI', 'origin_terminal' => 'Cubao', 'destination_terminal' => 'Virac', 'bus_type' => BusType::Deluxe, 'scheduled_departure_time' => '19:00', 'direction' => Direction::SB],
+            ['code' => 'SB-007', 'operator' => 'BITSI', 'origin_terminal' => 'Cubao', 'destination_terminal' => 'Tabaco', 'bus_type' => BusType::Regular, 'scheduled_departure_time' => '21:00', 'direction' => Direction::SB],
+            ['code' => 'SB-008', 'operator' => 'BITSI', 'origin_terminal' => 'Naga', 'destination_terminal' => 'Masbate', 'bus_type' => BusType::Regular, 'scheduled_departure_time' => '05:00', 'direction' => Direction::SB],
+            ['code' => 'SB-009', 'operator' => 'BITSI', 'origin_terminal' => 'Cubao', 'destination_terminal' => 'Tacloban', 'bus_type' => BusType::Elite, 'scheduled_departure_time' => '17:00', 'direction' => Direction::SB],
+            ['code' => 'SB-010', 'operator' => 'BITSI', 'origin_terminal' => 'Cubao', 'destination_terminal' => 'Naga', 'bus_type' => BusType::Sleeper, 'scheduled_departure_time' => '22:00', 'direction' => Direction::SB],
+            // Northbound (Bicol → Cubao)
+            ['code' => 'NB-001', 'operator' => 'BITSI', 'origin_terminal' => 'Naga', 'destination_terminal' => 'Cubao', 'bus_type' => BusType::Regular, 'scheduled_departure_time' => '06:00', 'direction' => Direction::NB],
+            ['code' => 'NB-002', 'operator' => 'BITSI', 'origin_terminal' => 'Naga', 'destination_terminal' => 'Cubao', 'bus_type' => BusType::Deluxe, 'scheduled_departure_time' => '08:00', 'direction' => Direction::NB],
+            ['code' => 'NB-003', 'operator' => 'BITSI', 'origin_terminal' => 'Legazpi', 'destination_terminal' => 'Cubao', 'bus_type' => BusType::Regular, 'scheduled_departure_time' => '07:00', 'direction' => Direction::NB],
+            ['code' => 'NB-004', 'operator' => 'BITSI', 'origin_terminal' => 'Legazpi', 'destination_terminal' => 'Cubao', 'bus_type' => BusType::SuperDeluxe, 'scheduled_departure_time' => '20:00', 'direction' => Direction::NB],
+            ['code' => 'NB-005', 'operator' => 'BITSI', 'origin_terminal' => 'Sorsogon', 'destination_terminal' => 'Cubao', 'bus_type' => BusType::Regular, 'scheduled_departure_time' => '18:00', 'direction' => Direction::NB],
+            ['code' => 'NB-006', 'operator' => 'BITSI', 'origin_terminal' => 'Virac', 'destination_terminal' => 'Cubao', 'bus_type' => BusType::Deluxe, 'scheduled_departure_time' => '19:00', 'direction' => Direction::NB],
+            ['code' => 'NB-007', 'operator' => 'BITSI', 'origin_terminal' => 'Tabaco', 'destination_terminal' => 'Cubao', 'bus_type' => BusType::Regular, 'scheduled_departure_time' => '21:00', 'direction' => Direction::NB],
+            ['code' => 'NB-008', 'operator' => 'BITSI', 'origin_terminal' => 'Masbate', 'destination_terminal' => 'Naga', 'bus_type' => BusType::Regular, 'scheduled_departure_time' => '05:00', 'direction' => Direction::NB],
+            ['code' => 'NB-009', 'operator' => 'BITSI', 'origin_terminal' => 'Tacloban', 'destination_terminal' => 'Cubao', 'bus_type' => BusType::Elite, 'scheduled_departure_time' => '17:00', 'direction' => Direction::NB],
+            ['code' => 'NB-010', 'operator' => 'BITSI', 'origin_terminal' => 'Naga', 'destination_terminal' => 'Cubao', 'bus_type' => BusType::Sleeper, 'scheduled_departure_time' => '22:00', 'direction' => Direction::NB],
+        ])->map(fn($tc) => TripCode::create($tc));
+>>>>>>> f3e9eb09b15a2f6335fdb45f7d301596e236cf82
 
         // PMS Settings
         PmsSetting::create(['name' => 'Standard PMS (15,000 km)', 'unit' => PmsUnit::Kilometers, 'threshold' => 15000, 'description' => 'Standard preventive maintenance every 15,000 km', 'is_default' => true]);
