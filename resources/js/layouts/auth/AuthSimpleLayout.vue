@@ -1,11 +1,31 @@
 <script setup lang="ts">
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { Link } from '@inertiajs/vue3';
+import { onMounted, onUnmounted } from 'vue';
 
 defineProps<{
     title?: string;
     description?: string;
 }>();
+
+// Force light mode on auth pages (login, register, forgot password)
+// and restore user preference when leaving
+let savedAppearance: string | null = null;
+
+onMounted(() => {
+    savedAppearance = localStorage.getItem('appearance');
+    document.documentElement.classList.remove('dark');
+});
+
+onUnmounted(() => {
+    if (savedAppearance === 'dark') {
+        document.documentElement.classList.add('dark');
+    } else if (savedAppearance === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', prefersDark);
+    }
+    // If savedAppearance is 'light' or null, dark is already removed
+});
 </script>
 
 <template>
