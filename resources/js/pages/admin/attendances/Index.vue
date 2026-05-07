@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import ExportButtons from '@/components/ExportButtons.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type BreadcrumbItem, type PaginatedData } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Calendar, CheckCircle, Clock, RefreshCw, TriangleAlert, UserX, XCircle } from 'lucide-vue-next';
+import { Calendar, CheckCircle, Clock, RefreshCw, Settings, TriangleAlert, UserX, XCircle } from 'lucide-vue-next';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -100,6 +101,7 @@ const statusConfig: Record<string, { label: string; badge: string; icon: any }> 
                     <p class="text-sm text-muted-foreground">Track driver check-ins and attendance status</p>
                 </div>
                 <div class="flex items-center gap-2">
+                    <ExportButtons entity="attendance" />
                     <Link href="/admin/attendance/settings">
                         <Button variant="outline" size="sm">
                             <Settings class="mr-2 h-4 w-4" />

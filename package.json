@@ -6,15 +6,29 @@
         "build:prod": "vite build --mode production",
         "dev": "vite"
     },
+    "dependencies": {
+        "@headlessui/vue": "^1.7.23",
+        "@inertiajs/vue3": "^2.0.0",
+        "@vitejs/plugin-vue": "^6.0.6",
+        "@vueuse/core": "^14.3.0",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "lucide-vue-next": "^0.453.0",
+        "radix-vue": "^1.9.17",
+        "tailwind-merge": "^3.5.0",
+        "vue": "^3.4.0"
+    },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.7",
         "@tailwindcss/typography": "^0.5.10",
         "autoprefixer": "^10.4.16",
+        "laravel-vite-plugin": "^1.0",
+        "lightningcss": "^1.32.0",
         "postcss": "^8.4.32",
         "tailwindcss": "^3.4.0",
-        "laravel-vite-plugin": "^1.0",
-        "vite": "^6.0.3",
-        "tailwindcss-animate": "^1.0.7"
+        "tailwindcss-animate": "^1.0.7",
+        "typescript": "^6.0.3",
+        "vite": "^6.0.3"
     },
     "optionalDependencies": {
         "@rollup/rollup-linux-x64-gnu": "4.9.5",

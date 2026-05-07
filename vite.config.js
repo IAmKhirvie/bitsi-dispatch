@@ -1,12 +1,14 @@
 import autoprefixer from 'autoprefixer';
 import laravel from 'laravel-vite-plugin';
 import tailwindcss from 'tailwindcss';
+import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vite';
 
 export default defineConfig(({ mode }) => ({
     plugins: [
+        vue(),
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/css/app.css', 'resources/js/app.ts'],
             refresh: true,
         }),
     ],
