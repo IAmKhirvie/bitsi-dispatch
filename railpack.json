@@ -1,5 +1,22 @@
 {
   "php": {
-    "extensions": ["gd", "zip", "iconv", "simplexml", "xmlreader", "xmlwriter", "zlib"]
+    "extensions": ["pdo_mysql", "gd", "zip", "iconv", "simplexml", "xmlreader", "xmlwriter", "zlib"]
   }
 }
+```
+
+**Problem 2: Database variables** — it's connecting to `Host: 127.0.0.1, Database: laravel` which are the default `.env` values. You need to set up an actual MySQL database and point your app at it.
+
+In Railway, you need to either:
+
+**Option A (recommended): Add a MySQL database service**
+1. In your Railway project, click **+ New** → **Database** → **MySQL**
+2. Railway will create a MySQL service and auto-generate connection variables
+3. Then in your Laravel app's Variables tab, add these (using the values Railway gives your MySQL service):
+```
+DB_CONNECTION=mysql
+DB_HOST=${{MySQL.MYSQLHOST}}
+DB_PORT=${{MySQL.MYSQLPORT}}
+DB_DATABASE=${{MySQL.MYSQLDATABASE}}
+DB_USERNAME=${{MySQL.MYSQLUSER}}
+DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}

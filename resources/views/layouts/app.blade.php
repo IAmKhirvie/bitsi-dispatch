@@ -43,19 +43,13 @@
         {{-- SidebarProvider wrapper --}}
         <div
             x-data="{
-                sidebarOpen: false,
+                sidebarOpen: Alpine.$persist(true).as('sidebar'),
                 mobileOpen: false,
-                init() {
-                    // Initialize sidebar state from localStorage
-                    const saved = localStorage.getItem('sidebar');
-                    this.sidebarOpen = saved === null ? true : saved === 'true';
-                },
                 toggleSidebar() {
                     if (window.innerWidth < 768) {
                         this.mobileOpen = !this.mobileOpen;
                     } else {
                         this.sidebarOpen = !this.sidebarOpen;
-                        localStorage.setItem('sidebar', this.sidebarOpen ? 'true' : 'false');
                     }
                 }
             }"

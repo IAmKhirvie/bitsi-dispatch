@@ -81,7 +81,7 @@
                                 </td>
                             </tr>
                             @if ($log->old_values || $log->new_values)
-                                <tr x-show="expanded" x-collapse class="bg-muted/20">
+                                <tr x-show="expanded" class="bg-muted/20">
                                     <td colspan="7" class="px-4 py-3">
                                         <div class="grid gap-3 md:grid-cols-2">
                                             @if ($log->old_values)
