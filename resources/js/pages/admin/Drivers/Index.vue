@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import ExportButtons from '@/components/ExportButtons.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,7 +11,6 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
     DialogClose,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -186,12 +186,15 @@ const allStatuses: DriverStatus[] = ['available', 'dispatched', 'on_route', 'on_
                     <h1 class="text-2xl font-bold">Drivers</h1>
                     <p class="text-sm text-muted-foreground">Manage bus drivers and their status</p>
                 </div>
-                <Button as-child>
-                    <Link href="/admin/drivers/create">
-                        <Plus class="mr-2 h-4 w-4" />
-                        Add Driver
-                    </Link>
-                </Button>
+                <div class="flex items-center gap-2">
+                    <ExportButtons entity="drivers" />
+                    <Button as-child>
+                        <Link href="/admin/drivers/create">
+                            <Plus class="mr-2 h-4 w-4" />
+                            Add Driver
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             <!-- Flash Messages -->

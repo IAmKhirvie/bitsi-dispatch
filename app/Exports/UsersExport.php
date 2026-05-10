@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Exports;
+
+use App\Models\User;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+
+class UsersExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
+{
+    public function __construct(
+        private ?string $dateFrom = null,
+        private ?string $dateTo = null,
+    ) {}
+
+    public function collection(): Collection
+    {
+        return User::query()
+            ->when($this->dateFrom, fn ($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
+            ->when($this->dateTo, fn ($q) => $q->whereDate('created_at', '<=', $this->dateTo))
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    public function headings(): array
+    {
+        return ['Name', 'Email', 'Role', 'Phone', 'Active', 'Created At', 'Updated At'];
+    }
+
+    public function map($user): array
+    {
+        return [
+            $user->name,
+            $user->email,
+            $user->getRoleNames()->first() ?? 'N/A',
+            $user->phone ?? '--',
+            $user->is_active ? 'Yes' : 'No',
+            $user->created_at?->format('Y-m-d H:i') ?? '',
+            $user->updated_at?->format('Y-m-d H:i') ?? '',
+        ];
+    }
+}

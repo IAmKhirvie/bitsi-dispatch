@@ -435,6 +435,191 @@ Vehicles track current PMS value against a configurable threshold (by km or trip
 
 ---
 
+## Production Deployment
+
+### Quick Deploy (One-Click Script)
+
+For a fresh production server, run the included deployment script:
+
+```bash
+chmod +x deploy-production.sh
+./deploy-production.sh
+```
+
+### Manual Deployment Steps
+
+```bash
+# 1. Install production dependencies only
+composer install --no-dev --prefer-dist --optimize-autoloader
+
+# 2. Build frontend assets (minified, treeshaken, console-stripped)
+npm ci --omit=dev
+npm run build:prod
+
+# 3. Run migrations
+php artisan migrate --force
+
+# 4. Create storage symlink
+php artisan storage:link --force
+
+# 5. Cache everything for maximum performance
+php artisan optimize
+php artisan view:cache
+php artisan route:cache
+php artisan config:cache
+php artisan event:cache
+
+# 6. Restart queue worker
+php artisan queue:restart
+
+# 7. Verify
+php artisan about
+```
+
+### Server Requirements (Production)
+
+| Software       | Version  | Notes                                      |
+| -------------- | -------- | ------------------------------------------ |
+| **PHP**        | ≥ 8.2    | Extensions: pdo_mysql, mbstring, openssl, fileinfo, gd, xml, zip, intl, bcmath, curl |
+| **Composer**   | ≥ 2.x    |                                            |
+| **Node.js**    | ≥ 20.x   | Only needed at build time, not runtime     |
+| **MySQL**      | ≥ 8.0    | Or MariaDB 10.6+                           |
+| **Web Server** | Apache 2.4+ / Nginx | See config templates below |
+
+### Web Server Configuration
+
+#### Option A: Apache (with `.htaccess`)
+
+The included `public/.htaccess` provides:
+- **Security Headers**: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy
+- **Gzip Compression**: Automatic compression of HTML, CSS, JS, JSON, SVG, fonts
+- **Asset Caching**: 1-year cache headers for images, fonts, CSS, JS (fingerprinted by Vite)
+- **Sensitive File Blocking**: Blocks access to composer files, dot-files, storage, and vendor directories
+- **HTTPS Redirect**: Commented out — uncomment after SSL setup
+
+Enable required Apache modules:
+```bash
+sudo a2enmod rewrite headers expires deflate
+sudo systemctl restart apache2
+```
+
+#### Option B: Nginx (recommended for high traffic)
+
+Use the included `nginx-production.conf` template:
+
+```bash
+# 1. Edit the config with your domain and paths
+sudo cp nginx-production.conf /etc/nginx/sites-available/bitsi-dispatch
+# Edit /etc/nginx/sites-available/bitsi-dispatch — change your-domain.com and paths
+
+# 2. Enable the site
+sudo ln -s /etc/nginx/sites-available/bitsi-dispatch /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### PHP OPcache (Critical for Performance)
+
+Copy the included `php-opcache.ini` to your PHP configuration:
+
+```bash
+sudo cp php-opcache.ini /etc/php/8.2/fpm/conf.d/99-bitsi-opcache.ini
+sudo systemctl restart php8.2-fpm
+```
+
+Key settings:
+- `opcache.memory_consumption=256` — 256MB for compiled scripts
+- `opcache.validate_timestamps=0` — No file checks on every request (cleared on deploy)
+- `opcache.max_accelerated_files=20000` — Enough for Laravel + dependencies
+- `opcache.huge_code_pages=1` — ~10% perf gain (Linux only)
+
+### Environment Configuration
+
+```env
+# Required changes from local development
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://your-production-domain.com
+LOG_LEVEL=error          # Never use "debug" in production
+SESSION_SECURE_COOKIE=true  # Requires HTTPS
+SESSION_SAME_SITE=lax
+CACHE_STORE=file         # Faster than database cache
+
+# SMTP for email (configure your provider)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailgun.org
+MAIL_PORT=587
+MAIL_USERNAME=your-login
+MAIL_PASSWORD=your-password
+MAIL_FROM_ADDRESS=noreply@your-domain.com
+```
+
+### Performance Checklist
+
+| Item                                  | Status |
+| ------------------------------------- | ------ |
+| Composer installed with `--no-dev`    | ☐      |
+| Frontend built with `npm run build`   | ☐      |
+| Config cached (`php artisan config:cache`) | ☐  |
+| Route cached (`php artisan route:cache`) | ☐   |
+| View cached (`php artisan view:cache`) | ☐     |
+| Event cached (`php artisan event:cache`) | ☐   |
+| OPcache enabled with INI config       | ☐      |
+| Storage symlink created               | ☐      |
+| HTTPS enabled with HSTS headers       | ☐      |
+| Gzip/Brotli compression enabled       | ☐      |
+| Static assets have long cache headers | ☐      |
+| Queue worker running as daemon        | ☐      |
+| Debug mode disabled (`APP_DEBUG=false`) | ☐    |
+| Log level set to `error`              | ☐      |
+
+### Queue Worker (Production)
+
+Run the queue worker as a systemd service so it restarts automatically:
+
+```bash
+# /etc/systemd/system/bitsi-queue.service
+[Unit]
+Description=BITSI Queue Worker
+After=network.target mysql.service
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/bitsi-dispatch
+ExecStart=/usr/bin/php artisan queue:work --queue=high,default --sleep=3 --tries=3 --backoff=30
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Then:
+```bash
+sudo systemctl enable bitsi-queue
+sudo systemctl start bitsi-queue
+```
+
+### Scheduled Task (Cron)
+
+Add the following to your server's crontab (`sudo crontab -e`):
+
+```cron
+* * * * * cd /var/www/bitsi-dispatch && php artisan schedule:run >> /dev/null 2>&1
+```
+
+This runs the attendance alert checker every 5 minutes and other scheduled tasks.
+
+### Supervision & Monitoring
+
+- **Logs**: `tail -f storage/logs/laravel.log`
+- **Queue**: `php artisan queue:monitor --queue=high,default`
+- **Database**: Monitor MySQL slow query log / performance schema
+- **Health**: Set up a cron or monitoring tool (e.g., Uptime Robot) to check `APP_URL/up`
+
+---
+
 ## Common Commands
 
 ```bash

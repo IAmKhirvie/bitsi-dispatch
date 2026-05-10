@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import ExportButtons from '@/components/ExportButtons.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -61,12 +62,15 @@ const vehicleStatusClasses: Record<string, string> = {
                     <h1 class="text-2xl font-bold">Vehicles</h1>
                     <p class="text-sm text-muted-foreground">Manage fleet vehicles and maintenance status</p>
                 </div>
-                <Button as-child>
-                    <Link href="/admin/vehicles/create">
-                        <Plus class="mr-2 h-4 w-4" />
-                        Add Vehicle
-                    </Link>
-                </Button>
+                <div class="flex items-center gap-2">
+                    <ExportButtons entity="vehicles" />
+                    <Button as-child>
+                        <Link href="/admin/vehicles/create">
+                            <Plus class="mr-2 h-4 w-4" />
+                            Add Vehicle
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             <!-- Filters -->

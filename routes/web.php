@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminExportController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\DriverController;
 use App\Http\Controllers\Admin\DriverNotificationController;
@@ -41,6 +42,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/daily/{date}', [ReportController::class, 'daily'])->name('daily');
         Route::get('/export/excel/{date}', [ReportController::class, 'exportExcel'])->name('export-excel');
         Route::get('/export/pdf/{date}', [ReportController::class, 'exportPdf'])->name('export-pdf');
+        Route::get('/export/weekly-excel', [ReportController::class, 'exportWeeklyExcel'])->name('export-weekly-excel');
+        Route::get('/export/monthly-excel', [ReportController::class, 'exportMonthlyExcel'])->name('export-monthly-excel');
     });
 
     // History
@@ -82,6 +85,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
         Route::get('/api/attendance/alerts', [AttendanceController::class, 'getAlerts'])->name('api.attendance.alerts');
         Route::get('/api/attendance/pending', [AttendanceController::class, 'getPendingAttendance'])->name('api.attendance.pending');
+
+        // ─── Export Routes ────────────────────────────────────────
+        Route::prefix('export')->name('export.')->group(function () {
+            Route::get('users/{period}', [AdminExportController::class, 'exportUsers'])->name('users');
+            Route::get('users', [AdminExportController::class, 'exportUsersCustom'])->name('users.custom');
+            Route::get('drivers/{period}', [AdminExportController::class, 'exportDrivers'])->name('drivers');
+            Route::get('drivers', [AdminExportController::class, 'exportDriversCustom'])->name('drivers.custom');
+            Route::get('vehicles/{period}', [AdminExportController::class, 'exportVehicles'])->name('vehicles');
+            Route::get('vehicles', [AdminExportController::class, 'exportVehiclesCustom'])->name('vehicles.custom');
+            Route::get('trip-codes/{period}', [AdminExportController::class, 'exportTripCodes'])->name('trip-codes');
+            Route::get('trip-codes', [AdminExportController::class, 'exportTripCodesCustom'])->name('trip-codes.custom');
+            Route::get('attendance/{period}', [AdminExportController::class, 'exportAttendance'])->name('attendance');
+            Route::get('attendance', [AdminExportController::class, 'exportAttendanceCustom'])->name('attendance.custom');
+            Route::get('audit-logs/{period}', [AdminExportController::class, 'exportAuditLogs'])->name('audit-logs');
+            Route::get('audit-logs', [AdminExportController::class, 'exportAuditLogsCustom'])->name('audit-logs.custom');
+            Route::get('sms-logs/{period}', [AdminExportController::class, 'exportSmsLogs'])->name('sms-logs');
+            Route::get('sms-logs', [AdminExportController::class, 'exportSmsLogsCustom'])->name('sms-logs.custom');
+        });
     });
 });
 

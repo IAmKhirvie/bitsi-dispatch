@@ -11,6 +11,11 @@ enum BusType: string
     case Sleeper = 'sleeper';
     case SingleSeater = 'single_seater';
     case SkyBus = 'skybus';
+    case Executive = 'executive';
+    case Royal = 'royal';
+    case RoyalExe = 'royal_exe';
+    case Premier = 'premier';
+    case Economy = 'economy';
 
     public function label(): string
     {
@@ -22,6 +27,11 @@ enum BusType: string
             self::Sleeper => 'Sleeper',
             self::SingleSeater => 'Single Seater',
             self::SkyBus => 'SkyBus',
+            self::Executive => 'Executive',
+            self::Royal => 'Royal',
+            self::RoyalExe => 'Royal Executive',
+            self::Premier => 'Premier',
+            self::Economy => 'Economy',
         };
     }
 }

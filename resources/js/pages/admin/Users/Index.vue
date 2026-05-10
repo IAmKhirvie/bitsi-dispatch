@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import ExportButtons from '@/components/ExportButtons.vue';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { type BreadcrumbItem, type PaginatedData, type User } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
@@ -63,12 +64,15 @@ const roleClasses: Record<string, string> = {
                     <h1 class="text-2xl font-bold">Users</h1>
                     <p class="text-sm text-muted-foreground">Manage system users and their roles</p>
                 </div>
-                <Button as-child>
-                    <Link href="/admin/users/create">
-                        <Plus class="mr-2 h-4 w-4" />
-                        Add User
-                    </Link>
-                </Button>
+                <div class="flex items-center gap-2">
+                    <ExportButtons entity="users" />
+                    <Button as-child>
+                        <Link href="/admin/users/create">
+                            <Plus class="mr-2 h-4 w-4" />
+                            Add User
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             <!-- Filters -->

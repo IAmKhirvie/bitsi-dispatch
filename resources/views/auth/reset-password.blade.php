@@ -5,7 +5,7 @@
 @section('description', 'Please enter your new password below')
 
 @section('content')
-    <form method="POST" action="{{ route('password.store') }}">
+    <form method="POST" action="{{ route('password.update') }}">
         @csrf
 
         {{-- Token --}}

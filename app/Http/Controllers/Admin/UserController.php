@@ -31,7 +31,8 @@ class UserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]));
 
-        User::create($validated);
+        $user = User::create($validated);
+        $user->assignRole($validated['role']);
 
         return redirect()->route('admin.users.index');
     }
@@ -55,6 +56,7 @@ class UserController extends Controller
         }
 
         $user->update($validated);
+        $user->syncRoles([$validated['role']]);
 
         return redirect()->route('admin.users.index');
     }

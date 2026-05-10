@@ -15,24 +15,27 @@ const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
 const handleSystemThemeChange = () => {
     const currentAppearance = localStorage.getItem('appearance') as Appearance | null;
-    updateTheme(currentAppearance || 'system');
+    updateTheme(currentAppearance || 'light');
 };
 
+let themeInitialized = false;
+
 export function initializeTheme() {
-    // Initialize theme from saved preference or default to system...
+    if (themeInitialized) return; // Prevent redundant re-initialization on Inertia navigations
+    themeInitialized = true;
+
+    // Initialize theme from saved preference or default to light...
     const savedAppearance = localStorage.getItem('appearance') as Appearance | null;
-    updateTheme(savedAppearance || 'system');
+    updateTheme(savedAppearance || 'light');
 
     // Set up system theme change listener...
     mediaQuery.addEventListener('change', handleSystemThemeChange);
 }
 
 export function useAppearance() {
-    const appearance = ref<Appearance>('system');
+    const appearance = ref<Appearance>('light');
 
     onMounted(() => {
-        initializeTheme();
-
         const savedAppearance = localStorage.getItem('appearance') as Appearance | null;
 
         if (savedAppearance) {

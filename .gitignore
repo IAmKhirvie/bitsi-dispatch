@@ -23,3 +23,28 @@ yarn-error.log
 /.zed
 /.claude
 /database/database.sqlite
+
+# Deployment artifacts
+/scaffold/
+/deploy
+/release
+
+# Compression archives (avoid committing zip/tar files)
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+
+# Common config/log artifacts
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+
+# IDE / Temporary
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

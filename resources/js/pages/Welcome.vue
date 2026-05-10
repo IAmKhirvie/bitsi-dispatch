@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import { Bus, Clock, MapPin, Shield, Phone, ChevronRight, Armchair, Star, Route, Users } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 // ─── HERO SECTION (edit text/tagline here) ─────────────────────────────────
 const hero = {
@@ -90,6 +90,24 @@ const openFaq = ref<number | null>(null);
 function toggleFaq(index: number) {
     openFaq.value = openFaq.value === index ? null : index;
 }
+
+// Force light mode on the Welcome (pre-login) page
+// and restore user preference when leaving
+let savedAppearance: string | null = null;
+
+onMounted(() => {
+    savedAppearance = localStorage.getItem('appearance');
+    document.documentElement.classList.remove('dark');
+});
+
+onUnmounted(() => {
+    if (savedAppearance === 'dark') {
+        document.documentElement.classList.add('dark');
+    } else if (savedAppearance === 'system') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', prefersDark);
+    }
+});
 
 // ─── FOOTER LINKS (add/remove freely) ────────────────────────────────────────
 const footerLinks = [

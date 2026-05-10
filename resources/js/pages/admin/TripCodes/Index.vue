@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import ExportButtons from '@/components/ExportButtons.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -53,12 +54,15 @@ function deleteTripCode(tripCode: TripCode) {
                     <h1 class="text-2xl font-bold">Trip Codes</h1>
                     <p class="text-sm text-muted-foreground">Manage trip code definitions and routes</p>
                 </div>
-                <Button as-child>
-                    <Link href="/admin/trip-codes/create">
-                        <Plus class="mr-2 h-4 w-4" />
-                        Add Trip Code
-                    </Link>
-                </Button>
+                <div class="flex items-center gap-2">
+                    <ExportButtons entity="trip-codes" />
+                    <Button as-child>
+                        <Link href="/admin/trip-codes/create">
+                            <Plus class="mr-2 h-4 w-4" />
+                            Add Trip Code
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             <!-- Filters -->
