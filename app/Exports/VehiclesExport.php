@@ -27,7 +27,7 @@ class VehiclesExport implements FromCollection, WithHeadings, WithMapping, Shoul
 
     public function headings(): array
     {
-        return ['Bus Number', 'Brand', 'Bus Type', 'Plate Number', 'Status', 'Location', 'Total KM', 'PMS Threshold', 'Current PMS', 'PMS %', 'Last PMS', 'Next PMS', 'Idle Days', 'Created At'];
+        return ['Bus No.', 'Brand', 'Bus Type', 'Seating', 'Plate Number', 'Status', 'Current KMR', 'Last PMS KMR', 'KM Since PMS', 'PMS Band', 'Last PMS Date', 'Next PMS Date', 'Idle Days'];
     }
 
     public function map($vehicle): array
@@ -36,17 +36,16 @@ class VehiclesExport implements FromCollection, WithHeadings, WithMapping, Shoul
             $vehicle->bus_number,
             $vehicle->brand,
             $vehicle->bus_type?->label() ?? $vehicle->bus_type,
+            $vehicle->seating_capacity ?? '--',
             $vehicle->plate_number,
             $vehicle->status?->label() ?? '--',
-            $vehicle->current_location ?? '--',
-            $vehicle->total_kilometers ?? 0,
-            $vehicle->pms_threshold ?? 0,
-            $vehicle->current_pms_value ?? 0,
-            round($vehicle->pms_percentage ?? 0) . '%',
+            $vehicle->current_kmr ?? 0,
+            $vehicle->last_pms_kmr ?? 0,
+            $vehicle->km_since_pms ?? 0,
+            strtoupper($vehicle->pms_band ?? '--'),
             $vehicle->last_pms_date?->format('Y-m-d') ?? '--',
             $vehicle->next_pms_date?->format('Y-m-d') ?? '--',
             $vehicle->idle_days ?? 0,
-            $vehicle->created_at?->format('Y-m-d H:i') ?? '',
         ];
     }
 }

@@ -2,43 +2,49 @@
 
 namespace App\Exports;
 
+use App\Exports\Concerns\DispatchRowMapper;
 use App\Models\DispatchDay;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DispatchExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
+class DispatchExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles, WithTitle
 {
+    use DispatchRowMapper;
+
     public function __construct(private DispatchDay $dispatchDay) {}
 
     public function collection()
     {
-        return $this->dispatchDay->entries()->with(['vehicle', 'tripCode', 'driver'])->orderBy('sort_order')->get();
+        return $this->dispatchDay->entries()
+            ->with(['vehicle', 'tripCode', 'driver', 'driver2', 'dispatcher', 'dispatchDay'])
+            ->orderBy('sort_order')
+            ->get();
     }
 
     public function headings(): array
     {
-        return ['#', 'Brand', 'Bus No.', 'Trip Code', 'Route', 'Bus Type', 'Dep. Terminal', 'Arr. Terminal', 'Sched. Departure', 'Actual Departure', 'Direction', 'Driver', 'Status', 'Remarks'];
+        return $this->dispatchHeadings();
     }
 
     public function map($entry): array
     {
+        return $this->dispatchRow($entry);
+    }
+
+    public function title(): string
+    {
+        return $this->dispatchDay->service_date?->format('Y-m-d') ?? 'Dispatch';
+    }
+
+    public function styles(Worksheet $sheet): array
+    {
         return [
-            $entry->sort_order + 1,
-            $entry->brand,
-            $entry->bus_number,
-            $entry->tripCode?->code,
-            $entry->route,
-            $entry->bus_type,
-            $entry->departure_terminal,
-            $entry->arrival_terminal,
-            $entry->scheduled_departure,
-            $entry->actual_departure,
-            $entry->direction,
-            $entry->driver?->name,
-            $entry->status->value ?? $entry->status,
-            $entry->remarks,
+            1 => ['font' => ['bold' => true], 'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'E5E7EB']]],
         ];
     }
 }

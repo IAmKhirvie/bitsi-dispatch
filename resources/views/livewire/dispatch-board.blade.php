@@ -108,6 +108,7 @@
                                 <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">#</th>
                                 <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Brand</th>
                                 <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Bus No.</th>
+                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Seat</th>
                                 <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Trip Code</th>
                                 <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Route</th>
                                 <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Bus Type</th>
@@ -115,6 +116,8 @@
                                 <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Arr. Terminal</th>
                                 <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Sched. Dep.</th>
                                 <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Actual Dep.</th>
+                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Arrived</th>
+                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">KMR Out / In</th>
                                 <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Dir.</th>
                                 <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Driver 1</th>
                                 <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Driver 2</th>
@@ -129,13 +132,19 @@
                                     <td class="whitespace-nowrap px-3 py-1.5 text-muted-foreground">{{ $index + 1 }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5 font-medium">{{ $entry->brand ?? '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5 font-semibold">{{ $entry->bus_number ?? '--' }}</td>
+                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->seating_capacity ?? '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->tripCode->code ?? '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->route ?? '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->bus_type ?? '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->departure_terminal ?? '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->arrival_terminal ?? '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->scheduled_departure ? Str::substr($entry->scheduled_departure, 0, 5) : '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->actual_departure ? Str::substr($entry->actual_departure, 0, 5) : '--' }}</td>
+                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i') : '--' }}</td>
+                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i') : '--' }}</td>
+                                    <td class="whitespace-nowrap px-3 py-1.5 text-xs text-muted-foreground">
+                                        {{ $entry->kmr_at_dispatch ? number_format($entry->kmr_at_dispatch) : '--' }} /
+                                        {{ $entry->kmr_at_arrival ? number_format($entry->kmr_at_arrival) : '--' }}
+                                    </td>
                                     <td class="whitespace-nowrap px-3 py-1.5">
                                         @if ($entry->direction)
                                             @php $dir = $entry->direction?->value ?? $entry->direction; @endphp
@@ -156,7 +165,28 @@
                                     </td>
                                     <td class="max-w-[120px] truncate px-3 py-1.5" title="{{ $entry->remarks ?? '' }}">{{ $entry->remarks ?? '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">
-                                        <div class="flex items-center gap-1">
+                                        <div class="flex flex-wrap items-center gap-1">
+                                            @if (in_array($entryStatus, ['scheduled', 'delayed']))
+                                                <button wire:click="transitionStatus({{ $entry->id }}, 'departed')"
+                                                    class="rounded bg-blue-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-blue-700"
+                                                    title="Mark as Departed">Depart</button>
+                                            @endif
+                                            @if (in_array($entryStatus, ['departed', 'on_route', 'delayed']))
+                                                <button wire:click="transitionStatus({{ $entry->id }}, 'arrived')"
+                                                    class="rounded bg-green-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-green-700"
+                                                    title="Mark as Arrived">Arrive</button>
+                                            @endif
+                                            @if (in_array($entryStatus, ['scheduled', 'departed', 'on_route']))
+                                                <button wire:click="transitionStatus({{ $entry->id }}, 'delayed')"
+                                                    class="rounded bg-orange-500 px-2 py-0.5 text-xs font-medium text-white hover:bg-orange-600"
+                                                    title="Mark as Delayed">Delay</button>
+                                            @endif
+                                            @if (!in_array($entryStatus, ['arrived', 'cancelled']))
+                                                <button wire:click="transitionStatus({{ $entry->id }}, 'cancelled')"
+                                                    wire:confirm="Cancel this trip?"
+                                                    class="rounded bg-red-500 px-2 py-0.5 text-xs font-medium text-white hover:bg-red-600"
+                                                    title="Cancel">Cancel</button>
+                                            @endif
                                             <button
                                                 wire:click="openEditDialog({{ $entry->id }})"
                                                 class="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -177,7 +207,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="16" class="px-3 py-8 text-center text-sm text-muted-foreground">
+                                    <td colspan="19" class="px-3 py-8 text-center text-sm text-muted-foreground">
                                         No entries yet. Click "Add Entry" to start dispatching.
                                     </td>
                                 </tr>

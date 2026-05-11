@@ -19,29 +19,34 @@ class TripCodesExport implements FromCollection, WithHeadings, WithMapping, Shou
     public function collection(): Collection
     {
         return TripCode::query()
+            ->with('defaultVehicle')
             ->when($this->dateFrom, fn ($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
             ->when($this->dateTo, fn ($q) => $q->whereDate('created_at', '<=', $this->dateTo))
-            ->orderBy('created_at', 'desc')
+            ->orderBy('code')
             ->get();
     }
 
     public function headings(): array
     {
-        return ['Code', 'Operator', 'Origin Terminal', 'Destination Terminal', 'Bus Type', 'Direction', 'Scheduled Departure', 'Active', 'Created At'];
+        return ['Code', 'Operator', 'Bus No.', 'Brand', 'Bus Type', 'Seating', 'KMR', 'Origin', 'Destination', 'Direction', 'Scheduled', 'Active'];
     }
 
     public function map($tripCode): array
     {
+        $v = $tripCode->defaultVehicle;
         return [
             $tripCode->code,
             $tripCode->operator,
+            $v?->bus_number ?? '--',
+            $v?->brand ?? $tripCode->default_brand ?? '--',
+            $tripCode->bus_type?->label() ?? '--',
+            $v?->seating_capacity ?? $tripCode->default_seating_capacity ?? '--',
+            $v?->current_kmr !== null ? number_format($v->current_kmr) : '--',
             $tripCode->origin_terminal,
             $tripCode->destination_terminal,
-            $tripCode->bus_type?->label() ?? '--',
             $tripCode->direction?->label() ?? '--',
             $tripCode->scheduled_departure_time ?? '--',
             $tripCode->is_active ? 'Yes' : 'No',
-            $tripCode->created_at?->format('Y-m-d H:i') ?? '',
         ];
     }
 }

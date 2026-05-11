@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Actions\Dispatch\TransitionStatus;
+use App\Enums\DispatchStatus;
 use App\Enums\VehicleStatus;
 use App\Models\DispatchDay;
 use App\Models\DispatchEntry;
@@ -23,6 +25,7 @@ class DispatchBoard extends Component
     public ?int $addDriver2Id = null;
     public string $addBrand = '';
     public string $addBusNumber = '';
+    public ?int $addSeatingCapacity = null;
     public string $addRoute = '';
     public string $addBusType = '';
     public string $addDepartureTerminal = '';
@@ -41,6 +44,7 @@ class DispatchBoard extends Component
     public ?int $editDriver2Id = null;
     public string $editBrand = '';
     public string $editBusNumber = '';
+    public ?int $editSeatingCapacity = null;
     public string $editRoute = '';
     public string $editBusType = '';
     public string $editDepartureTerminal = '';
@@ -68,7 +72,7 @@ class DispatchBoard extends Component
     public function updatedAddTripCodeId($value): void
     {
         if ($value) {
-            $tripCode = TripCode::find($value);
+            $tripCode = TripCode::with('defaultVehicle')->find($value);
             if ($tripCode) {
                 $this->addRoute = $tripCode->origin_terminal . ' - ' . $tripCode->destination_terminal;
                 $this->addBusType = $tripCode->bus_type?->value ?? $tripCode->bus_type ?? '';
@@ -76,6 +80,16 @@ class DispatchBoard extends Component
                 $this->addArrivalTerminal = $tripCode->destination_terminal;
                 $this->addScheduledDeparture = $tripCode->scheduled_departure_time ?? '';
                 $this->addDirection = $tripCode->direction?->value ?? $tripCode->direction ?? '';
+
+                if ($v = $tripCode->defaultVehicle) {
+                    $this->addVehicleId = $v->id;
+                    $this->addBrand = $v->brand ?? '';
+                    $this->addBusNumber = $v->bus_number ?? '';
+                    $this->addSeatingCapacity = $v->seating_capacity;
+                } else {
+                    $this->addBrand = $tripCode->default_brand ?? $this->addBrand;
+                    $this->addSeatingCapacity = $tripCode->default_seating_capacity ?? $this->addSeatingCapacity;
+                }
             }
         }
     }
@@ -88,6 +102,7 @@ class DispatchBoard extends Component
             if ($vehicle) {
                 $this->addBrand = $vehicle->brand ?? '';
                 $this->addBusNumber = $vehicle->bus_number ?? '';
+                $this->addSeatingCapacity = $vehicle->seating_capacity;
                 if (!$this->addBusType) {
                     $this->addBusType = $vehicle->bus_type?->value ?? $vehicle->bus_type ?? '';
                 }
@@ -99,7 +114,7 @@ class DispatchBoard extends Component
     public function updatedEditTripCodeId($value): void
     {
         if ($value) {
-            $tripCode = TripCode::find($value);
+            $tripCode = TripCode::with('defaultVehicle')->find($value);
             if ($tripCode) {
                 $this->editRoute = $tripCode->origin_terminal . ' - ' . $tripCode->destination_terminal;
                 $this->editBusType = $tripCode->bus_type?->value ?? $tripCode->bus_type ?? '';
@@ -107,6 +122,16 @@ class DispatchBoard extends Component
                 $this->editArrivalTerminal = $tripCode->destination_terminal;
                 $this->editScheduledDeparture = $tripCode->scheduled_departure_time ?? '';
                 $this->editDirection = $tripCode->direction?->value ?? $tripCode->direction ?? '';
+
+                if ($v = $tripCode->defaultVehicle) {
+                    $this->editVehicleId = $v->id;
+                    $this->editBrand = $v->brand ?? '';
+                    $this->editBusNumber = $v->bus_number ?? '';
+                    $this->editSeatingCapacity = $v->seating_capacity;
+                } else {
+                    $this->editBrand = $tripCode->default_brand ?? $this->editBrand;
+                    $this->editSeatingCapacity = $tripCode->default_seating_capacity ?? $this->editSeatingCapacity;
+                }
             }
         }
     }
@@ -119,11 +144,23 @@ class DispatchBoard extends Component
             if ($vehicle) {
                 $this->editBrand = $vehicle->brand ?? '';
                 $this->editBusNumber = $vehicle->bus_number ?? '';
+                $this->editSeatingCapacity = $vehicle->seating_capacity;
                 if (!$this->editBusType) {
                     $this->editBusType = $vehicle->bus_type?->value ?? $vehicle->bus_type ?? '';
                 }
             }
         }
+    }
+
+    public function transitionStatus(int $entryId, string $to, ?int $kmr = null): void
+    {
+        $entry = DispatchEntry::with('vehicle')->findOrFail($entryId);
+        app(TransitionStatus::class)->execute(
+            $entry,
+            DispatchStatus::from($to),
+            auth()->user(),
+            $kmr,
+        );
     }
 
     public function createDispatchDay(): void
@@ -156,8 +193,10 @@ class DispatchBoard extends Component
             'vehicle_id' => $this->addVehicleId,
             'driver_id' => $this->addDriverId,
             'driver2_id' => $this->addDriver2Id,
+            'dispatcher_user_id' => auth()->id(),
             'brand' => $this->addBrand,
             'bus_number' => $this->addBusNumber,
+            'seating_capacity' => $this->addSeatingCapacity,
             'route' => $this->addRoute,
             'bus_type' => $this->addBusType,
             'departure_terminal' => $this->addDepartureTerminal,
@@ -184,6 +223,7 @@ class DispatchBoard extends Component
         $this->editDriver2Id = $entry->driver2_id;
         $this->editBrand = $entry->brand ?? '';
         $this->editBusNumber = $entry->bus_number ?? '';
+        $this->editSeatingCapacity = $entry->seating_capacity;
         $this->editRoute = $entry->route ?? '';
         $this->editBusType = $entry->bus_type ?? '';
         $this->editDepartureTerminal = $entry->departure_terminal ?? '';
@@ -208,6 +248,7 @@ class DispatchBoard extends Component
             'driver2_id' => $this->editDriver2Id,
             'brand' => $this->editBrand,
             'bus_number' => $this->editBusNumber,
+            'seating_capacity' => $this->editSeatingCapacity,
             'route' => $this->editRoute,
             'bus_type' => $this->editBusType,
             'departure_terminal' => $this->editDepartureTerminal,
@@ -236,6 +277,7 @@ class DispatchBoard extends Component
         $this->addDriver2Id = null;
         $this->addBrand = '';
         $this->addBusNumber = '';
+        $this->addSeatingCapacity = null;
         $this->addRoute = '';
         $this->addBusType = '';
         $this->addDepartureTerminal = '';

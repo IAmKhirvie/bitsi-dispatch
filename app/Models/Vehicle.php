@@ -23,12 +23,15 @@ class Vehicle extends Model
         "bus_number",
         "brand",
         "bus_type",
+        "seating_capacity",
         "plate_number",
         "status",
         "current_location",
         "pms_unit",
         "pms_threshold",
         "current_pms_value",
+        "current_kmr",
+        "last_pms_kmr",
         "total_kilometers",
         "last_pms_date",
         "pms_interval_months",
@@ -43,6 +46,9 @@ class Vehicle extends Model
         "pms_unit" => PmsUnit::class,
         "pms_threshold" => "integer",
         "current_pms_value" => "integer",
+        "current_kmr" => "integer",
+        "last_pms_kmr" => "integer",
+        "seating_capacity" => "integer",
         "total_kilometers" => "integer",
         "last_pms_date" => "datetime",
         "pms_interval_months" => "integer",
@@ -50,6 +56,19 @@ class Vehicle extends Model
         "idle_days" => "integer",
         "last_used_at" => "datetime",
     ];
+
+    public function getKmSincePmsAttribute(): int
+    {
+        return max(0, ($this->current_kmr ?? 0) - ($this->last_pms_kmr ?? 0));
+    }
+
+    public function getPmsBandAttribute(): string
+    {
+        $km = $this->km_since_pms;
+        if ($km < 8000) return 'good';
+        if ($km < 10000) return 'warning';
+        return 'overdue';
+    }
 
     public function dispatchEntries(): HasMany
     {

@@ -24,14 +24,19 @@ class DispatchEntry extends Model
         "trip_code_id",
         "driver_id",
         "driver2_id",
+        "dispatcher_user_id",
         "brand",
         "bus_number",
+        "seating_capacity",
         "route",
         "bus_type",
         "departure_terminal",
         "arrival_terminal",
         "scheduled_departure",
         "actual_departure",
+        "actual_arrival",
+        "kmr_at_dispatch",
+        "kmr_at_arrival",
         "direction",
         "status",
         "remarks",
@@ -40,7 +45,25 @@ class DispatchEntry extends Model
 
     protected $casts = [
         "status" => DispatchStatus::class,
+        "actual_departure" => "datetime",
+        "actual_arrival" => "datetime",
+        "seating_capacity" => "integer",
+        "kmr_at_dispatch" => "integer",
+        "kmr_at_arrival" => "integer",
     ];
+
+    public function dispatcher(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'dispatcher_user_id');
+    }
+
+    public function getKmRunAttribute(): ?int
+    {
+        if ($this->kmr_at_dispatch !== null && $this->kmr_at_arrival !== null) {
+            return max(0, $this->kmr_at_arrival - $this->kmr_at_dispatch);
+        }
+        return null;
+    }
 
     public function dispatchDay(): BelongsTo
     {
@@ -86,6 +109,17 @@ class DispatchEntry extends Model
         $this->arrival_terminal = $tripCode->destination_terminal;
         $this->scheduled_departure = $tripCode->scheduled_departure_time;
         $this->direction = $tripCode->direction->value;
+
+        $vehicle = $tripCode->defaultVehicle;
+        if ($vehicle) {
+            $this->vehicle_id = $vehicle->id;
+            $this->bus_number = $vehicle->bus_number;
+            $this->brand = $vehicle->brand;
+            $this->seating_capacity = $vehicle->seating_capacity;
+        } else {
+            $this->brand = $tripCode->default_brand ?: $this->brand;
+            $this->seating_capacity = $tripCode->default_seating_capacity ?: $this->seating_capacity;
+        }
 
         return $this;
     }
