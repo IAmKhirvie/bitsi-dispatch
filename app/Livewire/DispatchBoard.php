@@ -11,7 +11,6 @@ use App\Models\Driver;
 use App\Models\TripCode;
 use App\Models\Vehicle;
 use App\Services\DispatchService;
-use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class DispatchBoard extends Component
@@ -294,24 +293,6 @@ class DispatchBoard extends Component
         $dispatchDay = DispatchDay::with(['entries' => fn ($q) => $q->orderBy('sort_order')->with(['tripCode', 'vehicle', 'driver', 'driver2']), 'summary.items'])
             ->where('service_date', $this->date)
             ->first();
-
-        // Auto-depart overdue entries on each poll
-        if ($dispatchDay) {
-            $now = now()->format('H:i');
-            $overdueCount = $dispatchDay->entries()
-                ->where('status', 'scheduled')
-                ->where('scheduled_departure', '<=', $now)
-                ->whereNotNull('scheduled_departure')
-                ->update([
-                    'status' => 'departed',
-                    'actual_departure' => DB::raw('scheduled_departure'),
-                ]);
-
-            // Refresh if any entries were auto-departed
-            if ($overdueCount > 0) {
-                $dispatchDay->load(['entries' => fn ($q) => $q->orderBy('sort_order')->with(['tripCode', 'vehicle', 'driver', 'driver2']), 'summary.items']);
-            }
-        }
 
         $tripCodes = TripCode::where('is_active', true)->orderBy('code')->get();
         $vehicles = Vehicle::where('status', VehicleStatus::OK)->orderBy('bus_number')->get();

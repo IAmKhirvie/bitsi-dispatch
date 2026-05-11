@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', "Edit Vehicle {$vehicle['bus_number']} - BITSI Dispatch")
+@section('title', "Edit Bus {$vehicle['bus_number']} - BITSI Dispatch")
 
 @section('content')
     <div class="flex h-full flex-1 flex-col gap-4 p-4">
         <div class="mx-auto w-full max-w-2xl">
             <div class="rounded-xl border bg-card text-card-foreground shadow">
                 <div class="p-6">
-                    <h3 class="font-semibold leading-none tracking-tight">Edit Vehicle</h3>
-                    <p class="text-sm text-muted-foreground">Update vehicle {{ $vehicle['brand'] }} {{ $vehicle['bus_number'] }}.</p>
+                    <h3 class="font-semibold leading-none tracking-tight">Edit Bus</h3>
+                    <p class="text-sm text-muted-foreground">Update bus {{ $vehicle['brand'] }} {{ $vehicle['bus_number'] }}.</p>
                 </div>
                 <div class="p-6 pt-0">
                     <form method="POST" action="{{ route('admin.vehicles.update', $vehicle['id']) }}" class="space-y-4">

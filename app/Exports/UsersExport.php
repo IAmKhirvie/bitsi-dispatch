@@ -18,11 +18,7 @@ class UsersExport implements FromCollection, WithHeadings, WithMapping, ShouldAu
 
     public function collection(): Collection
     {
-        return User::query()
-            ->when($this->dateFrom, fn ($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
-            ->when($this->dateTo, fn ($q) => $q->whereDate('created_at', '<=', $this->dateTo))
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return User::query()->orderBy('name')->get();
     }
 
     public function headings(): array

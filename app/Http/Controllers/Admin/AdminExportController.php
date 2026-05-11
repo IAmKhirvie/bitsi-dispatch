@@ -122,7 +122,7 @@ class AdminExportController extends Controller
 
         return Excel::download(
             new VehiclesExport($range['date_from'], $range['date_to']),
-            "vehicles-{$range['label']}.xlsx"
+            "buses-{$range['label']}.xlsx"
         );
     }
 
@@ -137,7 +137,7 @@ class AdminExportController extends Controller
 
         return Excel::download(
             new VehiclesExport($range['date_from'], $range['date_to']),
-            "vehicles-{$range['label']}.xlsx"
+            "buses-{$range['label']}.xlsx"
         );
     }
 

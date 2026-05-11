@@ -3,15 +3,15 @@
 <div class="flex h-full flex-1 flex-col gap-4 p-4">
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold">Vehicles</h1>
-            <p class="text-sm text-muted-foreground">Manage fleet vehicles and maintenance status</p>
+            <h1 class="text-2xl font-bold">Buses</h1>
+            <p class="text-sm text-muted-foreground">Manage fleet buses and maintenance status</p>
         </div>
         <div class="flex items-center gap-3">
             <x-export-buttons resource="vehicles" />
             <a href="{{ route('admin.vehicles.create') }}"
                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Add Vehicle
+                Add Bus
             </a>
         </div>
     </div>

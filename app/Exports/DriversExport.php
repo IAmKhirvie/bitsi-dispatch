@@ -18,11 +18,7 @@ class DriversExport implements FromCollection, WithHeadings, WithMapping, Should
 
     public function collection(): Collection
     {
-        return Driver::query()
-            ->when($this->dateFrom, fn ($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
-            ->when($this->dateTo, fn ($q) => $q->whereDate('created_at', '<=', $this->dateTo))
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return Driver::query()->orderBy('name')->get();
     }
 
     public function headings(): array

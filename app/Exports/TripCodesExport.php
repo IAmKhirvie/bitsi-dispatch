@@ -18,12 +18,8 @@ class TripCodesExport implements FromCollection, WithHeadings, WithMapping, Shou
 
     public function collection(): Collection
     {
-        return TripCode::query()
-            ->with('defaultVehicle')
-            ->when($this->dateFrom, fn ($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
-            ->when($this->dateTo, fn ($q) => $q->whereDate('created_at', '<=', $this->dateTo))
-            ->orderBy('code')
-            ->get();
+        // Trip codes are a static reference list.
+        return TripCode::query()->with('defaultVehicle')->orderBy('code')->get();
     }
 
     public function headings(): array

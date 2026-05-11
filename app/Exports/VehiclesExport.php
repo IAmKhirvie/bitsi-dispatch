@@ -18,11 +18,8 @@ class VehiclesExport implements FromCollection, WithHeadings, WithMapping, Shoul
 
     public function collection(): Collection
     {
-        return Vehicle::query()
-            ->when($this->dateFrom, fn ($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
-            ->when($this->dateTo, fn ($q) => $q->whereDate('created_at', '<=', $this->dateTo))
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Buses are a static reference list — always export the full fleet.
+        return Vehicle::query()->orderBy('bus_number')->get();
     }
 
     public function headings(): array
