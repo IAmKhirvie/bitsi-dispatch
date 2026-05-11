@@ -24,36 +24,48 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>Brand</th>
-                <th>Bus No.</th>
                 <th>Trip Code</th>
+                <th>Bus No.</th>
+                <th>Brand</th>
+                <th>Seat</th>
                 <th>Route</th>
-                <th>Bus Type</th>
+                <th>Dir.</th>
+                <th>Driver 1</th>
+                <th>Driver 2</th>
+                <th>Dispatcher</th>
+                <th>Sched.</th>
                 <th>Dep.</th>
                 <th>Arr.</th>
-                <th>Sched.</th>
-                <th>Actual</th>
-                <th>Dir.</th>
-                <th>Driver</th>
+                <th>KMR Out</th>
+                <th>KMR In</th>
+                <th>KM Run</th>
                 <th>Status</th>
                 <th>Remarks</th>
             </tr>
         </thead>
         <tbody>
             @foreach($dispatchDay->entries as $index => $entry)
+                @php
+                    $kmRun = ($entry->kmr_at_dispatch && $entry->kmr_at_arrival)
+                        ? max(0, $entry->kmr_at_arrival - $entry->kmr_at_dispatch) : null;
+                @endphp
             <tr>
                 <td>{{ $index + 1 }}</td>
-                <td>{{ $entry->brand }}</td>
-                <td>{{ $entry->bus_number }}</td>
                 <td>{{ $entry->tripCode?->code }}</td>
+                <td>{{ $entry->bus_number }}</td>
+                <td>{{ $entry->brand }}</td>
+                <td>{{ $entry->seating_capacity }}</td>
                 <td>{{ $entry->route }}</td>
-                <td>{{ $entry->bus_type?->value ?? $entry->bus_type }}</td>
-                <td>{{ $entry->departure_terminal }}</td>
-                <td>{{ $entry->arrival_terminal }}</td>
-                <td>{{ $entry->scheduled_departure }}</td>
-                <td>{{ $entry->actual_departure }}</td>
                 <td>{{ $entry->direction?->value ?? $entry->direction }}</td>
                 <td>{{ $entry->driver?->name }}</td>
+                <td>{{ $entry->driver2?->name }}</td>
+                <td>{{ $entry->dispatcher?->name }}</td>
+                <td>{{ $entry->scheduled_departure ? \Carbon\Carbon::parse($entry->scheduled_departure)->format('H:i') : '' }}</td>
+                <td>{{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i') : '' }}</td>
+                <td>{{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i') : '' }}</td>
+                <td>{{ $entry->kmr_at_dispatch ? number_format($entry->kmr_at_dispatch) : '' }}</td>
+                <td>{{ $entry->kmr_at_arrival ? number_format($entry->kmr_at_arrival) : '' }}</td>
+                <td>{{ $kmRun !== null ? number_format($kmRun) : '' }}</td>
                 <td>{{ $entry->status?->value ?? $entry->status }}</td>
                 <td>{{ $entry->remarks }}</td>
             </tr>

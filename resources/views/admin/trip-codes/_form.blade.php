@@ -21,6 +21,34 @@
     </div>
 </div>
 
+<div class="rounded-md border border-dashed p-4 space-y-3">
+    <p class="text-xs font-medium text-muted-foreground">Defaults for autofill (used when adding a dispatch entry with this trip code)</p>
+    <div class="grid grid-cols-3 gap-4">
+        <div class="space-y-2">
+            <label for="default_vehicle_id" class="text-sm font-medium leading-none">Default Bus</label>
+            <select id="default_vehicle_id" name="default_vehicle_id" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm">
+                <option value="">-- None --</option>
+                @foreach (($vehicles ?? collect()) as $vehicle)
+                    <option value="{{ $vehicle->id }}" {{ old('default_vehicle_id', $isEdit ? $tripCode->default_vehicle_id : '') == $vehicle->id ? 'selected' : '' }}>
+                        {{ $vehicle->bus_number }} — {{ $vehicle->brand }}
+                    </option>
+                @endforeach
+            </select>
+            @error('default_vehicle_id')<p class="text-xs text-red-500">{{ $message }}</p>@enderror
+        </div>
+        <div class="space-y-2">
+            <label for="default_brand" class="text-sm font-medium leading-none">Default Brand (fallback)</label>
+            <input id="default_brand" name="default_brand" type="text" value="{{ old('default_brand', $isEdit ? $tripCode->default_brand : '') }}" placeholder="e.g. BITSI" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" />
+            @error('default_brand')<p class="text-xs text-red-500">{{ $message }}</p>@enderror
+        </div>
+        <div class="space-y-2">
+            <label for="default_seating_capacity" class="text-sm font-medium leading-none">Default Seating</label>
+            <input id="default_seating_capacity" name="default_seating_capacity" type="number" min="0" max="120" value="{{ old('default_seating_capacity', $isEdit ? $tripCode->default_seating_capacity : '') }}" placeholder="e.g. 47" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" />
+            @error('default_seating_capacity')<p class="text-xs text-red-500">{{ $message }}</p>@enderror
+        </div>
+    </div>
+</div>
+
 <div class="grid grid-cols-2 gap-4">
     <div class="space-y-2">
         <label for="origin_terminal" class="text-sm font-medium leading-none">Origin Terminal</label>

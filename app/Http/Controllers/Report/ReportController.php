@@ -46,7 +46,7 @@ class ReportController extends Controller
 
     public function exportPdf(string $date)
     {
-        $dispatchDay = DispatchDay::with(['entries.tripCode', 'entries.driver', 'summary.items'])
+        $dispatchDay = DispatchDay::with(['entries.tripCode', 'entries.driver', 'entries.driver2', 'entries.dispatcher', 'summary.items'])
             ->whereDate('service_date', $date)
             ->firstOrFail();
 

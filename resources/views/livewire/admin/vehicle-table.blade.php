@@ -65,8 +65,8 @@
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Plate No.</th>
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Total KM</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">PMS</th>
+                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Current KMR</th>
+                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">PMS Status</th>
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Next PMS</th>
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Idle Days</th>
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
@@ -75,10 +75,12 @@
                     <tbody>
                         @forelse ($vehicles as $vehicle)
                             @php
-                                $pmsPercentage = $vehicle->pms_percentage ?? 0;
-                                $isPmsOver = ($vehicle->current_pms_value ?? 0) > ($vehicle->pms_threshold ?? 0);
-                                $isPmsWarning = $pmsPercentage >= 80 && !$isPmsOver;
+                                $pmsBand = $vehicle->pms_band ?? 'good';
+                                $kmSincePms = $vehicle->km_since_pms ?? 0;
+                                $isPmsOver = $pmsBand === 'overdue';
+                                $isPmsWarning = $pmsBand === 'warning';
                                 $rowClass = $isPmsOver ? 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100/50 dark:hover:bg-red-900/30' : ($isPmsWarning ? 'bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100/50 dark:hover:bg-orange-900/30' : 'hover:bg-muted/30');
+                                $bandBadgeClass = $isPmsOver ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' : ($isPmsWarning ? 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300');
                             @endphp
                             <tr class="border-b last:border-0 transition-colors {{ $rowClass }} {{ $vehicle->trashed() ? 'opacity-60' : '' }}">
                                 <td class="px-4 py-3 font-semibold {{ $isPmsOver ? 'text-red-700 dark:text-red-400' : '' }}">{{ $vehicle->bus_number }}</td>
@@ -92,23 +94,13 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">{{ $vehicle->current_location ?? '--' }}</td>
-                                <td class="px-4 py-3">{{ $vehicle->total_kilometers ? number_format($vehicle->total_kilometers) : '--' }}</td>
+                                <td class="px-4 py-3">{{ $vehicle->current_kmr ? number_format($vehicle->current_kmr) : '--' }}</td>
                                 <td class="px-4 py-3">
-                                    @php
-                                        $pmsBarColor = $isPmsOver ? 'bg-red-600' : ($pmsPercentage >= 80 ? 'bg-orange-500' : ($pmsPercentage >= 60 ? 'bg-yellow-500' : 'bg-green-500'));
-                                    @endphp
                                     <div class="flex items-center gap-2">
-                                        <div class="h-2 w-16 rounded-full bg-gray-200 dark:bg-gray-700">
-                                            <div class="h-2 rounded-full transition-all {{ $pmsBarColor }}"
-                                                 style="width: {{ min($pmsPercentage, 100) }}%">
-                                            </div>
-                                        </div>
-                                        <span class="text-xs text-muted-foreground {{ $isPmsOver ? 'font-semibold text-red-700 dark:text-red-400' : '' }}">{{ $vehicle->current_pms_value ?? 0 }}/{{ $vehicle->pms_threshold ?? 0 }}</span>
-                                        @if ($isPmsOver)
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                                        @elseif ($vehicle->is_pms_warning)
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                                        @endif
+                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold uppercase {{ $bandBadgeClass }}">
+                                            {{ $pmsBand }}
+                                        </span>
+                                        <span class="text-xs text-muted-foreground">{{ number_format($kmSincePms) }} km</span>
                                     </div>
                                 </td>
                                 <td class="px-4 py-3">
