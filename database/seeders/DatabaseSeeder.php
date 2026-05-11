@@ -60,22 +60,9 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Roberto Cruz', 'phone' => '09185555555', 'license_number' => 'N05-16-789012'],
         ])->map(fn($d) => Driver::create($d));
 
-        // Vehicles
-        $vehicles = collect([
-            ['bus_number' => '1001', 'brand' => 'Hino', 'bus_type' => BusType::Regular, 'plate_number' => 'ABC 1234', 'status' => VehicleStatus::OK, 'pms_threshold' => 15000, 'current_pms_value' => 5000],
-            ['bus_number' => '1002', 'brand' => 'Hino', 'bus_type' => BusType::Deluxe, 'plate_number' => 'DEF 5678', 'status' => VehicleStatus::OK, 'pms_threshold' => 15000, 'current_pms_value' => 12000],
-            ['bus_number' => '1003', 'brand' => 'Yutong', 'bus_type' => BusType::SuperDeluxe, 'plate_number' => 'GHI 9012', 'status' => VehicleStatus::OK, 'pms_threshold' => 20000, 'current_pms_value' => 3000],
-            ['bus_number' => '1004', 'brand' => 'Yutong', 'bus_type' => BusType::Elite, 'plate_number' => 'JKL 3456', 'status' => VehicleStatus::UR, 'pms_threshold' => 20000, 'current_pms_value' => 18000],
-            ['bus_number' => '1005', 'brand' => 'Hino', 'bus_type' => BusType::Sleeper, 'plate_number' => 'MNO 7890', 'status' => VehicleStatus::OK, 'pms_threshold' => 15000, 'current_pms_value' => 7500],
-            ['bus_number' => '1006', 'brand' => 'Daewoo', 'bus_type' => BusType::SkyBus, 'plate_number' => 'PQR 1234', 'status' => VehicleStatus::PMS, 'pms_threshold' => 15000, 'current_pms_value' => 15000],
-            ['bus_number' => '1007', 'brand' => 'Hino', 'bus_type' => BusType::Regular, 'plate_number' => 'STU 5678', 'status' => VehicleStatus::InTransit, 'pms_threshold' => 15000, 'current_pms_value' => 9000],
-            ['bus_number' => '1008', 'brand' => 'Yutong', 'bus_type' => BusType::Deluxe, 'plate_number' => 'VWX 9012', 'status' => VehicleStatus::Lutaw, 'idle_days' => 5],
-            ['bus_number' => '1009', 'brand' => 'Daewoo', 'bus_type' => BusType::SingleSeater, 'plate_number' => 'YZA 3456', 'status' => VehicleStatus::OK, 'pms_threshold' => 12000, 'current_pms_value' => 2000],
-            ['bus_number' => '1010', 'brand' => 'Hino', 'bus_type' => BusType::Regular, 'plate_number' => 'BCD 7890', 'status' => VehicleStatus::OK, 'pms_threshold' => 15000, 'current_pms_value' => 10500],
-        ])->map(fn($v) => Vehicle::create($v));
-
-        // Trip Codes — Seeded from TripScheduleSeeder (hardcoded from TRIP SCHEDULE.xlsx)
-        $this->call(TripScheduleSeeder::class);
+        // Vehicles + Trip Codes — seeded from the real TRIP SCHEDULE.xlsx
+        $this->call(XlsxTripScheduleSeeder::class);
+        $vehicles = Vehicle::all();
 
         // Grab a sample of active trip codes for sample dispatch entries
         $tripCodes = TripCode::where('is_active', true)
