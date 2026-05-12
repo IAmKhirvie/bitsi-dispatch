@@ -89,7 +89,7 @@
                 <div>
                     <h3 class="text-base font-semibold leading-none tracking-tight">
                         Entries for {{ $dispatchDay->service_date }}
-                        <span class="ml-2 text-sm font-normal text-muted-foreground">({{ $dispatchDay->entries->count() }} entries)</span>
+                        <span class="ml-2 text-sm font-normal text-muted-foreground">({{ $entries->total() }} entries)</span>
                     </h3>
                 </div>
                 <button
@@ -100,54 +100,45 @@
                     Add Entry
                 </button>
             </div>
+
+            @if (session('dispatch_error'))
+                <div class="mx-4 mb-2 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                    {{ session('dispatch_error') }}
+                </div>
+            @endif
+
             <div class="p-0">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-xs">
+                    <table class="w-full text-xs table-fixed">
                         <thead>
                             <tr class="border-b bg-muted/50">
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">#</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Brand</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Bus No.</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Seat</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Trip Code</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Route</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Bus Type</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Dep. Terminal</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Arr. Terminal</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Sched. Dep.</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Actual Dep.</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Arrived</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">KMR Out / In</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Dir.</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Driver 1</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Driver 2</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Status</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Remarks</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Actions</th>
+                                <th class="w-8 px-2 py-2 text-left font-medium text-muted-foreground">#</th>
+                                <th class="w-20 px-2 py-2 text-left font-medium text-muted-foreground">Trip</th>
+                                <th class="w-24 px-2 py-2 text-left font-medium text-muted-foreground">Bus</th>
+                                <th class="w-12 px-2 py-2 text-left font-medium text-muted-foreground">Dir</th>
+                                <th class="px-2 py-2 text-left font-medium text-muted-foreground">Route</th>
+                                <th class="w-24 px-2 py-2 text-left font-medium text-muted-foreground">Times</th>
+                                <th class="w-32 px-2 py-2 text-left font-medium text-muted-foreground">Drivers</th>
+                                <th class="w-28 px-2 py-2 text-left font-medium text-muted-foreground">Status</th>
+                                <th class="px-2 py-2 text-left font-medium text-muted-foreground">Remarks</th>
+                                <th class="w-16 px-2 py-2 text-left font-medium text-muted-foreground">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($dispatchDay->entries as $index => $entry)
-                                <tr class="border-b hover:bg-muted/30 transition-colors">
-                                    <td class="whitespace-nowrap px-3 py-1.5 text-muted-foreground">{{ $index + 1 }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5 font-medium">{{ $entry->brand ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5 font-semibold">{{ $entry->bus_number ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->seating_capacity ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->tripCode->code ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->route ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->bus_type ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->departure_terminal ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->arrival_terminal ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->scheduled_departure ? Str::substr($entry->scheduled_departure, 0, 5) : '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i') : '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i') : '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5 text-xs text-muted-foreground">
-                                        {{ $entry->kmr_at_dispatch ? number_format($entry->kmr_at_dispatch) : '--' }} /
-                                        {{ $entry->kmr_at_arrival ? number_format($entry->kmr_at_arrival) : '--' }}
+                            @forelse ($entries as $index => $entry)
+                                @php
+                                    $entryStatus = $entry->status?->value ?? $entry->status ?? 'scheduled';
+                                    $dir = $entry->direction?->value ?? $entry->direction;
+                                @endphp
+                                <tr class="border-b align-top hover:bg-muted/30 transition-colors">
+                                    <td class="px-2 py-1.5 text-muted-foreground">{{ ($entries->currentPage() - 1) * $entries->perPage() + $index + 1 }}</td>
+                                    <td class="px-2 py-1.5">{{ $entry->tripCode->code ?? '--' }}</td>
+                                    <td class="px-2 py-1.5">
+                                        <div class="font-semibold truncate">{{ $entry->bus_number ?? '--' }}</div>
+                                        <div class="text-[10px] text-muted-foreground truncate">{{ $entry->brand ?? '' }}{{ $entry->bus_type ? ' · ' . $entry->bus_type : '' }}</div>
                                     </td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">
-                                        @if ($entry->direction)
-                                            @php $dir = $entry->direction?->value ?? $entry->direction; @endphp
+                                    <td class="px-2 py-1.5">
+                                        @if ($dir)
                                             <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium {{ $dir === 'SB' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' }}">
                                                 {{ $dir }}
                                             </span>
@@ -155,38 +146,29 @@
                                             --
                                         @endif
                                     </td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->driver->name ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->driver2->name ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">
-                                        @php $entryStatus = $entry->status?->value ?? $entry->status ?? 'scheduled'; @endphp
-                                        <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium {{ $statusClasses[$entryStatus] ?? $statusClasses['scheduled'] }}">
-                                            {{ ucwords(str_replace('_', ' ', $entryStatus)) }}
-                                        </span>
+                                    <td class="px-2 py-1.5 truncate" title="{{ $entry->route ?? '' }}">{{ $entry->route ?? '--' }}</td>
+                                    <td class="px-2 py-1.5 text-[11px] leading-tight">
+                                        <div><span class="text-muted-foreground">S:</span> {{ $entry->scheduled_departure ? \Illuminate\Support\Str::substr($entry->scheduled_departure, 0, 5) : '--' }}</div>
+                                        <div><span class="text-muted-foreground">D:</span> {{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i') : '--' }}</div>
+                                        <div><span class="text-muted-foreground">A:</span> {{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i') : '--' }}</div>
                                     </td>
-                                    <td class="max-w-[120px] truncate px-3 py-1.5" title="{{ $entry->remarks ?? '' }}">{{ $entry->remarks ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">
-                                        <div class="flex flex-wrap items-center gap-1">
-                                            @if (in_array($entryStatus, ['scheduled', 'delayed']))
-                                                <button wire:click="transitionStatus({{ $entry->id }}, 'departed')"
-                                                    class="rounded bg-blue-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-blue-700"
-                                                    title="Mark as Departed">Depart</button>
-                                            @endif
-                                            @if (in_array($entryStatus, ['departed', 'on_route', 'delayed']))
-                                                <button wire:click="transitionStatus({{ $entry->id }}, 'arrived')"
-                                                    class="rounded bg-green-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-green-700"
-                                                    title="Mark as Arrived">Arrive</button>
-                                            @endif
-                                            @if (in_array($entryStatus, ['scheduled', 'departed', 'on_route']))
-                                                <button wire:click="transitionStatus({{ $entry->id }}, 'delayed')"
-                                                    class="rounded bg-orange-500 px-2 py-0.5 text-xs font-medium text-white hover:bg-orange-600"
-                                                    title="Mark as Delayed">Delay</button>
-                                            @endif
-                                            @if (!in_array($entryStatus, ['arrived', 'cancelled']))
-                                                <button wire:click="transitionStatus({{ $entry->id }}, 'cancelled')"
-                                                    wire:confirm="Cancel this trip?"
-                                                    class="rounded bg-red-500 px-2 py-0.5 text-xs font-medium text-white hover:bg-red-600"
-                                                    title="Cancel">Cancel</button>
-                                            @endif
+                                    <td class="px-2 py-1.5 text-[11px] leading-tight">
+                                        <div class="truncate">{{ $entry->driver->name ?? '--' }}</div>
+                                        <div class="truncate text-muted-foreground">{{ $entry->driver2->name ?? '' }}</div>
+                                    </td>
+                                    <td class="px-2 py-1.5">
+                                        <select
+                                            wire:change="transitionStatus({{ $entry->id }}, $event.target.value)"
+                                            class="w-full rounded border border-input px-1.5 py-1 text-xs font-medium shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring {{ $statusClasses[$entryStatus] ?? $statusClasses['scheduled'] }}"
+                                        >
+                                            @foreach ($statusOptions as $s)
+                                                <option value="{{ $s }}" @selected($entryStatus === $s)>{{ ucwords(str_replace('_', ' ', $s)) }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td class="px-2 py-1.5 truncate" title="{{ $entry->remarks ?? '' }}">{{ $entry->remarks ?? '--' }}</td>
+                                    <td class="px-2 py-1.5">
+                                        <div class="flex items-center gap-1">
                                             <button
                                                 wire:click="openEditDialog({{ $entry->id }})"
                                                 class="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -207,13 +189,34 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="19" class="px-3 py-8 text-center text-sm text-muted-foreground">
+                                    <td colspan="10" class="px-3 py-8 text-center text-sm text-muted-foreground">
                                         No entries yet. Click "Add Entry" to start dispatching.
                                     </td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            {{-- Pagination footer --}}
+            <div class="flex flex-wrap items-center justify-between gap-2 border-t p-3 text-xs">
+                <div class="flex items-center gap-2">
+                    <label class="text-muted-foreground">Rows per page:</label>
+                    <select
+                        wire:model.live="perPage"
+                        class="rounded border border-input bg-transparent px-2 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                        @foreach ($perPageOptions as $opt)
+                            <option value="{{ $opt }}">{{ $opt }}</option>
+                        @endforeach
+                    </select>
+                    <span class="text-muted-foreground">
+                        Showing {{ $entries->firstItem() ?? 0 }}–{{ $entries->lastItem() ?? 0 }} of {{ $entries->total() }}
+                    </span>
+                </div>
+                <div>
+                    {{ $entries->onEachSide(1)->links() }}
                 </div>
             </div>
         </div>

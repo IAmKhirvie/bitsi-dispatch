@@ -12,10 +12,15 @@ use App\Models\TripCode;
 use App\Models\Vehicle;
 use App\Services\DispatchService;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class DispatchBoard extends Component
 {
+    use WithPagination;
+
     public string $date;
+    public int $perPage = 20;
+    public array $perPageOptions = [5, 10, 15, 20, 30, 40, 50, 100];
 
     // Add entry form
     public ?int $addTripCodeId = null;
@@ -64,7 +69,12 @@ class DispatchBoard extends Component
 
     public function updatedDate(): void
     {
-        // Date changed — component re-renders automatically
+        $this->resetPage();
+    }
+
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
     }
 
     // Auto-fill from trip code (Add form)
@@ -153,13 +163,17 @@ class DispatchBoard extends Component
 
     public function transitionStatus(int $entryId, string $to, ?int $kmr = null): void
     {
-        $entry = DispatchEntry::with('vehicle')->findOrFail($entryId);
-        app(TransitionStatus::class)->execute(
-            $entry,
-            DispatchStatus::from($to),
-            auth()->user(),
-            $kmr,
-        );
+        try {
+            $entry = DispatchEntry::with('vehicle')->findOrFail($entryId);
+            app(TransitionStatus::class)->execute(
+                $entry,
+                DispatchStatus::from($to),
+                auth()->user(),
+                $kmr,
+            );
+        } catch (\InvalidArgumentException $e) {
+            session()->flash('dispatch_error', $e->getMessage());
+        }
     }
 
     public function createDispatchDay(): void
@@ -290,14 +304,21 @@ class DispatchBoard extends Component
 
     public function render()
     {
-        $dispatchDay = DispatchDay::with(['entries' => fn ($q) => $q->orderBy('sort_order')->with(['tripCode', 'vehicle', 'driver', 'driver2']), 'summary.items'])
+        $dispatchDay = DispatchDay::with('summary.items')
             ->where('service_date', $this->date)
             ->first();
+
+        $entries = $dispatchDay
+            ? DispatchEntry::where('dispatch_day_id', $dispatchDay->id)
+                ->with(['tripCode', 'vehicle', 'driver', 'driver2'])
+                ->orderBy('sort_order')
+                ->paginate($this->perPage)
+            : null;
 
         $tripCodes = TripCode::where('is_active', true)->orderBy('code')->get();
         $vehicles = Vehicle::where('status', VehicleStatus::OK)->orderBy('bus_number')->get();
         $drivers = Driver::where('is_active', true)->orderBy('name')->get();
 
-        return view('livewire.dispatch-board', compact('dispatchDay', 'tripCodes', 'vehicles', 'drivers'));
+        return view('livewire.dispatch-board', compact('dispatchDay', 'entries', 'tripCodes', 'vehicles', 'drivers'));
     }
 }

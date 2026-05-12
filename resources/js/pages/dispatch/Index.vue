@@ -171,16 +171,48 @@ function deleteEntry(entry: DispatchEntry) {
     }
 }
 
-const statusClasses: Record<string, string> = {
-    scheduled: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-    departed: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-    on_route: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300',
-    delayed: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
-    cancelled: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
-    arrived: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+const statusConfig: Record<string, { label: string; badge: string; btnActive: string }> = {
+    scheduled: {
+        label: 'Scheduled',
+        badge: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+        btnActive: 'bg-gray-600 text-white hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600',
+    },
+    departed: {
+        label: 'Departed',
+        badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+        btnActive: 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600',
+    },
+    on_route: {
+        label: 'On Route',
+        badge: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300',
+        btnActive: 'bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600',
+    },
+    delayed: {
+        label: 'Delayed',
+        badge: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
+        btnActive: 'bg-orange-600 text-white hover:bg-orange-700 dark:bg-orange-700 dark:hover:bg-orange-600',
+    },
+    arrived: {
+        label: 'Arrived',
+        badge: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+        btnActive: 'bg-green-600 text-white hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600',
+    },
+    cancelled: {
+        label: 'Cancelled',
+        badge: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+        btnActive: 'bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600',
+    },
 };
 
-const statusOptions = ['scheduled', 'departed', 'on_route', 'delayed', 'cancelled', 'arrived'];
+const statusOptions = ['scheduled', 'departed', 'on_route', 'delayed', 'arrived', 'cancelled'];
+
+function setEntryStatus(entry: DispatchEntry, status: string) {
+    if (!props.dispatchDay || entry.status === status) return;
+    router.patch(`/dispatch/${props.dispatchDay.id}/entries/${entry.id}/status`, { status }, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+}
 
 function formatStatus(status: string): string {
     return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -387,17 +419,19 @@ const summary = computed(() => props.dispatchDay?.summary);
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Arr. Terminal</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Sched. Dep.</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Actual Dep.</th>
+                                    <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Actual Arr.</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Dir.</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Driver 1</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Driver 2</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Status</th>
+                                    <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Quick Status</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Remarks</th>
                                     <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-if="entries.length === 0">
-                                    <td colspan="16" class="px-3 py-8 text-center text-sm text-muted-foreground">
+                                    <td colspan="18" class="px-3 py-8 text-center text-sm text-muted-foreground">
                                         No entries yet. Click "Add Entry" to start dispatching.
                                     </td>
                                 </tr>
@@ -412,6 +446,7 @@ const summary = computed(() => props.dispatchDay?.summary);
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ entry.arrival_terminal || '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ formatTime(entry.scheduled_departure) }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ formatTime(entry.actual_departure) }}</td>
+                                    <td class="whitespace-nowrap px-3 py-1.5">{{ formatTime(entry.actual_arrival) }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">
                                         <span v-if="entry.direction" class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium"
                                             :class="entry.direction === 'SB' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'">
@@ -423,9 +458,25 @@ const summary = computed(() => props.dispatchDay?.summary);
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ entry.driver2?.name || '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">
                                         <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium"
-                                            :class="statusClasses[entry.status] || statusClasses.scheduled">
-                                            {{ formatStatus(entry.status) }}
+                                            :class="statusConfig[entry.status]?.badge ?? statusConfig.scheduled.badge">
+                                            {{ statusConfig[entry.status]?.label ?? formatStatus(entry.status) }}
                                         </span>
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-1.5">
+                                        <div class="flex flex-wrap items-center gap-1">
+                                            <button
+                                                v-for="s in statusOptions"
+                                                :key="s"
+                                                @click="setEntryStatus(entry, s)"
+                                                class="rounded px-1.5 py-0.5 text-[10px] font-medium transition-colors"
+                                                :class="entry.status === s
+                                                    ? statusConfig[s].btnActive
+                                                    : 'bg-muted text-muted-foreground hover:bg-muted/80'"
+                                                :title="`Set ${statusConfig[s].label}`"
+                                            >
+                                                {{ statusConfig[s].label }}
+                                            </button>
+                                        </div>
                                     </td>
                                     <td class="max-w-[120px] truncate px-3 py-1.5" :title="entry.remarks || ''">{{ entry.remarks || '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">
