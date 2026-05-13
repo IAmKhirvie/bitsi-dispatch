@@ -60,6 +60,20 @@
                 </a>
             </li>
 
+            {{-- Fleet Map --}}
+            <li class="group/menu-item relative" data-sidebar="menu-item">
+                <a
+                    href="{{ route('fleet-map') }}"
+                    data-sidebar="menu-button"
+                    data-size="default"
+                    data-active="{{ request()->routeIs('fleet-map') ? 'true' : 'false' }}"
+                    class="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 h-8 text-sm data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l-6 2V6l6-2 6 2 6-2v14l-6 2-6-2z"/><path d="M9 4v14"/><path d="M15 6v14"/></svg>
+                    <span>Fleet Map</span>
+                </a>
+            </li>
+
             {{-- Reports --}}
             <li class="group/menu-item relative" data-sidebar="menu-item">
                 <a

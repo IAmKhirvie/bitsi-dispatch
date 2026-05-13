@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\DriverAttendanceController;
+use App\Http\Controllers\Api\GpsIngestController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,4 +20,8 @@ Route::prefix('v1')->group(function () {
     Route::post('/driver/check-out', [DriverAttendanceController::class, 'checkOut']);
     Route::get('/driver/my-schedule', [DriverAttendanceController::class, 'mySchedule']);
     Route::get('/driver/my-attendance', [DriverAttendanceController::class, 'myAttendance']);
+
+    // GPS device ingest (authenticated via X-Ingest-Token or bearer token)
+    Route::post('/gps/ingest', [GpsIngestController::class, 'ingest'])
+        ->middleware('throttle:120,1');
 });

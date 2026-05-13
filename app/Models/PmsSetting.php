@@ -11,6 +11,7 @@ class PmsSetting extends Model
         "name",
         "unit",
         "threshold",
+        "warning_ratio",
         "description",
         "is_default",
     ];
@@ -18,6 +19,7 @@ class PmsSetting extends Model
     protected $casts = [
         "unit" => PmsUnit::class,
         "threshold" => "integer",
+        "warning_ratio" => "float",
         "is_default" => "boolean",
     ];
 }

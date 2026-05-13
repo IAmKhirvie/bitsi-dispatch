@@ -21,6 +21,7 @@ class Vehicle extends Model
 
     protected $fillable = [
         "bus_number",
+        "gps_device_id",
         "brand",
         "bus_type",
         "seating_capacity",
@@ -38,6 +39,9 @@ class Vehicle extends Model
         "next_pms_date",
         "idle_days",
         "last_used_at",
+        "last_lat",
+        "last_lng",
+        "last_position_at",
     ];
 
     protected $casts = [
@@ -55,6 +59,9 @@ class Vehicle extends Model
         "next_pms_date" => "date",
         "idle_days" => "integer",
         "last_used_at" => "datetime",
+        "last_lat" => "float",
+        "last_lng" => "float",
+        "last_position_at" => "datetime",
     ];
 
     public function getKmSincePmsAttribute(): int
@@ -64,10 +71,19 @@ class Vehicle extends Model
 
     public function getPmsBandAttribute(): string
     {
+        $threshold = (int) ($this->pms_threshold ?? 0);
+        if ($threshold <= 0) return 'good';
+        $ratio = (float) (PmsSetting::query()->where('is_default', true)->value('warning_ratio') ?? 0.8);
+        if ($ratio <= 0 || $ratio > 1) $ratio = 0.8;
         $km = $this->km_since_pms;
-        if ($km < 8000) return 'good';
-        if ($km < 10000) return 'warning';
+        if ($km < (int) ($threshold * $ratio)) return 'good';
+        if ($km < $threshold) return 'warning';
         return 'overdue';
+    }
+
+    public function positions(): HasMany
+    {
+        return $this->hasMany(VehiclePosition::class)->orderByDesc('recorded_at');
     }
 
     public function dispatchEntries(): HasMany

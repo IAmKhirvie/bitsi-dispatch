@@ -62,6 +62,14 @@ class DispatchBoard extends Component
     public bool $showAddDialog = false;
     public bool $showEditDialog = false;
 
+    // Status transition (KMR prompt) modal
+    public bool $showStatusDialog = false;
+    public ?int $statusEntryId = null;
+    public string $statusTo = '';
+    public ?int $statusKmr = null;
+    public ?int $statusKmrSuggested = null;
+    public string $statusEntryLabel = '';
+
     public function mount(string $date = ''): void
     {
         $this->date = $date ?: now()->toDateString();
@@ -174,6 +182,31 @@ class DispatchBoard extends Component
         } catch (\InvalidArgumentException $e) {
             session()->flash('dispatch_error', $e->getMessage());
         }
+    }
+
+    public function openStatusDialog(int $entryId, string $to): void
+    {
+        $entry = DispatchEntry::with('vehicle')->findOrFail($entryId);
+        $this->statusEntryId = $entry->id;
+        $this->statusTo = $to;
+        $this->statusKmrSuggested = $to === 'departed'
+            ? ($entry->vehicle?->current_kmr ?? null)
+            : ($entry->kmr_at_dispatch ?? $entry->vehicle?->current_kmr ?? null);
+        $this->statusKmr = $this->statusKmrSuggested;
+        $this->statusEntryLabel = trim(($entry->tripCode->code ?? '') . ' · ' . ($entry->bus_number ?? ''), ' ·');
+        $this->showStatusDialog = true;
+    }
+
+    public function confirmStatusDialog(): void
+    {
+        if (!$this->statusEntryId || !$this->statusTo) return;
+        $this->transitionStatus($this->statusEntryId, $this->statusTo, $this->statusKmr ?: null);
+        $this->showStatusDialog = false;
+        $this->statusEntryId = null;
+        $this->statusTo = '';
+        $this->statusKmr = null;
+        $this->statusKmrSuggested = null;
+        $this->statusEntryLabel = '';
     }
 
     public function createDispatchDay(): void

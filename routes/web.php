@@ -49,6 +49,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // History
     Route::get('history', [HistoryController::class, 'index'])->name('history.index');
 
+    // Fleet GPS Map
+    Route::get('fleet-map', \App\Livewire\FleetMap::class)->name('fleet-map');
+
     // Admin routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', UserController::class);

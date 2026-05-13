@@ -157,14 +157,51 @@
                                         <div class="truncate text-muted-foreground">{{ $entry->driver2->name ?? '' }}</div>
                                     </td>
                                     <td class="px-2 py-1.5">
-                                        <select
-                                            wire:change="transitionStatus({{ $entry->id }}, $event.target.value)"
-                                            class="w-full rounded border border-input px-1.5 py-1 text-xs font-medium shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring {{ $statusClasses[$entryStatus] ?? $statusClasses['scheduled'] }}"
-                                        >
-                                            @foreach ($statusOptions as $s)
-                                                <option value="{{ $s }}" @selected($entryStatus === $s)>{{ ucwords(str_replace('_', ' ', $s)) }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div class="flex flex-col gap-1">
+                                            <span class="inline-flex w-fit items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide {{ $statusClasses[$entryStatus] ?? $statusClasses['scheduled'] }}">
+                                                {{ ucwords(str_replace('_', ' ', $entryStatus)) }}
+                                            </span>
+                                            <div class="flex flex-wrap gap-1">
+                                                @if (in_array($entryStatus, ['scheduled', 'delayed']))
+                                                    <button
+                                                        type="button"
+                                                        wire:click="openStatusDialog({{ $entry->id }}, 'departed')"
+                                                        class="rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-blue-700"
+                                                        title="Mark departed (stamps time + KMR out)"
+                                                    >Depart</button>
+                                                @endif
+                                                @if (in_array($entryStatus, ['departed', 'on_route', 'delayed']))
+                                                    <button
+                                                        type="button"
+                                                        wire:click="openStatusDialog({{ $entry->id }}, 'arrived')"
+                                                        class="rounded bg-green-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-green-700"
+                                                        title="Mark arrived (stamps time + KMR in)"
+                                                    >Arrive</button>
+                                                @endif
+                                                @if (in_array($entryStatus, ['scheduled', 'departed', 'on_route']))
+                                                    <button
+                                                        type="button"
+                                                        wire:click="transitionStatus({{ $entry->id }}, 'delayed')"
+                                                        class="rounded bg-orange-500 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-orange-600"
+                                                    >Delay</button>
+                                                @endif
+                                                @if (in_array($entryStatus, ['scheduled', 'departed', 'delayed']))
+                                                    <button
+                                                        type="button"
+                                                        wire:click="transitionStatus({{ $entry->id }}, 'cancelled')"
+                                                        wire:confirm="Cancel this dispatch entry?"
+                                                        class="rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-red-700"
+                                                    >Cancel</button>
+                                                @endif
+                                                @if ($entryStatus === 'cancelled')
+                                                    <button
+                                                        type="button"
+                                                        wire:click="transitionStatus({{ $entry->id }}, 'scheduled')"
+                                                        class="rounded bg-gray-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-gray-700"
+                                                    >Reschedule</button>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </td>
                                     <td class="px-2 py-1.5 truncate" title="{{ $entry->remarks ?? '' }}">{{ $entry->remarks ?? '--' }}</td>
                                     <td class="px-2 py-1.5">
@@ -254,6 +291,57 @@
                     >
                         Add Entry
                     </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Status Transition (KMR) Modal --}}
+    <div
+        x-data
+        x-show="$wire.showStatusDialog"
+        x-transition.opacity
+        class="fixed inset-0 z-50 overflow-y-auto"
+        style="display: none;"
+    >
+        <div class="fixed inset-0 bg-black/50" x-on:click="$wire.showStatusDialog = false"></div>
+        <div class="relative mx-auto my-16 max-w-sm rounded-lg bg-background p-6 shadow-lg border">
+            <div class="mb-4">
+                <h2 class="text-lg font-semibold">
+                    {{ $statusTo === 'departed' ? 'Mark Departed' : 'Mark Arrived' }}
+                </h2>
+                <p class="text-sm text-muted-foreground">
+                    {{ $statusEntryLabel ?: 'Dispatch entry' }} — stamps {{ $statusTo === 'departed' ? 'departure' : 'arrival' }} time now.
+                </p>
+            </div>
+            <form wire:submit.prevent="confirmStatusDialog" class="space-y-4">
+                <div>
+                    <label class="mb-1 block text-sm font-medium">
+                        KMR {{ $statusTo === 'departed' ? 'Out' : 'In' }} reading
+                    </label>
+                    <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        wire:model="statusKmr"
+                        placeholder="{{ $statusKmrSuggested ?? '—' }}"
+                        class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        autofocus
+                    />
+                    @if ($statusKmrSuggested)
+                        <p class="mt-1 text-xs text-muted-foreground">Current vehicle KMR: {{ number_format($statusKmrSuggested) }}</p>
+                    @endif
+                </div>
+                <div class="flex justify-end gap-2 pt-1">
+                    <button
+                        type="button"
+                        x-on:click="$wire.showStatusDialog = false"
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+                    >Cancel</button>
+                    <button
+                        type="submit"
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
+                    >Confirm</button>
                 </div>
             </form>
         </div>
