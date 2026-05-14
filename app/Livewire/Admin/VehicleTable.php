@@ -74,7 +74,8 @@ class VehicleTable extends Component
             ->when($this->search, fn ($q) => $q->where(function ($q) {
                 $q->where('bus_number', 'like', "%{$this->search}%")
                   ->orWhere('brand', 'like', "%{$this->search}%")
-                  ->orWhere('plate_number', 'like', "%{$this->search}%");
+                  ->orWhere('plate_number', 'like', "%{$this->search}%")
+                  ->orWhere('current_location', 'like', "%{$this->search}%");
             }))
             ->when($this->statusFilter, fn ($q) => $q->where('status', $this->statusFilter))
             ->tap(fn ($query) => $this->applyTableSort($query))

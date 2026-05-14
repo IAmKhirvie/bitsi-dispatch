@@ -19,6 +19,7 @@ class DispatchBoard extends Component
     use WithPagination;
 
     public string $date;
+    public string $search = '';
     public int $perPage = 20;
     public array $perPageOptions = [5, 10, 15, 20, 30, 40, 50, 100];
     public string $sortField = 'sort_order';
@@ -84,9 +85,19 @@ class DispatchBoard extends Component
     public ?int $statusKmrSuggested = null;
     public string $statusEntryLabel = '';
 
+    protected $queryString = [
+        'search' => ['except' => ''],
+    ];
+
     public function mount(string $date = ''): void
     {
         $this->date = $date ?: now()->toDateString();
+        $this->search = request('search', '');
+    }
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
     }
 
     public function updatedDate(): void
@@ -377,6 +388,16 @@ class DispatchBoard extends Component
                 ->leftJoin('trip_codes as sort_trip_codes', 'dispatch_entries.trip_code_id', '=', 'sort_trip_codes.id')
                 ->leftJoin('drivers as sort_drivers', 'dispatch_entries.driver_id', '=', 'sort_drivers.id')
                 ->select('dispatch_entries.*')
+                ->when($this->search, fn ($query) => $query->where(function ($query) {
+                    $query->where('dispatch_entries.bus_number', 'like', "%{$this->search}%")
+                        ->orWhere('dispatch_entries.brand', 'like', "%{$this->search}%")
+                        ->orWhere('dispatch_entries.route', 'like', "%{$this->search}%")
+                        ->orWhere('dispatch_entries.departure_terminal', 'like', "%{$this->search}%")
+                        ->orWhere('dispatch_entries.arrival_terminal', 'like', "%{$this->search}%")
+                        ->orWhere('dispatch_entries.remarks', 'like', "%{$this->search}%")
+                        ->orWhere('sort_trip_codes.code', 'like', "%{$this->search}%")
+                        ->orWhere('sort_drivers.name', 'like', "%{$this->search}%");
+                }))
                 ->tap(fn ($query) => match ($this->sortField) {
                     'trip' => $query->orderBy('sort_trip_codes.code', $this->sortDirection),
                     'driver' => $query->orderBy('sort_drivers.name', $this->sortDirection),

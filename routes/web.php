@@ -12,6 +12,7 @@ use App\Http\Controllers\Dispatch\DispatchDayController;
 use App\Http\Controllers\Dispatch\DispatchEntryController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\Report\ReportController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,6 +22,7 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::get('search', SearchController::class)->name('search.index');
 
     // Dispatch
     Route::get('dispatch', [DispatchDayController::class, 'index'])->name('dispatch.index');
