@@ -99,3 +99,28 @@ html {
         background-color: hsl(var(--background));
     }
 }
+
+@layer components {
+    .group[data-collapsible="icon"] [data-sidebar="menu-button"] {
+        width: 100% !important;
+        padding: 0.5rem !important;
+        justify-content: flex-start;
+    }
+
+    .group[data-collapsible="icon"] [data-sidebar="menu-button"][data-size="lg"] {
+        height: 3rem !important;
+    }
+
+    .group[data-collapsible="icon"] [data-sidebar="menu-button"][data-size="default"] {
+        height: 2rem !important;
+    }
+
+    .group[data-collapsible="icon"] [data-sidebar="menu-button"] > :not(:first-child) {
+        display: none !important;
+    }
+
+    .group[data-collapsible="icon"] [data-sidebar="group-label"] {
+        margin-top: 0 !important;
+        opacity: 0 !important;
+    }
+}
