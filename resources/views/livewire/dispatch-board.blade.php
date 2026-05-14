@@ -10,6 +10,15 @@
         ];
         $statusOptions = ['scheduled', 'departed', 'on_route', 'delayed', 'cancelled', 'arrived'];
         $sortHeaderClass = 'inline-flex w-full items-center gap-1 text-left font-medium text-muted-foreground transition-colors hover:text-foreground';
+        $sortIcon = function (string $field) use ($sortField, $sortDirection) {
+            if ($sortField !== $field) {
+                return '';
+            }
+
+            return $sortDirection === 'asc'
+                ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+        };
     @endphp
 
     {{-- Header with date picker --}}
@@ -93,13 +102,27 @@
                         <span class="ml-2 text-sm font-normal text-muted-foreground">({{ $entries->total() }} entries)</span>
                     </h3>
                 </div>
-                <button
-                    wire:click="$set('showAddDialog', true)"
-                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Add Entry
-                </button>
+                <div class="flex flex-wrap items-center justify-end gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-medium text-muted-foreground">Export:</span>
+                        <a href="{{ route('reports.export-excel', $dispatchDay->service_date, false) }}" class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground" title="Export daily Excel">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-3.5 w-3.5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
+                            Excel
+                        </a>
+                        <a href="{{ route('reports.export-pdf', $dispatchDay->service_date, false) }}" class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground" title="Export daily PDF">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-3.5 w-3.5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            PDF
+                        </a>
+                    </div>
+                    <button
+                        type="button"
+                        wire:click="$set('showAddDialog', true)"
+                        class="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Entry
+                    </button>
+                </div>
             </div>
 
             @if (session('dispatch_error'))
@@ -116,73 +139,55 @@
                                 <th class="w-8 px-2 py-2 text-left">
                                     <button type="button" wire:click="sortBy('sort_order')" class="{{ $sortHeaderClass }}">
                                         #
-                                        @if ($sortField === 'sort_order')
-                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
-                                        @endif
+                                        {!! $sortIcon('sort_order') !!}
                                     </button>
                                 </th>
                                 <th class="w-20 px-2 py-2 text-left">
                                     <button type="button" wire:click="sortBy('trip')" class="{{ $sortHeaderClass }}">
                                         Trip
-                                        @if ($sortField === 'trip')
-                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
-                                        @endif
+                                        {!! $sortIcon('trip') !!}
                                     </button>
                                 </th>
                                 <th class="w-24 px-2 py-2 text-left">
                                     <button type="button" wire:click="sortBy('bus_number')" class="{{ $sortHeaderClass }}">
                                         Bus
-                                        @if ($sortField === 'bus_number')
-                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
-                                        @endif
+                                        {!! $sortIcon('bus_number') !!}
                                     </button>
                                 </th>
                                 <th class="w-12 px-2 py-2 text-left">
                                     <button type="button" wire:click="sortBy('direction')" class="{{ $sortHeaderClass }}">
                                         Dir
-                                        @if ($sortField === 'direction')
-                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
-                                        @endif
+                                        {!! $sortIcon('direction') !!}
                                     </button>
                                 </th>
                                 <th class="w-36 px-2 py-2 text-left">
                                     <button type="button" wire:click="sortBy('route')" class="{{ $sortHeaderClass }}">
                                         Route
-                                        @if ($sortField === 'route')
-                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
-                                        @endif
+                                        {!! $sortIcon('route') !!}
                                     </button>
                                 </th>
                                 <th class="w-24 px-2 py-2 text-left">
                                     <button type="button" wire:click="sortBy('scheduled_departure')" class="{{ $sortHeaderClass }}">
                                         Times
-                                        @if ($sortField === 'scheduled_departure')
-                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
-                                        @endif
+                                        {!! $sortIcon('scheduled_departure') !!}
                                     </button>
                                 </th>
                                 <th class="w-40 px-2 py-2 text-left">
                                     <button type="button" wire:click="sortBy('driver')" class="{{ $sortHeaderClass }}">
                                         Drivers
-                                        @if ($sortField === 'driver')
-                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
-                                        @endif
+                                        {!! $sortIcon('driver') !!}
                                     </button>
                                 </th>
                                 <th class="w-48 px-2 py-2 text-left">
                                     <button type="button" wire:click="sortBy('status')" class="{{ $sortHeaderClass }}">
                                         Status
-                                        @if ($sortField === 'status')
-                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
-                                        @endif
+                                        {!! $sortIcon('status') !!}
                                     </button>
                                 </th>
                                 <th class="w-56 px-2 py-2 text-left">
                                     <button type="button" wire:click="sortBy('remarks')" class="{{ $sortHeaderClass }}">
                                         Remarks
-                                        @if ($sortField === 'remarks')
-                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
-                                        @endif
+                                        {!! $sortIcon('remarks') !!}
                                     </button>
                                 </th>
                                 <th class="w-16 px-2 py-2 text-left font-medium text-muted-foreground">Actions</th>
