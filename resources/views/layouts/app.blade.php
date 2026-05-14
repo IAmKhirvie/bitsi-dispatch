@@ -92,8 +92,8 @@
                 class="relative flex min-h-svh flex-1 flex-col bg-background peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow"
             >
                 {{-- Header with sidebar trigger and breadcrumbs --}}
-                <header class="flex h-16 shrink-0 items-center gap-3 border-b border-sidebar-border/70 px-6 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 md:px-4">
-                    <div class="flex min-w-0 flex-1 items-center gap-3">
+                <header class="relative flex h-16 shrink-0 items-center justify-center border-b border-sidebar-border/70 px-6 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 md:px-4">
+                    <div class="absolute left-6 flex min-w-0 items-center gap-3 md:left-4">
                         {{-- Sidebar Trigger --}}
                         <button
                             x-on:click="toggleSidebar()"
@@ -102,34 +102,33 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
                             <span class="sr-only">Toggle Sidebar</span>
                         </button>
+                    </div>
 
-                        <form action="{{ route('search.index') }}" method="GET" class="flex min-w-[260px] max-w-2xl flex-1 items-center">
-                            <div class="flex h-9 w-full overflow-hidden rounded-md border border-input bg-background shadow-sm focus-within:ring-1 focus-within:ring-ring">
-                                <div class="relative min-w-0 flex-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                                    <input
-                                        type="search"
-                                        name="q"
-                                        value="{{ request('q', request('search', '')) }}"
-                                        placeholder="Search"
-                                        class="h-full w-full border-0 bg-transparent pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground"
-                                    />
-                                </div>
-                                <select
-                                    name="category"
-                                    aria-label="Search category"
-                                    class="w-32 border-0 border-l border-input bg-muted/40 px-2 text-xs font-medium outline-none"
-                                >
-                                    @foreach ($searchCategories as $value => $label)
-                                        <option value="{{ $value }}" @selected($searchCategory === $value)>{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="inline-flex h-full w-10 items-center justify-center border-l border-input hover:bg-accent" title="Search">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                                </button>
+                    <form action="{{ route('search.index') }}" method="GET" class="flex w-full max-w-2xl items-center px-12 md:px-16">
+                        <div class="flex h-9 w-full overflow-hidden rounded-md border border-input bg-background shadow-sm focus-within:ring-1 focus-within:ring-ring">
+                            <div class="relative min-w-0 flex-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                <input
+                                    type="search"
+                                    name="q"
+                                    value="{{ request('q', request('search', '')) }}"
+                                    placeholder="Search"
+                                    class="h-full w-full border-0 bg-transparent pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground"
+                                />
                             </div>
-                        </form>
+                            <select
+                                name="category"
+                                aria-label="Search category"
+                                class="w-32 border-0 border-l border-input bg-muted/40 px-2 text-xs font-medium outline-none"
+                            >
+                                @foreach ($searchCategories as $value => $label)
+                                    <option value="{{ $value }}" @selected($searchCategory === $value)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </form>
 
+                    <div class="absolute right-6 flex items-center md:right-4">
                         {{-- Breadcrumbs --}}
                         @isset($breadcrumbs)
                             <nav aria-label="breadcrumb">
