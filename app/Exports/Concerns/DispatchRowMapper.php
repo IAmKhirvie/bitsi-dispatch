@@ -6,8 +6,8 @@ use App\Models\DispatchEntry;
 use Carbon\Carbon;
 
 /**
- * Canonical column layout for all dispatch-based Excel exports.
- * Matches the reference TRIP SCHEDULE.xlsx columns + KMR / dispatcher additions.
+ * Canonical column layout for dispatch-based Excel exports.
+ * Follows the reference TRIP SCHEDULE.xlsx schedule columns, with dispatch-only fields appended.
  */
 trait DispatchRowMapper
 {
@@ -15,54 +15,79 @@ trait DispatchRowMapper
     {
         return [
             'Date',
-            'Trip Code',
             'Service Class',
-            'Route',
-            'Direction',
+            'Trip Code',
+            'Seats Available',
+            'Origin',
+            'Destination',
+            'Departure Time',
+            'Status',
+            'Action',
+            'Seating Capacity',
             'Bus No.',
             'Brand',
-            'Seating',
             'Driver 1',
             'Driver 2',
             'Dispatcher',
-            'Scheduled',
-            'Departed',
-            'Arrived',
-            'KMR Out',
-            'KMR In',
-            'KM Run',
-            'Status',
             'Remarks',
+        ];
+    }
+
+    public function dispatchColumnWidths(): array
+    {
+        return [
+            'A' => 12,
+            'B' => 18,
+            'C' => 14,
+            'D' => 16,
+            'E' => 18,
+            'F' => 18,
+            'G' => 15,
+            'H' => 14,
+            'I' => 10,
+            'J' => 16,
+            'K' => 12,
+            'L' => 14,
+            'M' => 22,
+            'N' => 22,
+            'O' => 22,
+            'P' => 30,
         ];
     }
 
     public function dispatchRow(DispatchEntry $entry): array
     {
-        $kmRun = ($entry->kmr_at_dispatch && $entry->kmr_at_arrival)
-            ? max(0, $entry->kmr_at_arrival - $entry->kmr_at_dispatch)
-            : null;
-
         return [
             optional($entry->dispatchDay)->service_date?->format('Y-m-d'),
+            $this->enumLabel($entry->bus_type),
             $entry->tripCode?->code,
-            $entry->bus_type,
-            $entry->route,
-            $entry->direction instanceof \BackedEnum ? $entry->direction->value : $entry->direction,
+            $entry->seating_capacity ?? $entry->tripCode?->default_seating_capacity,
+            $entry->departure_terminal,
+            $entry->arrival_terminal,
+            $this->fmtTime($entry->scheduled_departure),
+            $this->enumLabel($entry->status),
+            '',
+            $entry->seating_capacity,
             $entry->bus_number,
             $entry->brand,
-            $entry->seating_capacity,
             $entry->driver?->name,
             $entry->driver2?->name,
             $entry->dispatcher?->name,
-            $this->fmtTime($entry->scheduled_departure),
-            $this->fmtTime($entry->actual_departure),
-            $this->fmtTime($entry->actual_arrival),
-            $entry->kmr_at_dispatch,
-            $entry->kmr_at_arrival,
-            $kmRun,
-            $entry->status instanceof \BackedEnum ? $entry->status->value : $entry->status,
             $entry->remarks,
         ];
+    }
+
+    protected function enumLabel($value): ?string
+    {
+        if ($value instanceof \UnitEnum && method_exists($value, 'label')) {
+            return $value->label();
+        }
+
+        if ($value instanceof \BackedEnum) {
+            return ucwords(str_replace('_', ' ', $value->value));
+        }
+
+        return $value ? ucwords(str_replace('_', ' ', (string) $value)) : null;
     }
 
     protected function fmtTime($value): ?string

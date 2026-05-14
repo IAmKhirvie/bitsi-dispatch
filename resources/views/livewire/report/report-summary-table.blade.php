@@ -1,14 +1,23 @@
 <div>
     {{-- Report Type Tabs --}}
-    <div class="flex items-center gap-1 rounded-lg bg-muted p-1 w-fit">
-        @foreach (['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly'] as $type => $label)
-            <button
-                wire:click="$set('reportType', '{{ $type }}')"
-                class="rounded-md px-4 py-2 text-sm font-medium transition-colors {{ $reportType === $type ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground' }}"
-            >
-                {{ $label }}
-            </button>
-        @endforeach
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex w-fit items-center gap-1 rounded-lg bg-muted p-1">
+            @foreach (['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly'] as $type => $label)
+                <button
+                    wire:click="$set('reportType', '{{ $type }}')"
+                    class="rounded-md px-4 py-2 text-sm font-medium transition-colors {{ $reportType === $type ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground' }}"
+                >
+                    {{ $label }}
+                </button>
+            @endforeach
+        </div>
+
+        <x-schedule-export-buttons
+            period-route="reports.export-schedule-period"
+            custom-route="reports.export-schedule-custom"
+            :date-from="$dateFrom"
+            :date-to="$dateTo"
+        />
     </div>
 
     {{-- Date Range Filter --}}

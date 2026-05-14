@@ -47,10 +47,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/export/pdf/{date}', [ReportController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/export/weekly-excel', [ReportController::class, 'exportWeeklyExcel'])->name('export-weekly-excel');
         Route::get('/export/monthly-excel', [ReportController::class, 'exportMonthlyExcel'])->name('export-monthly-excel');
+        Route::get('/export/schedule/{period}', [ReportController::class, 'exportSchedulePeriod'])->name('export-schedule-period');
+        Route::get('/export/schedule', [ReportController::class, 'exportScheduleCustom'])->name('export-schedule-custom');
     });
 
     // History
     Route::get('history', [HistoryController::class, 'index'])->name('history.index');
+    Route::get('history/export/{period}', [HistoryController::class, 'exportPeriod'])->name('history.export-period');
+    Route::get('history/export', [HistoryController::class, 'exportCustom'])->name('history.export-custom');
 
     // Fleet GPS Map
     Route::get('fleet-map', fn () => view('fleet-map.index'))->name('fleet-map');

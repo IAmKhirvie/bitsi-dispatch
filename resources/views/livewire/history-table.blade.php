@@ -1,7 +1,23 @@
 <div class="flex h-full flex-1 flex-col gap-4 p-4">
-    <div>
-        <h1 class="text-2xl font-bold">Dispatch History</h1>
-        <p class="text-sm text-muted-foreground">Search and filter past dispatch entries</p>
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold">Dispatch History</h1>
+            <p class="text-sm text-muted-foreground">Search and filter past dispatch entries</p>
+        </div>
+
+        <x-schedule-export-buttons
+            period-route="history.export-period"
+            custom-route="history.export-custom"
+            :date-from="$dateFrom"
+            :date-to="$dateTo"
+            :filtered-query="[
+                'date_from' => $dateFrom,
+                'date_to' => $dateTo,
+                'search' => $search,
+                'direction' => $direction,
+                'status' => $status,
+            ]"
+        />
     </div>
 
     @php

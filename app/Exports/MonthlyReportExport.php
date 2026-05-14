@@ -6,14 +6,14 @@ use App\Exports\Concerns\DispatchRowMapper;
 use App\Models\DispatchEntry;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class MonthlyReportExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles, WithTitle
+class MonthlyReportExport implements FromCollection, WithHeadings, WithMapping, WithColumnWidths, WithStyles, WithTitle
 {
     use DispatchRowMapper;
 
@@ -47,6 +47,11 @@ class MonthlyReportExport implements FromCollection, WithHeadings, WithMapping, 
     public function title(): string
     {
         return "Month {$this->dateFrom} to {$this->dateTo}";
+    }
+
+    public function columnWidths(): array
+    {
+        return $this->dispatchColumnWidths();
     }
 
     public function styles(Worksheet $sheet): array

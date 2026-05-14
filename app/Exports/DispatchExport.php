@@ -5,14 +5,14 @@ namespace App\Exports;
 use App\Exports\Concerns\DispatchRowMapper;
 use App\Models\DispatchDay;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DispatchExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles, WithTitle
+class DispatchExport implements FromCollection, WithHeadings, WithMapping, WithColumnWidths, WithStyles, WithTitle
 {
     use DispatchRowMapper;
 
@@ -39,6 +39,11 @@ class DispatchExport implements FromCollection, WithHeadings, WithMapping, Shoul
     public function title(): string
     {
         return $this->dispatchDay->service_date?->format('Y-m-d') ?? 'Dispatch';
+    }
+
+    public function columnWidths(): array
+    {
+        return $this->dispatchColumnWidths();
     }
 
     public function styles(Worksheet $sheet): array
