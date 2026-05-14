@@ -34,7 +34,7 @@ watch([search, statusFilter], () => {
             preserveState: true,
             preserveScroll: true,
         });
-    }, 300);
+    }, 150);
 });
 
 function deleteVehicle(vehicle: Vehicle) {
@@ -65,7 +65,7 @@ const vehicleStatusClasses: Record<string, string> = {
                 <div class="flex items-center gap-2">
                     <ExportButtons entity="vehicles" />
                     <Button as-child>
-                        <Link href="/admin/vehicles/create">
+                        <Link href="/admin/vehicles/create" prefetch>
                             <Plus class="mr-2 h-4 w-4" />
                             Add Vehicle
                         </Link>
@@ -141,7 +141,7 @@ const vehicleStatusClasses: Record<string, string> = {
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-2">
                                             <Button as-child variant="ghost" size="icon" class="h-8 w-8">
-                                                <Link :href="`/admin/vehicles/${vehicle.id}/edit`">
+                                                <Link :href="`/admin/vehicles/${vehicle.id}/edit`" prefetch>
                                                     <Pencil class="h-4 w-4" />
                                                 </Link>
                                             </Button>

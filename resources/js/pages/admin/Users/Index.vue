@@ -34,7 +34,7 @@ watch([search, roleFilter], () => {
             preserveState: true,
             preserveScroll: true,
         });
-    }, 300);
+    }, 150);
 });
 
 function deleteUser(user: User) {
@@ -67,7 +67,7 @@ const roleClasses: Record<string, string> = {
                 <div class="flex items-center gap-2">
                     <ExportButtons entity="users" />
                     <Button as-child>
-                        <Link href="/admin/users/create">
+                        <Link href="/admin/users/create" prefetch>
                             <Plus class="mr-2 h-4 w-4" />
                             Add User
                         </Link>
@@ -127,7 +127,7 @@ const roleClasses: Record<string, string> = {
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-2">
                                             <Button as-child variant="ghost" size="icon" class="h-8 w-8">
-                                                <Link :href="`/admin/users/${user.id}/edit`">
+                                                <Link :href="`/admin/users/${user.id}/edit`" prefetch>
                                                     <Pencil class="h-4 w-4" />
                                                 </Link>
                                             </Button>

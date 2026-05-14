@@ -34,19 +34,38 @@ function initializeToday() {
 function markAsLate(attendance: any) {
     const minutes = prompt('Enter minutes late:', '15');
     if (minutes && !isNaN(Number(minutes))) {
+        // Optimistic UI update - instantly show as late
+        const previousStatus = attendance.status;
+        const previousMinutes = attendance.minutes_late;
+        attendance.status = 'late';
+        attendance.minutes_late = Number(minutes);
+        
         router.post('/admin/attendance/mark-late', {
             driver_id: attendance.driver_id,
             dispatch_entry_id: attendance.dispatch_entry_id,
             minutes_late: Number(minutes),
+        }, {
+            onError: () => {
+                // Revert on error
+                attendance.status = previousStatus;
+                attendance.minutes_late = previousMinutes;
+            },
         });
     }
 }
 
 function markAsAbsent(attendance: any) {
     if (confirm(`Mark ${attendance.driver.name} as absent?`)) {
+        const previousStatus = attendance.status;
+        attendance.status = 'absent';
+        
         router.post('/admin/attendance/mark-absent', {
             driver_id: attendance.driver_id,
             dispatch_entry_id: attendance.dispatch_entry_id,
+        }, {
+            onError: () => {
+                attendance.status = previousStatus;
+            },
         });
     }
 }
@@ -54,9 +73,16 @@ function markAsAbsent(attendance: any) {
 function overrideStatus(attendance: any) {
     const newStatus = prompt('Enter new status (on_time/late/absent/excused):');
     if (newStatus && ['on_time', 'late', 'absent', 'excused'].includes(newStatus)) {
+        const previousStatus = attendance.status;
+        attendance.status = newStatus;
+        
         router.post('/admin/attendance/override', {
             attendance_id: attendance.id,
             status: newStatus,
+        }, {
+            onError: () => {
+                attendance.status = previousStatus;
+            },
         });
     }
 }
@@ -102,7 +128,7 @@ const statusConfig: Record<string, { label: string; badge: string; icon: any }> 
                 </div>
                 <div class="flex items-center gap-2">
                     <ExportButtons entity="attendance" />
-                    <Link href="/admin/attendance/settings">
+                    <Link href="/admin/attendance/settings" prefetch>
                         <Button variant="outline" size="sm">
                             <Settings class="mr-2 h-4 w-4" />
                             Settings

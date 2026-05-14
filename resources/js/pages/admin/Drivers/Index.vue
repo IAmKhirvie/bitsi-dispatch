@@ -58,7 +58,7 @@ let searchTimeout: ReturnType<typeof setTimeout>;
 
 watch(search, () => {
     clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(applyFilters, 300);
+    searchTimeout = setTimeout(applyFilters, 150);
 });
 
 watch(statusFilter, applyFilters);
@@ -80,11 +80,21 @@ function deleteDriver(driver: Driver) {
 }
 
 function setStatus(driver: Driver, status: DriverStatus) {
+    if (driver.status === status) return;
+    
+    // Optimistic UI update - instantly update status for immediate feedback
+    const previousStatus = driver.status;
+    driver.status = status;
+    
     router.patch(`/admin/drivers/${driver.id}/update-status`, {
         status,
     }, {
         preserveState: true,
         preserveScroll: true,
+        onError: () => {
+            // Revert on error
+            driver.status = previousStatus;
+        },
     });
 }
 
@@ -189,7 +199,7 @@ const allStatuses: DriverStatus[] = ['available', 'dispatched', 'on_route', 'on_
                 <div class="flex items-center gap-2">
                     <ExportButtons entity="drivers" />
                     <Button as-child>
-                        <Link href="/admin/drivers/create">
+                        <Link href="/admin/drivers/create" prefetch>
                             <Plus class="mr-2 h-4 w-4" />
                             Add Driver
                         </Link>
@@ -306,7 +316,7 @@ const allStatuses: DriverStatus[] = ['available', 'dispatched', 'on_route', 'on_
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-2">
                                             <Button as-child variant="ghost" size="icon" class="h-8 w-8">
-                                                <Link :href="`/admin/drivers/${driver.id}/edit`">
+                                                <Link :href="`/admin/drivers/${driver.id}/edit`" prefetch>
                                                     <Pencil class="h-4 w-4" />
                                                 </Link>
                                             </Button>

@@ -208,9 +208,18 @@ const statusOptions = ['scheduled', 'departed', 'on_route', 'delayed', 'arrived'
 
 function setEntryStatus(entry: DispatchEntry, status: string) {
     if (!props.dispatchDay || entry.status === status) return;
+
+    // Optimistic UI update - instantly show new status for immediate feedback
+    const previousStatus = entry.status;
+    entry.status = status;
+
     router.patch(`/dispatch/${props.dispatchDay.id}/entries/${entry.id}/status`, { status }, {
         preserveState: true,
         preserveScroll: true,
+        onError: () => {
+            // Revert on error
+            entry.status = previousStatus;
+        },
     });
 }
 

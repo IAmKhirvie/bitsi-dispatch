@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { type BreadcrumbItem, type PaginatedData, type TripCode } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Plus, Pencil, Trash2, Search } from 'lucide-vue-next';
+import { Plus, Pencil, Trash2, Search, Check, X } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -34,8 +34,22 @@ watch([search, directionFilter], () => {
             preserveState: true,
             preserveScroll: true,
         });
-    }, 300);
+    }, 150);
 });
+
+function toggleStatus(tripCode: TripCode) {
+    // Optimistic UI update - instantly toggle for immediate feedback
+    tripCode.is_active = !tripCode.is_active;
+    
+    router.patch(`/admin/trip-codes/${tripCode.id}/toggle-active`, {}, {
+        preserveScroll: true,
+        preserveState: true,
+        onError: () => {
+            // Revert on error
+            tripCode.is_active = !tripCode.is_active;
+        },
+    });
+}
 
 function deleteTripCode(tripCode: TripCode) {
     if (confirm(`Are you sure you want to delete trip code ${tripCode.code}?`)) {
@@ -57,7 +71,7 @@ function deleteTripCode(tripCode: TripCode) {
                 <div class="flex items-center gap-2">
                     <ExportButtons entity="trip-codes" />
                     <Button as-child>
-                        <Link href="/admin/trip-codes/create">
+                        <Link href="/admin/trip-codes/create" prefetch>
                             <Plus class="mr-2 h-4 w-4" />
                             Add Trip Code
                         </Link>
@@ -112,15 +126,33 @@ function deleteTripCode(tripCode: TripCode) {
                                         </span>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
-                                            :class="tc.is_active ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'">
-                                            {{ tc.is_active ? 'Active' : 'Inactive' }}
-                                        </span>
+                                        <div class="flex items-center gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                class="h-7 w-7 rounded-full"
+                                                :class="tc.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300' : 'text-muted-foreground hover:text-green-600'"
+                                                :title="tc.is_active ? 'Active (click to deactivate)' : 'Set Active'"
+                                                @click="!tc.is_active && toggleStatus(tc)"
+                                            >
+                                                <Check class="h-3.5 w-3.5" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                class="h-7 w-7 rounded-full"
+                                                :class="!tc.is_active ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-300' : 'text-muted-foreground hover:text-red-600'"
+                                                :title="!tc.is_active ? 'Inactive (click to activate)' : 'Set Inactive'"
+                                                @click="tc.is_active && toggleStatus(tc)"
+                                            >
+                                                <X class="h-3.5 w-3.5" />
+                                            </Button>
+                                        </div>
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-2">
                                             <Button as-child variant="ghost" size="icon" class="h-8 w-8">
-                                                <Link :href="`/admin/trip-codes/${tc.id}/edit`">
+                                                <Link :href="`/admin/trip-codes/${tc.id}/edit`" prefetch>
                                                     <Pencil class="h-4 w-4" />
                                                 </Link>
                                             </Button>
