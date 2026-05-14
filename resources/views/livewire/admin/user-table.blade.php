@@ -52,11 +52,11 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Email</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Role</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Phone</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+                            <x-sortable-th field="name" label="Name" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="email" label="Email" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="role" label="Role" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="phone" label="Phone" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="is_active" label="Status" :active="$sortField" :direction="$sortDirection" />
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                         </tr>
                     </thead>
@@ -106,10 +106,5 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
-    @if ($users->hasPages())
-        <div class="mt-2">
-            {{ $users->links() }}
-        </div>
-    @endif
+    <x-table-pagination :paginator="$users" :options="$perPageOptions" />
 </div>

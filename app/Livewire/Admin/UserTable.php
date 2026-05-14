@@ -2,16 +2,24 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\HasTableControls;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class UserTable extends Component
 {
+    use HasTableControls;
     use WithPagination;
 
     public string $search = '';
     public string $roleFilter = '';
+    public int $perPage = 15;
+    public array $perPageOptions = [5, 10, 15, 20, 30, 40, 50, 100];
+    public string $sortField = 'name';
+    public string $sortDirection = 'asc';
+
+    protected array $sortableFields = ['name', 'email', 'role', 'phone', 'is_active', 'created_at'];
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -48,8 +56,8 @@ class UserTable extends Component
                   ->orWhere('email', 'like', "%{$this->search}%");
             }))
             ->when($this->roleFilter, fn ($q) => $q->where('role', $this->roleFilter))
-            ->latest()
-            ->paginate(15);
+            ->tap(fn ($query) => $this->applyTableSort($query))
+            ->paginate($this->perPage);
 
         return view('livewire.admin.user-table', compact('users'));
     }

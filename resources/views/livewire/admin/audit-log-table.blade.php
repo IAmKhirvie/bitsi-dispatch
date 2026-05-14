@@ -80,12 +80,12 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Date/Time</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">User</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Action</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Model</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Record ID</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">IP Address</th>
+                            <x-sortable-th field="created_at" label="Date/Time" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="user" label="User" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="action" label="Action" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="auditable_type" label="Model" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="auditable_id" label="Record ID" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="ip_address" label="IP Address" :active="$sortField" :direction="$sortDirection" />
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Changes</th>
                         </tr>
                     </thead>
@@ -152,10 +152,5 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
-    @if ($logs->hasPages())
-        <div class="mt-2">
-            {{ $logs->links() }}
-        </div>
-    @endif
+    <x-table-pagination :paginator="$logs" :options="$perPageOptions" />
 </div>

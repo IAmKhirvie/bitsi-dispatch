@@ -64,11 +64,11 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Phone</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">License Number</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Active</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+                            <x-sortable-th field="name" label="Name" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="phone" label="Phone" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="license_number" label="License Number" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="is_active" label="Active" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="status" label="Status" :active="$sortField" :direction="$sortDirection" />
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Quick Status</th>
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                         </tr>
@@ -160,10 +160,5 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
-    @if ($drivers->hasPages())
-        <div class="mt-2">
-            {{ $drivers->links() }}
-        </div>
-    @endif
+    <x-table-pagination :paginator="$drivers" :options="$perPageOptions" />
 </div>

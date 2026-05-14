@@ -60,7 +60,7 @@ class DriverAttendance extends Model
      */
     public function scopeForDate(Builder $query, string $date): Builder
     {
-        return $query->where('attendance_date', $date);
+        return $query->where($query->getModel()->getTable() . '.attendance_date', $date);
     }
 
     /**

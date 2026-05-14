@@ -59,13 +59,13 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Code</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Operator</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Route</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Bus Type</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Departure</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Direction</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+                            <x-sortable-th field="code" label="Code" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="operator" label="Operator" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="origin_terminal" label="Route" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="bus_type" label="Bus Type" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="scheduled_departure_time" label="Departure" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="direction" label="Direction" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="is_active" label="Status" :active="$sortField" :direction="$sortDirection" />
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                         </tr>
                     </thead>
@@ -128,10 +128,5 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
-    @if ($tripCodes->hasPages())
-        <div class="mt-2">
-            {{ $tripCodes->links() }}
-        </div>
-    @endif
+    <x-table-pagination :paginator="$tripCodes" :options="$perPageOptions" />
 </div>

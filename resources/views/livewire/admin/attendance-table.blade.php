@@ -141,12 +141,12 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Driver</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Trip / Route</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Scheduled</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Check In</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Check Out</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+                            <x-sortable-th field="driver" label="Driver" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="trip" label="Trip / Route" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="scheduled_departure" label="Scheduled" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="check_in_time" label="Check In" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="check_out_time" label="Check Out" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="status" label="Status" :active="$sortField" :direction="$sortDirection" />
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                         </tr>
                     </thead>
@@ -224,10 +224,5 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
-    @if ($attendances->hasPages())
-        <div class="mt-2">
-            {{ $attendances->links() }}
-        </div>
-    @endif
+    <x-table-pagination :paginator="$attendances" :options="$perPageOptions" />
 </div>

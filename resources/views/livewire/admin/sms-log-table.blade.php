@@ -127,11 +127,11 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Recipient</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Message</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Provider ID</th>
+                            <x-sortable-th field="created_at" label="Date" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="recipient_phone" label="Recipient" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="message" label="Message" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="status" label="Status" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="provider_message_id" label="Provider ID" :active="$sortField" :direction="$sortDirection" />
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                         </tr>
                     </thead>
@@ -210,12 +210,7 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
-    @if ($logs->hasPages())
-        <div class="mt-2">
-            {{ $logs->links() }}
-        </div>
-    @endif
+    <x-table-pagination :paginator="$logs" :options="$perPageOptions" />
 
     {{-- Create Modal --}}
     @if ($showCreateModal)

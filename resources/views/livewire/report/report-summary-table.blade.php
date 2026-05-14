@@ -113,13 +113,21 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">
-                                {{ $reportType === 'daily' ? 'Date' : ($reportType === 'weekly' ? 'Week' : 'Month') }}
-                            </th>
+                            @if ($reportType === 'daily')
+                                <x-sortable-th field="service_date" label="Date" :active="$sortField" :direction="$sortDirection" />
+                            @else
+                                <th class="px-4 py-3 text-left font-medium text-muted-foreground">
+                                    {{ $reportType === 'weekly' ? 'Week' : 'Month' }}
+                                </th>
+                            @endif
                             @if ($reportType !== 'daily')
                                 <th class="px-4 py-3 text-right font-medium text-muted-foreground">Days</th>
                             @endif
-                            <th class="px-4 py-3 text-right font-medium text-muted-foreground">Total</th>
+                            @if ($reportType === 'daily')
+                                <x-sortable-th field="total_trips" label="Total" :active="$sortField" :direction="$sortDirection" class="text-right" />
+                            @else
+                                <th class="px-4 py-3 text-right font-medium text-muted-foreground">Total</th>
+                            @endif
                             <th class="px-4 py-3 text-right font-medium text-muted-foreground">SB</th>
                             <th class="px-4 py-3 text-right font-medium text-muted-foreground">NB</th>
                             <th class="px-4 py-3 text-right font-medium text-muted-foreground">Naga</th>
@@ -233,10 +241,9 @@
             </div>
         </div>
 
-        {{-- Pagination (daily only) --}}
-        @if($reportType === 'daily' && $summaries && $summaries->hasPages())
+        @if($reportType === 'daily' && $summaries)
             <div class="border-t px-6 py-4">
-                {{ $summaries->links() }}
+                <x-table-pagination :paginator="$summaries" :options="$perPageOptions" />
             </div>
         @endif
     </div>

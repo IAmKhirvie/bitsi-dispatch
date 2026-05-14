@@ -59,16 +59,16 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Bus No.</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Brand</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Plate No.</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Current KMR</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">PMS Status</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Next PMS</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Idle Days</th>
+                            <x-sortable-th field="bus_number" label="Bus No." :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="brand" label="Brand" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="bus_type" label="Type" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="plate_number" label="Plate No." :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="status" label="Status" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="current_location" label="Location" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="current_kmr" label="Current KMR" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="last_pms_kmr" label="PMS Status" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="next_pms_date" label="Next PMS" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="last_dispatched_at" label="Idle Days" :active="$sortField" :direction="$sortDirection" />
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                         </tr>
                     </thead>
@@ -155,10 +155,5 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
-    @if ($vehicles->hasPages())
-        <div class="mt-2">
-            {{ $vehicles->links() }}
-        </div>
-    @endif
+    <x-table-pagination :paginator="$vehicles" :options="$perPageOptions" />
 </div>
