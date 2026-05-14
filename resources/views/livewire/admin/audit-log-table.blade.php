@@ -4,7 +4,7 @@
             <h1 class="text-2xl font-bold">Audit Logs</h1>
             <p class="text-sm text-muted-foreground">Track who changed what and when</p>
         </div>
-        <div class="flex items-center gap-1.5" x-data="{ showCustomExport: false, dateFrom: '', dateTo: '' }">
+        <div class="relative flex items-center gap-1.5" x-data="{ showCustomExport: false, dateFrom: '', dateTo: '' }">
             <span class="text-xs font-medium text-muted-foreground mr-1">Export:</span>
             <a href="{{ route('admin.export.audit-logs', 'daily') }}" class="inline-flex items-center rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
                 Daily
@@ -15,7 +15,7 @@
             <a href="{{ route('admin.export.audit-logs', 'monthly') }}" class="inline-flex items-center rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
                 Monthly
             </a>
-            <button x-on:click="showCustomExport = !showCustomExport"
+            <button type="button" x-on:click="showCustomExport = !showCustomExport"
                 class="inline-flex items-center rounded-md border border-orange-300 bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-700 shadow-sm hover:bg-orange-100 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 Custom
@@ -89,9 +89,9 @@
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Changes</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody x-data="{ expanded: {} }">
                         @forelse ($logs as $log)
-                            <tr class="border-b last:border-0 hover:bg-muted/30 transition-colors" x-data="{ expanded: false }">
+                            <tr class="border-b last:border-0 hover:bg-muted/30 transition-colors">
                                 <td class="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{{ $log->created_at->format('M d, Y H:i') }}</td>
                                 <td class="px-4 py-3 font-medium">{{ $log->user?->name ?? 'System' }}</td>
                                 <td class="px-4 py-3">
@@ -112,9 +112,9 @@
                                 <td class="px-4 py-3 text-xs text-muted-foreground">{{ $log->ip_address }}</td>
                                 <td class="px-4 py-3">
                                     @if ($log->old_values || $log->new_values)
-                                        <button x-on:click="expanded = !expanded" class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400">
-                                            <span x-text="expanded ? 'Hide' : 'View'"></span>
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-3 w-3 transition-transform" x-bind:class="expanded && 'rotate-180'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                        <button type="button" x-on:click.prevent="expanded[{{ $log->id }}] = !expanded[{{ $log->id }}]" class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                                            <span x-text="expanded[{{ $log->id }}] ? 'Hide' : 'View'"></span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-3 w-3 transition-transform" x-bind:class="expanded[{{ $log->id }}] && 'rotate-180'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                                         </button>
                                     @else
                                         <span class="text-xs text-muted-foreground">--</span>
@@ -122,7 +122,7 @@
                                 </td>
                             </tr>
                             @if ($log->old_values || $log->new_values)
-                                <tr x-show="expanded" class="bg-muted/20">
+                                <tr x-cloak x-show="expanded[{{ $log->id }}]" class="bg-muted/20">
                                     <td colspan="7" class="px-4 py-3">
                                         <div class="grid gap-3 md:grid-cols-2">
                                             @if ($log->old_values)

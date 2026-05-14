@@ -37,6 +37,8 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <!-- Styles -->
+        @stack('styles')
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
         @livewireStyles
     </head>
     <body class="font-sans antialiased">
@@ -125,6 +127,75 @@
 
         @stack('modals')
 
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+        <script>
+            function fleetMap(initial) {
+                return {
+                    map: null,
+                    markers: {},
+                    init() {
+                        const center = initial.length
+                            ? [initial[0].lat, initial[0].lng]
+                            : [13.6218, 123.1948];
+
+                        this.map = L.map('fleet-map-canvas').setView(center, initial.length ? 11 : 9);
+
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
+                            attribution: '&copy; OpenStreetMap',
+                        }).addTo(this.map);
+
+                        this.update(initial);
+                    },
+                    update(positions) {
+                        if (!this.map) return;
+
+                        const seen = new Set();
+
+                        positions.forEach((position) => {
+                            seen.add(position.id);
+
+                            const color = position.stale ? '#9ca3af' : '#16a34a';
+                            const label = position.bus_number || `#${position.id}`;
+                            const html = [
+                                `<div style="background:${color};color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:9999px;border:2px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.3);white-space:nowrap;">`,
+                                label,
+                                '</div>',
+                            ].join('');
+                            const icon = L.divIcon({ html, className: '', iconSize: null });
+                            const popup = [
+                                '<div style="font-size:12px;line-height:1.4;">',
+                                `<div style="font-weight:600;">${position.bus_number || ''} <span style="color:#666;font-weight:400;">${position.brand || ''}</span></div>`,
+                                `<div>Status: ${position.status || '&mdash;'}</div>`,
+                                `<div>KMR: ${position.kmr ?? '&mdash;'}</div>`,
+                                `<div>Updated: ${position.recorded_at ? new Date(position.recorded_at).toLocaleString() : '&mdash;'}</div>`,
+                                position.stale ? '<div style="color:#b91c1c;font-weight:600;">STALE</div>' : '',
+                                '</div>',
+                            ].join('');
+
+                            if (this.markers[position.id]) {
+                                this.markers[position.id]
+                                    .setLatLng([position.lat, position.lng])
+                                    .setIcon(icon)
+                                    .bindPopup(popup);
+                            } else {
+                                this.markers[position.id] = L.marker([position.lat, position.lng], { icon })
+                                    .addTo(this.map)
+                                    .bindPopup(popup);
+                            }
+                        });
+
+                        Object.keys(this.markers).forEach((id) => {
+                            if (!seen.has(parseInt(id))) {
+                                this.map.removeLayer(this.markers[id]);
+                                delete this.markers[id];
+                            }
+                        });
+                    },
+                };
+            }
+        </script>
         @livewireScripts
+        @stack('scripts')
     </body>
 </html>
