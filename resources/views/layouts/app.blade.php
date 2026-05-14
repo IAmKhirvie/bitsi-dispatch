@@ -92,8 +92,8 @@
                 class="relative flex min-h-svh flex-1 flex-col bg-background peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow"
             >
                 {{-- Header with sidebar trigger and breadcrumbs --}}
-                <header class="relative flex h-16 shrink-0 items-center justify-center border-b border-sidebar-border/70 px-6 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 md:px-4">
-                    <div class="absolute left-6 flex min-w-0 items-center gap-3 md:left-4">
+                <header class="flex h-16 shrink-0 items-center gap-4 border-b border-sidebar-border/70 px-6 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 md:px-4">
+                    <div class="flex min-w-0 items-center">
                         {{-- Sidebar Trigger --}}
                         <button
                             x-on:click="toggleSidebar()"
@@ -107,7 +107,7 @@
                     <form
                         action="{{ route('search.index') }}"
                         method="GET"
-                        class="relative flex w-full max-w-2xl items-center px-12 md:px-16"
+                        class="relative flex min-w-0 flex-1 items-center"
                         x-data="{
                             query: @js(request('q', request('search', ''))),
                             category: @js($searchCategory),
@@ -170,7 +170,7 @@
                             x-cloak
                             x-show="open"
                             x-transition
-                            class="absolute left-12 right-12 top-full z-50 mt-2 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg md:left-16 md:right-16"
+                            class="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg"
                         >
                             <template x-if="loading">
                                 <div class="px-3 py-3 text-sm text-muted-foreground">Searching...</div>
@@ -201,7 +201,7 @@
                         </div>
                     </form>
 
-                    <div class="absolute right-6 flex items-center md:right-4">
+                    <div class="flex shrink-0 items-center">
                         {{-- Breadcrumbs --}}
                         @isset($breadcrumbs)
                             <nav aria-label="breadcrumb">

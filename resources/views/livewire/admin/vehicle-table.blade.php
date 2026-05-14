@@ -68,7 +68,7 @@
                             <x-sortable-th field="current_kmr" label="Current KMR" :active="$sortField" :direction="$sortDirection" />
                             <x-sortable-th field="last_pms_kmr" label="PMS Status" :active="$sortField" :direction="$sortDirection" />
                             <x-sortable-th field="next_pms_date" label="Next PMS" :active="$sortField" :direction="$sortDirection" />
-                            <x-sortable-th field="last_dispatched_at" label="Idle Days" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="idle_days" label="Idle Days" :active="$sortField" :direction="$sortDirection" />
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                         </tr>
                     </thead>

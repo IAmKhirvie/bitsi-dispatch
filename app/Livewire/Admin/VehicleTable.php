@@ -30,7 +30,7 @@ class VehicleTable extends Component
         'current_kmr',
         'last_pms_kmr',
         'next_pms_date',
-        'last_dispatched_at',
+        'idle_days',
         'created_at',
     ];
 
