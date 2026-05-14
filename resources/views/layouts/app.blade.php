@@ -104,14 +104,51 @@
                         </button>
                     </div>
 
-                    <form action="{{ route('search.index') }}" method="GET" class="flex w-full max-w-2xl items-center px-12 md:px-16">
+                    <form
+                        action="{{ route('search.index') }}"
+                        method="GET"
+                        class="relative flex w-full max-w-2xl items-center px-12 md:px-16"
+                        x-data="{
+                            query: @js(request('q', request('search', ''))),
+                            category: @js($searchCategory),
+                            items: [],
+                            open: false,
+                            loading: false,
+                            timer: null,
+                            fetchSuggestions() {
+                                clearTimeout(this.timer);
+                                if (this.query.trim().length < 2) {
+                                    this.items = [];
+                                    this.open = false;
+                                    return;
+                                }
+                                this.timer = setTimeout(async () => {
+                                    this.loading = true;
+                                    const params = new URLSearchParams({ q: this.query, category: this.category });
+                                    const response = await fetch('{{ route('search.suggestions', [], false) }}?' + params.toString(), {
+                                        headers: { 'Accept': 'application/json' },
+                                    });
+                                    const data = await response.json();
+                                    this.items = data.items || [];
+                                    this.open = true;
+                                    this.loading = false;
+                                }, 220);
+                            },
+                            go(url) {
+                                window.location.href = url;
+                            },
+                        }"
+                        x-on:click.away="open = false"
+                    >
                         <div class="flex h-9 w-full overflow-hidden rounded-md border border-input bg-background shadow-sm focus-within:ring-1 focus-within:ring-ring">
                             <div class="relative min-w-0 flex-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                                 <input
                                     type="search"
                                     name="q"
-                                    value="{{ request('q', request('search', '')) }}"
+                                    x-model="query"
+                                    x-on:input="fetchSuggestions()"
+                                    x-on:focus="items.length && (open = true)"
                                     placeholder="Search"
                                     class="h-full w-full border-0 bg-transparent pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground"
                                 />
@@ -119,12 +156,48 @@
                             <select
                                 name="category"
                                 aria-label="Search category"
+                                x-model="category"
+                                x-on:change="fetchSuggestions()"
                                 class="w-32 border-0 border-l border-input bg-muted/40 px-2 text-xs font-medium outline-none"
                             >
                                 @foreach ($searchCategories as $value => $label)
                                     <option value="{{ $value }}" @selected($searchCategory === $value)>{{ $label }}</option>
                                 @endforeach
                             </select>
+                        </div>
+
+                        <div
+                            x-cloak
+                            x-show="open"
+                            x-transition
+                            class="absolute left-12 right-12 top-full z-50 mt-2 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg md:left-16 md:right-16"
+                        >
+                            <template x-if="loading">
+                                <div class="px-3 py-3 text-sm text-muted-foreground">Searching...</div>
+                            </template>
+                            <template x-if="!loading && items.length === 0">
+                                <div class="px-3 py-3 text-sm text-muted-foreground">No suggestions found.</div>
+                            </template>
+                            <template x-for="item in items" :key="item.category + item.title + item.url">
+                                <button
+                                    type="button"
+                                    x-on:click="go(item.url)"
+                                    class="block w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground"
+                                >
+                                    <div class="flex items-center justify-between gap-3">
+                                        <span class="truncate text-sm font-medium" x-text="item.title"></span>
+                                        <span class="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground" x-text="item.category"></span>
+                                    </div>
+                                    <div class="truncate text-xs text-muted-foreground" x-text="item.subtitle"></div>
+                                </button>
+                            </template>
+                            <button
+                                type="submit"
+                                class="block w-full border-t px-3 py-2 text-left text-xs font-medium text-primary hover:bg-accent"
+                                x-show="query.trim().length >= 2"
+                            >
+                                View all results
+                            </button>
                         </div>
                     </form>
 

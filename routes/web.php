@@ -23,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::get('search', SearchController::class)->name('search.index');
+    Route::get('search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
     // Dispatch
     Route::get('dispatch', [DispatchDayController::class, 'index'])->name('dispatch.index');
