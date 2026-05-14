@@ -21,6 +21,20 @@ class DispatchBoard extends Component
     public string $date;
     public int $perPage = 20;
     public array $perPageOptions = [5, 10, 15, 20, 30, 40, 50, 100];
+    public string $sortField = 'sort_order';
+    public string $sortDirection = 'asc';
+
+    protected array $sortableFields = [
+        'sort_order',
+        'trip',
+        'bus_number',
+        'direction',
+        'route',
+        'scheduled_departure',
+        'driver',
+        'status',
+        'remarks',
+    ];
 
     // Add entry form
     public ?int $addTripCodeId = null;
@@ -82,6 +96,22 @@ class DispatchBoard extends Component
 
     public function updatedPerPage(): void
     {
+        $this->resetPage();
+    }
+
+    public function sortBy(string $field): void
+    {
+        if (! in_array($field, $this->sortableFields, true)) {
+            return;
+        }
+
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+
         $this->resetPage();
     }
 
@@ -344,7 +374,22 @@ class DispatchBoard extends Component
         $entries = $dispatchDay
             ? DispatchEntry::where('dispatch_day_id', $dispatchDay->id)
                 ->with(['tripCode', 'vehicle', 'driver', 'driver2'])
-                ->orderBy('sort_order')
+                ->leftJoin('trip_codes as sort_trip_codes', 'dispatch_entries.trip_code_id', '=', 'sort_trip_codes.id')
+                ->leftJoin('drivers as sort_drivers', 'dispatch_entries.driver_id', '=', 'sort_drivers.id')
+                ->select('dispatch_entries.*')
+                ->tap(fn ($query) => match ($this->sortField) {
+                    'trip' => $query->orderBy('sort_trip_codes.code', $this->sortDirection),
+                    'driver' => $query->orderBy('sort_drivers.name', $this->sortDirection),
+                    'bus_number',
+                    'direction',
+                    'route',
+                    'scheduled_departure',
+                    'status',
+                    'remarks',
+                    'sort_order' => $query->orderBy('dispatch_entries.' . $this->sortField, $this->sortDirection),
+                    default => $query->orderBy('dispatch_entries.sort_order', 'asc'),
+                })
+                ->orderBy('dispatch_entries.sort_order')
                 ->paginate($this->perPage)
             : null;
 

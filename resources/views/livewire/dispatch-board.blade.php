@@ -9,6 +9,7 @@
             'arrived' => 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
         ];
         $statusOptions = ['scheduled', 'departed', 'on_route', 'delayed', 'cancelled', 'arrived'];
+        $sortHeaderClass = 'inline-flex w-full items-center gap-1 text-left font-medium text-muted-foreground transition-colors hover:text-foreground';
     @endphp
 
     {{-- Header with date picker --}}
@@ -109,18 +110,81 @@
 
             <div class="p-0">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-xs table-fixed">
+                    <table class="min-w-[1120px] w-full text-xs table-fixed">
                         <thead>
                             <tr class="border-b bg-muted/50">
-                                <th class="w-8 px-2 py-2 text-left font-medium text-muted-foreground">#</th>
-                                <th class="w-20 px-2 py-2 text-left font-medium text-muted-foreground">Trip</th>
-                                <th class="w-24 px-2 py-2 text-left font-medium text-muted-foreground">Bus</th>
-                                <th class="w-12 px-2 py-2 text-left font-medium text-muted-foreground">Dir</th>
-                                <th class="px-2 py-2 text-left font-medium text-muted-foreground">Route</th>
-                                <th class="w-24 px-2 py-2 text-left font-medium text-muted-foreground">Times</th>
-                                <th class="w-32 px-2 py-2 text-left font-medium text-muted-foreground">Drivers</th>
-                                <th class="w-28 px-2 py-2 text-left font-medium text-muted-foreground">Status</th>
-                                <th class="px-2 py-2 text-left font-medium text-muted-foreground">Remarks</th>
+                                <th class="w-8 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('sort_order')" class="{{ $sortHeaderClass }}">
+                                        #
+                                        @if ($sortField === 'sort_order')
+                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
+                                        @endif
+                                    </button>
+                                </th>
+                                <th class="w-20 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('trip')" class="{{ $sortHeaderClass }}">
+                                        Trip
+                                        @if ($sortField === 'trip')
+                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
+                                        @endif
+                                    </button>
+                                </th>
+                                <th class="w-24 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('bus_number')" class="{{ $sortHeaderClass }}">
+                                        Bus
+                                        @if ($sortField === 'bus_number')
+                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
+                                        @endif
+                                    </button>
+                                </th>
+                                <th class="w-12 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('direction')" class="{{ $sortHeaderClass }}">
+                                        Dir
+                                        @if ($sortField === 'direction')
+                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
+                                        @endif
+                                    </button>
+                                </th>
+                                <th class="w-36 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('route')" class="{{ $sortHeaderClass }}">
+                                        Route
+                                        @if ($sortField === 'route')
+                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
+                                        @endif
+                                    </button>
+                                </th>
+                                <th class="w-24 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('scheduled_departure')" class="{{ $sortHeaderClass }}">
+                                        Times
+                                        @if ($sortField === 'scheduled_departure')
+                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
+                                        @endif
+                                    </button>
+                                </th>
+                                <th class="w-40 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('driver')" class="{{ $sortHeaderClass }}">
+                                        Drivers
+                                        @if ($sortField === 'driver')
+                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
+                                        @endif
+                                    </button>
+                                </th>
+                                <th class="w-48 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('status')" class="{{ $sortHeaderClass }}">
+                                        Status
+                                        @if ($sortField === 'status')
+                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
+                                        @endif
+                                    </button>
+                                </th>
+                                <th class="w-56 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('remarks')" class="{{ $sortHeaderClass }}">
+                                        Remarks
+                                        @if ($sortField === 'remarks')
+                                            <span class="text-[10px]">{{ $sortDirection === 'asc' ? '^' : 'v' }}</span>
+                                        @endif
+                                    </button>
+                                </th>
                                 <th class="w-16 px-2 py-2 text-left font-medium text-muted-foreground">Actions</th>
                             </tr>
                         </thead>
