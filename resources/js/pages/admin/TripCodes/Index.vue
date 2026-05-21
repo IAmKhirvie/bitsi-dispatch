@@ -1,9 +1,21 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import ExportButtons from '@/components/ExportButtons.vue';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { type BreadcrumbItem, type PaginatedData, type TripCode } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Plus, Pencil, Trash2, Search, Check, X } from 'lucide-vue-next';
@@ -20,7 +32,7 @@ const props = defineProps<{
 }>();
 
 const search = ref(props.filters.search || '');
-const directionFilter = ref(props.filters.direction || '');
+const directionFilter = ref(props.filters.direction || 'all');
 
 let searchTimeout: ReturnType<typeof setTimeout>;
 
@@ -29,7 +41,7 @@ watch([search, directionFilter], () => {
     searchTimeout = setTimeout(() => {
         router.get('/admin/trip-codes', {
             search: search.value || undefined,
-            direction: directionFilter.value || undefined,
+            direction: directionFilter.value === 'all' ? undefined : directionFilter.value,
         }, {
             preserveState: true,
             preserveScroll: true,
@@ -52,9 +64,7 @@ function toggleStatus(tripCode: TripCode) {
 }
 
 function deleteTripCode(tripCode: TripCode) {
-    if (confirm(`Are you sure you want to delete trip code ${tripCode.code}?`)) {
-        router.delete(`/admin/trip-codes/${tripCode.id}`);
-    }
+    router.delete(`/admin/trip-codes/${tripCode.id}`, { preserveScroll: true });
 }
 </script>
 
@@ -85,11 +95,16 @@ function deleteTripCode(tripCode: TripCode) {
                     <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input v-model="search" placeholder="Search trip codes..." class="pl-9" />
                 </div>
-                <select v-model="directionFilter" class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-                    <option value="">All Directions</option>
-                    <option value="SB">Southbound (SB)</option>
-                    <option value="NB">Northbound (NB)</option>
-                </select>
+                <Select v-model="directionFilter">
+                    <SelectTrigger class="w-[200px]">
+                        <SelectValue placeholder="All directions" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Directions</SelectItem>
+                        <SelectItem value="SB">Southbound (SB)</SelectItem>
+                        <SelectItem value="NB">Northbound (NB)</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
 
             <!-- Table -->
@@ -156,9 +171,31 @@ function deleteTripCode(tripCode: TripCode) {
                                                     <Pencil class="h-4 w-4" />
                                                 </Link>
                                             </Button>
-                                            <Button variant="ghost" size="icon" class="h-8 w-8 text-red-500 hover:text-red-700" @click="deleteTripCode(tc)">
-                                                <Trash2 class="h-4 w-4" />
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger
+                                                    :class="buttonVariants({ variant: 'ghost', size: 'icon' }) + ' h-8 w-8 text-destructive hover:text-destructive'"
+                                                    title="Delete trip code"
+                                                >
+                                                    <Trash2 class="h-4 w-4" />
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Delete trip code {{ tc.code }}?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            The trip code will be moved to Trash. Restore from Admin → Trash.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            :class="buttonVariants({ variant: 'destructive' })"
+                                                            @click="deleteTripCode(tc)"
+                                                        >
+                                                            Delete
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </div>
                                     </td>
                                 </tr>

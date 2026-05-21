@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import ExportButtons from '@/components/ExportButtons.vue';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
@@ -13,6 +13,18 @@ import {
     DialogTitle,
     DialogClose,
 } from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { type BreadcrumbItem, type Driver, type DriverStatus, type PaginatedData } from '@/types';
@@ -44,7 +56,7 @@ if (flash.value.success || flash.value.error) {
 }
 
 const search = ref(props.filters.search || '');
-const statusFilter = ref(props.filters.status || '');
+const statusFilter = ref(props.filters.status || 'all');
 
 // Custom SMS dialog state
 const selectedDriver = ref<Driver | null>(null);
@@ -66,7 +78,7 @@ watch(statusFilter, applyFilters);
 function applyFilters() {
     router.get('/admin/drivers', {
         search: search.value || undefined,
-        status: statusFilter.value || undefined,
+        status: statusFilter.value === 'all' ? undefined : statusFilter.value,
     }, {
         preserveState: true,
         preserveScroll: true,
@@ -74,9 +86,7 @@ function applyFilters() {
 }
 
 function deleteDriver(driver: Driver) {
-    if (confirm(`Are you sure you want to delete driver ${driver.name}?`)) {
-        router.delete(`/admin/drivers/${driver.id}`);
-    }
+    router.delete(`/admin/drivers/${driver.id}`, { preserveScroll: true });
 }
 
 function setStatus(driver: Driver, status: DriverStatus) {
@@ -221,13 +231,15 @@ const allStatuses: DriverStatus[] = ['available', 'dispatched', 'on_route', 'on_
                     <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input v-model="search" placeholder="Search drivers..." class="pl-9" />
                 </div>
-                <select
-                    v-model="statusFilter"
-                    class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                    <option value="">All Statuses</option>
-                    <option v-for="s in allStatuses" :key="s" :value="s">{{ statusConfig[s].label }}</option>
-                </select>
+                <Select v-model="statusFilter">
+                    <SelectTrigger class="w-[180px]">
+                        <SelectValue placeholder="All statuses" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem v-for="s in allStatuses" :key="s" :value="s">{{ statusConfig[s].label }}</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
 
             <!-- Table -->
@@ -320,9 +332,31 @@ const allStatuses: DriverStatus[] = ['available', 'dispatched', 'on_route', 'on_
                                                     <Pencil class="h-4 w-4" />
                                                 </Link>
                                             </Button>
-                                            <Button variant="ghost" size="icon" class="h-8 w-8 text-red-500 hover:text-red-700" @click="deleteDriver(driver)">
-                                                <Trash2 class="h-4 w-4" />
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger
+                                                    :class="buttonVariants({ variant: 'ghost', size: 'icon' }) + ' h-8 w-8 text-destructive hover:text-destructive'"
+                                                    title="Delete driver"
+                                                >
+                                                    <Trash2 class="h-4 w-4" />
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Delete driver {{ driver.name }}?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            The driver will be moved to Trash. You can restore them from Admin → Trash.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            :class="buttonVariants({ variant: 'destructive' })"
+                                                            @click="deleteDriver(driver)"
+                                                        >
+                                                            Delete
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </div>
                                     </td>
                                 </tr>

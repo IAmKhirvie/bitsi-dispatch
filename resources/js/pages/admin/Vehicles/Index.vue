@@ -1,9 +1,21 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import ExportButtons from '@/components/ExportButtons.vue';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { type BreadcrumbItem, type PaginatedData, type Vehicle } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Plus, Pencil, Trash2, Search, AlertTriangle } from 'lucide-vue-next';
@@ -20,7 +32,7 @@ const props = defineProps<{
 }>();
 
 const search = ref(props.filters.search || '');
-const statusFilter = ref(props.filters.status || '');
+const statusFilter = ref(props.filters.status || 'all');
 
 let searchTimeout: ReturnType<typeof setTimeout>;
 
@@ -29,7 +41,7 @@ watch([search, statusFilter], () => {
     searchTimeout = setTimeout(() => {
         router.get('/admin/vehicles', {
             search: search.value || undefined,
-            status: statusFilter.value || undefined,
+            status: statusFilter.value === 'all' ? undefined : statusFilter.value,
         }, {
             preserveState: true,
             preserveScroll: true,
@@ -38,9 +50,7 @@ watch([search, statusFilter], () => {
 });
 
 function deleteVehicle(vehicle: Vehicle) {
-    if (confirm(`Are you sure you want to delete vehicle ${vehicle.bus_number}?`)) {
-        router.delete(`/admin/vehicles/${vehicle.id}`);
-    }
+    router.delete(`/admin/vehicles/${vehicle.id}`, { preserveScroll: true });
 }
 
 const vehicleStatusClasses: Record<string, string> = {
@@ -79,14 +89,19 @@ const vehicleStatusClasses: Record<string, string> = {
                     <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input v-model="search" placeholder="Search vehicles..." class="pl-9" />
                 </div>
-                <select v-model="statusFilter" class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-                    <option value="">All Statuses</option>
-                    <option value="OK">OK</option>
-                    <option value="UR">Under Repair (UR)</option>
-                    <option value="PMS">PMS</option>
-                    <option value="In Transit">In Transit</option>
-                    <option value="Lutaw">Lutaw</option>
-                </select>
+                <Select v-model="statusFilter">
+                    <SelectTrigger class="w-[200px]">
+                        <SelectValue placeholder="All statuses" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="OK">OK</SelectItem>
+                        <SelectItem value="UR">Under Repair (UR)</SelectItem>
+                        <SelectItem value="PMS">PMS</SelectItem>
+                        <SelectItem value="In Transit">In Transit</SelectItem>
+                        <SelectItem value="Lutaw">Lutaw</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
 
             <!-- Table -->
@@ -145,9 +160,31 @@ const vehicleStatusClasses: Record<string, string> = {
                                                     <Pencil class="h-4 w-4" />
                                                 </Link>
                                             </Button>
-                                            <Button variant="ghost" size="icon" class="h-8 w-8 text-red-500 hover:text-red-700" @click="deleteVehicle(vehicle)">
-                                                <Trash2 class="h-4 w-4" />
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger
+                                                    :class="buttonVariants({ variant: 'ghost', size: 'icon' }) + ' h-8 w-8 text-destructive hover:text-destructive'"
+                                                    title="Delete vehicle"
+                                                >
+                                                    <Trash2 class="h-4 w-4" />
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Delete vehicle {{ vehicle.bus_number }}?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            The vehicle will be moved to Trash. Restore from Admin → Trash.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            :class="buttonVariants({ variant: 'destructive' })"
+                                                            @click="deleteVehicle(vehicle)"
+                                                        >
+                                                            Delete
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </div>
                                     </td>
                                 </tr>

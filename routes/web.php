@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminExportController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\DriverController;
 use App\Http\Controllers\Admin\DriverNotificationController;
+use App\Http\Controllers\Admin\TrashController;
 use App\Http\Controllers\Admin\TripCodeController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VehicleController;
@@ -75,6 +76,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('drivers/{driver}/send-schedule-sms', [DriverNotificationController::class, 'sendScheduleSms'])->name('drivers.send-schedule-sms');
         Route::post('drivers/{driver}/send-custom-sms', [DriverNotificationController::class, 'sendCustomSms'])->name('drivers.send-custom-sms');
         Route::get('drivers/{driver}/schedule-preview', [DriverNotificationController::class, 'getSchedulePreview'])->name('drivers.schedule-preview');
+
+        // Trash bin (soft-deleted records)
+        Route::prefix('trash')->name('trash.')->group(function () {
+            Route::get('/', [TrashController::class, 'overview'])->name('overview');
+            Route::get('{resource}', [TrashController::class, 'index'])->name('index');
+            Route::post('{resource}/{id}/restore', [TrashController::class, 'restore'])->name('restore');
+            Route::delete('{resource}/{id}', [TrashController::class, 'forceDelete'])->name('force-delete');
+            Route::delete('{resource}', [TrashController::class, 'emptyTrash'])->name('empty');
+        });
 
         // Audit Logs
         Route::get('audit-logs', fn () => view('admin.audit-logs.index'))->name('audit-logs.index');
