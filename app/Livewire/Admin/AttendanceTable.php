@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\HasTableControls;
 use App\Models\AttendanceAlert;
 use App\Models\DispatchDay;
 use App\Models\DispatchEntry;
@@ -11,9 +12,16 @@ use Livewire\WithPagination;
 
 class AttendanceTable extends Component
 {
+    use HasTableControls;
     use WithPagination;
 
     public string $date = '';
+    public int $perPage = 15;
+    public array $perPageOptions = [5, 10, 15, 20, 30, 40, 50, 100];
+    public string $sortField = 'scheduled_departure';
+    public string $sortDirection = 'asc';
+
+    protected array $sortableFields = ['driver', 'trip', 'scheduled_departure', 'status', 'check_in_time', 'check_out_time'];
 
     public function mount(): void
     {
@@ -101,9 +109,20 @@ class AttendanceTable extends Component
     public function render()
     {
         $attendances = DriverAttendance::with(['driver', 'dispatchEntry.tripCode'])
+            ->leftJoin('drivers as sort_drivers', 'driver_attendances.driver_id', '=', 'sort_drivers.id')
+            ->leftJoin('dispatch_entries as sort_entries', 'driver_attendances.dispatch_entry_id', '=', 'sort_entries.id')
+            ->leftJoin('trip_codes as sort_trip_codes', 'sort_entries.trip_code_id', '=', 'sort_trip_codes.id')
+            ->select('driver_attendances.*')
             ->forDate($this->date)
-            ->latest()
-            ->paginate(15);
+            ->tap(fn ($query) => $this->applyTableSort($query, [
+                'driver' => 'sort_drivers.name',
+                'trip' => 'sort_trip_codes.code',
+                'scheduled_departure' => 'sort_entries.scheduled_departure',
+                'status' => 'driver_attendances.status',
+                'check_in_time' => 'driver_attendances.check_in_time',
+                'check_out_time' => 'driver_attendances.check_out_time',
+            ]))
+            ->paginate($this->perPage);
 
         $statsRaw = DriverAttendance::forDate($this->date)
             ->selectRaw("

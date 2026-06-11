@@ -1,18 +1,59 @@
 @php use App\Enums\SmsStatus; @endphp
 
 <div class="flex h-full flex-1 flex-col gap-4 p-4">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold">SMS Logs</h1>
             <p class="text-sm text-muted-foreground">Monitor SMS delivery and retry failed messages</p>
         </div>
-        <button
-            wire:click="openCreateModal"
-            class="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-            Add SMS Log
-        </button>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-1.5" x-data="{ showCustomExport: false, dateFrom: '', dateTo: '' }">
+                <span class="text-xs font-medium text-muted-foreground mr-1">Export:</span>
+                <a href="{{ route('admin.export.sms-logs', 'daily') }}" class="inline-flex items-center rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Daily
+                </a>
+                <a href="{{ route('admin.export.sms-logs', 'weekly') }}" class="inline-flex items-center rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Weekly
+                </a>
+                <a href="{{ route('admin.export.sms-logs', 'monthly') }}" class="inline-flex items-center rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors">
+                    Monthly
+                </a>
+                <button x-on:click="showCustomExport = !showCustomExport"
+                    class="inline-flex items-center rounded-md border border-orange-300 bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-700 shadow-sm hover:bg-orange-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Custom
+                </button>
+                {{-- Custom date range popup --}}
+                <div x-show="showCustomExport" x-on:click.away="showCustomExport = false" x-transition
+                    class="absolute top-full right-0 mt-1 z-50 rounded-lg border bg-card p-3 shadow-lg w-64">
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-muted-foreground">From</label>
+                        <input type="date" x-model="dateFrom" max="{{ now()->toDateString() }}"
+                            class="flex h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs" />
+                        <label class="text-xs font-medium text-muted-foreground">To</label>
+                        <input type="date" x-model="dateTo" max="{{ now()->toDateString() }}" x-bind:min="dateFrom"
+                            class="flex h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs" />
+                        <a x-bind:href="dateFrom && dateTo && dateFrom <= dateTo
+                            ? '{{ route('admin.export.sms-logs.custom') }}?date_from=' + dateFrom + '&date_to=' + dateTo
+                            : '#'"
+                            x-bind:class="dateFrom && dateTo && dateFrom <= dateTo
+                                ? 'inline-flex w-full items-center justify-center rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors'
+                                : 'inline-flex w-full items-center justify-center rounded-md bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground cursor-not-allowed'"
+                            x-bind:aria-disabled="!(dateFrom && dateTo && dateFrom <= dateTo)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Export
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <button
+                wire:click="openCreateModal"
+                class="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                Add SMS Log
+            </button>
+        </div>
     </div>
 
     {{-- Flash Messages --}}
@@ -86,11 +127,11 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Recipient</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Message</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Provider ID</th>
+                            <x-sortable-th field="created_at" label="Date" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="recipient_phone" label="Recipient" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="message" label="Message" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="status" label="Status" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="provider_message_id" label="Provider ID" :active="$sortField" :direction="$sortDirection" />
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                         </tr>
                     </thead>
@@ -169,12 +210,7 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
-    @if ($logs->hasPages())
-        <div class="mt-2">
-            {{ $logs->links() }}
-        </div>
-    @endif
+    <x-table-pagination :paginator="$logs" :options="$perPageOptions" />
 
     {{-- Create Modal --}}
     @if ($showCreateModal)

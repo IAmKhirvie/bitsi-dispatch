@@ -2,17 +2,35 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\HasTableControls;
 use App\Models\TripCode;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class TripCodeTable extends Component
 {
+    use HasTableControls;
     use WithPagination;
 
     public string $search = '';
     public string $directionFilter = '';
     public bool $showTrashed = false;
+    public int $perPage = 15;
+    public array $perPageOptions = [5, 10, 15, 20, 30, 40, 50, 100];
+    public string $sortField = 'code';
+    public string $sortDirection = 'asc';
+
+    protected array $sortableFields = [
+        'code',
+        'operator',
+        'direction',
+        'origin_terminal',
+        'destination_terminal',
+        'scheduled_departure_time',
+        'bus_type',
+        'is_active',
+        'created_at',
+    ];
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -64,8 +82,8 @@ class TripCodeTable extends Component
                   ->orWhere('destination_terminal', 'like', "%{$this->search}%");
             }))
             ->when($this->directionFilter, fn ($q) => $q->where('direction', $this->directionFilter))
-            ->latest()
-            ->paginate(15);
+            ->tap(fn ($query) => $this->applyTableSort($query))
+            ->paginate($this->perPage);
 
         return view('livewire.admin.trip-code-table', compact('tripCodes'));
     }

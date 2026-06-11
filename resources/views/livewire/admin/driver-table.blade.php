@@ -6,11 +6,14 @@
             <h1 class="text-2xl font-bold">Drivers</h1>
             <p class="text-sm text-muted-foreground">Manage bus drivers and their status</p>
         </div>
-        <a href="{{ route('admin.drivers.create') }}"
-           class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Driver
-        </a>
+        <div class="flex items-center gap-3">
+            <x-export-buttons resource="drivers" />
+            <a href="{{ route('admin.drivers.create') }}"
+               class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Driver
+            </a>
+        </div>
     </div>
 
     {{-- Flash Messages --}}
@@ -61,11 +64,11 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Phone</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">License Number</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Active</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+                            <x-sortable-th field="name" label="Name" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="phone" label="Phone" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="license_number" label="License Number" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="is_active" label="Active" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="status" label="Status" :active="$sortField" :direction="$sortDirection" />
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Quick Status</th>
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                         </tr>
@@ -157,10 +160,5 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
-    @if ($drivers->hasPages())
-        <div class="mt-2">
-            {{ $drivers->links() }}
-        </div>
-    @endif
+    <x-table-pagination :paginator="$drivers" :options="$perPageOptions" />
 </div>

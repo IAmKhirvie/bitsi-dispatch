@@ -4,7 +4,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BarChart3, Bus, Clock, History, LayoutGrid, Route, Truck, UserCheck, Users } from 'lucide-vue-next';
+import { BarChart3, Bus, Clock, History, LayoutGrid, Route, Trash2, Truck, UserCheck, Users } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
@@ -24,6 +24,7 @@ const adminNavItems: NavItem[] = [
     { title: 'Vehicles', href: '/admin/vehicles', icon: Truck },
     { title: 'Drivers', href: '/admin/drivers', icon: UserCheck },
     { title: 'Attendance', href: '/admin/attendance', icon: Clock },
+    { title: 'Trash', href: '/admin/trash', icon: Trash2 },
 ];
 </script>
 
@@ -33,7 +34,7 @@ const adminNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="route('dashboard')">
+                        <Link :href="route('dashboard')" prefetch>
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>

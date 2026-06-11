@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Dispatch;
 
+use App\Actions\Dispatch\TransitionStatus;
+use App\Enums\DispatchStatus;
 use App\Http\Controllers\Controller;
 use App\Models\DispatchDay;
 use App\Models\DispatchEntry;
@@ -22,6 +24,7 @@ class DispatchEntryController extends Controller
             'driver2_id' => 'nullable|exists:drivers,id',
             'brand' => 'nullable|string|max:100',
             'bus_number' => 'nullable|string|max:20',
+            'seating_capacity' => 'nullable|integer|min:0|max:120',
             'route' => 'nullable|string|max:200',
             'bus_type' => 'nullable|string',
             'departure_terminal' => 'nullable|string|max:100',
@@ -51,6 +54,7 @@ class DispatchEntryController extends Controller
             'driver2_id' => 'nullable|exists:drivers,id',
             'brand' => 'nullable|string|max:100',
             'bus_number' => 'nullable|string|max:20',
+            'seating_capacity' => 'nullable|integer|min:0|max:120',
             'route' => 'nullable|string|max:200',
             'bus_type' => 'nullable|string',
             'departure_terminal' => 'nullable|string|max:100',
@@ -74,19 +78,26 @@ class DispatchEntryController extends Controller
         return redirect()->back();
     }
 
-    public function updateStatus(Request $request, DispatchDay $dispatchDay, DispatchEntry $entry): RedirectResponse
+    public function updateStatus(Request $request, DispatchDay $dispatchDay, DispatchEntry $entry, TransitionStatus $transition): RedirectResponse
     {
         $validated = $request->validate([
             'status' => 'required|string|in:scheduled,departed,on_route,delayed,cancelled,arrived',
+            'kmr' => 'nullable|integer|min:0',
         ]);
 
-        $entry->update($validated);
+        $transition->execute(
+            $entry,
+            DispatchStatus::from($validated['status']),
+            $request->user(),
+            $validated['kmr'] ?? null,
+        );
 
         return redirect()->back();
     }
 
     public function autofill(TripCode $tripCode): JsonResponse
     {
+        $vehicle = $tripCode->defaultVehicle;
         return response()->json([
             'trip_code_id' => $tripCode->id,
             'route' => $tripCode->route_display,
@@ -95,6 +106,11 @@ class DispatchEntryController extends Controller
             'arrival_terminal' => $tripCode->destination_terminal,
             'scheduled_departure' => $tripCode->scheduled_departure_time,
             'direction' => $tripCode->direction->value,
+            'vehicle_id' => $vehicle?->id,
+            'bus_number' => $vehicle?->bus_number,
+            'brand' => $vehicle?->brand ?? $tripCode->default_brand,
+            'seating_capacity' => $vehicle?->seating_capacity ?? $tripCode->default_seating_capacity,
+            'current_kmr' => $vehicle?->current_kmr,
         ]);
     }
 }

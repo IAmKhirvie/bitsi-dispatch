@@ -3,14 +3,17 @@
 <div class="flex h-full flex-1 flex-col gap-4 p-4">
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold">Vehicles</h1>
-            <p class="text-sm text-muted-foreground">Manage fleet vehicles and maintenance status</p>
+            <h1 class="text-2xl font-bold">Buses</h1>
+            <p class="text-sm text-muted-foreground">Manage fleet buses and maintenance status</p>
         </div>
-        <a href="{{ route('admin.vehicles.create') }}"
-           class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Vehicle
-        </a>
+        <div class="flex items-center gap-3">
+            <x-export-buttons resource="vehicles" />
+            <a href="{{ route('admin.vehicles.create') }}"
+               class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Bus
+            </a>
+        </div>
     </div>
 
     {{-- Flash Messages --}}
@@ -56,26 +59,28 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Bus No.</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Brand</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Plate No.</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Total KM</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">PMS</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Next PMS</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Idle Days</th>
+                            <x-sortable-th field="bus_number" label="Bus No." :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="brand" label="Brand" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="bus_type" label="Type" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="plate_number" label="Plate No." :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="status" label="Status" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="current_location" label="Location" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="current_kmr" label="Current KMR" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="last_pms_kmr" label="PMS Status" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="next_pms_date" label="Next PMS" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="idle_days" label="Idle Days" :active="$sortField" :direction="$sortDirection" />
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($vehicles as $vehicle)
                             @php
-                                $pmsPercentage = $vehicle->pms_percentage ?? 0;
-                                $isPmsOver = ($vehicle->current_pms_value ?? 0) > ($vehicle->pms_threshold ?? 0);
-                                $isPmsWarning = $pmsPercentage >= 80 && !$isPmsOver;
+                                $pmsBand = $vehicle->pms_band ?? 'good';
+                                $kmSincePms = $vehicle->km_since_pms ?? 0;
+                                $isPmsOver = $pmsBand === 'overdue';
+                                $isPmsWarning = $pmsBand === 'warning';
                                 $rowClass = $isPmsOver ? 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100/50 dark:hover:bg-red-900/30' : ($isPmsWarning ? 'bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100/50 dark:hover:bg-orange-900/30' : 'hover:bg-muted/30');
+                                $bandBadgeClass = $isPmsOver ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' : ($isPmsWarning ? 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300');
                             @endphp
                             <tr class="border-b last:border-0 transition-colors {{ $rowClass }} {{ $vehicle->trashed() ? 'opacity-60' : '' }}">
                                 <td class="px-4 py-3 font-semibold {{ $isPmsOver ? 'text-red-700 dark:text-red-400' : '' }}">{{ $vehicle->bus_number }}</td>
@@ -89,23 +94,13 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">{{ $vehicle->current_location ?? '--' }}</td>
-                                <td class="px-4 py-3">{{ $vehicle->total_kilometers ? number_format($vehicle->total_kilometers) : '--' }}</td>
+                                <td class="px-4 py-3">{{ $vehicle->current_kmr ? number_format($vehicle->current_kmr) : '--' }}</td>
                                 <td class="px-4 py-3">
-                                    @php
-                                        $pmsBarColor = $isPmsOver ? 'bg-red-600' : ($pmsPercentage >= 80 ? 'bg-orange-500' : ($pmsPercentage >= 60 ? 'bg-yellow-500' : 'bg-green-500'));
-                                    @endphp
                                     <div class="flex items-center gap-2">
-                                        <div class="h-2 w-16 rounded-full bg-gray-200 dark:bg-gray-700">
-                                            <div class="h-2 rounded-full transition-all {{ $pmsBarColor }}"
-                                                 style="width: {{ min($pmsPercentage, 100) }}%">
-                                            </div>
-                                        </div>
-                                        <span class="text-xs text-muted-foreground {{ $isPmsOver ? 'font-semibold text-red-700 dark:text-red-400' : '' }}">{{ $vehicle->current_pms_value ?? 0 }}/{{ $vehicle->pms_threshold ?? 0 }}</span>
-                                        @if ($isPmsOver)
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                                        @elseif ($vehicle->is_pms_warning)
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                                        @endif
+                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold uppercase {{ $bandBadgeClass }}">
+                                            {{ $pmsBand }}
+                                        </span>
+                                        <span class="text-xs text-muted-foreground">{{ number_format($kmSincePms) }} km</span>
                                     </div>
                                 </td>
                                 <td class="px-4 py-3">
@@ -160,10 +155,5 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
-    @if ($vehicles->hasPages())
-        <div class="mt-2">
-            {{ $vehicles->links() }}
-        </div>
-    @endif
+    <x-table-pagination :paginator="$vehicles" :options="$perPageOptions" />
 </div>

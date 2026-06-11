@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Report;
 
+use App\Livewire\Concerns\HasTableControls;
 use App\Models\DailySummary;
 use App\Models\DailySummaryItem;
 use Livewire\Component;
@@ -10,11 +11,21 @@ use Illuminate\Support\Facades\DB;
 
 class ReportSummaryTable extends Component
 {
+    use HasTableControls;
     use WithPagination;
 
     public string $dateFrom = '';
     public string $dateTo = '';
     public string $reportType = 'daily'; // daily, weekly, monthly
+    public int $perPage = 15;
+    public array $perPageOptions = [5, 10, 15, 20, 30, 40, 50, 100];
+    public string $sortField = 'service_date';
+    public string $sortDirection = 'desc';
+
+    protected array $sortableFields = [
+        'service_date',
+        'total_trips',
+    ];
 
     protected $queryString = [
         'dateFrom' => ['as' => 'date_from'],
@@ -84,9 +95,12 @@ class ReportSummaryTable extends Component
 
         $summaries = $query
             ->join('dispatch_days', 'daily_summaries.dispatch_day_id', '=', 'dispatch_days.id')
-            ->orderBy('dispatch_days.service_date', 'desc')
             ->select('daily_summaries.*')
-            ->paginate(15);
+            ->tap(fn ($query) => $this->applyTableSort($query, [
+                'service_date' => 'dispatch_days.service_date',
+                'total_trips' => 'daily_summaries.total_trips',
+            ]))
+            ->paginate($this->perPage);
 
         return view('livewire.report.report-summary-table', compact('summaries', 'totals', 'daysCount'));
     }

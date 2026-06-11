@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\HasTableControls;
 use App\Enums\SmsStatus;
 use App\Jobs\SendSmsJob;
 use App\Models\SmsLog;
@@ -10,12 +11,19 @@ use Livewire\WithPagination;
 
 class SmsLogTable extends Component
 {
+    use HasTableControls;
     use WithPagination;
 
     public string $search = '';
     public string $statusFilter = '';
     public string $dateFrom = '';
     public string $dateTo = '';
+    public int $perPage = 20;
+    public array $perPageOptions = [5, 10, 15, 20, 30, 40, 50, 100];
+    public string $sortField = 'created_at';
+    public string $sortDirection = 'desc';
+
+    protected array $sortableFields = ['created_at', 'recipient_phone', 'message', 'status', 'provider_message_id', 'sent_at'];
 
     // Modal state
     public bool $showCreateModal = false;
@@ -201,8 +209,8 @@ class SmsLogTable extends Component
             ->when($this->statusFilter, fn ($q) => $q->where('status', $this->statusFilter))
             ->when($this->dateFrom, fn ($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
             ->when($this->dateTo, fn ($q) => $q->whereDate('created_at', '<=', $this->dateTo))
-            ->latest()
-            ->paginate(20);
+            ->tap(fn ($query) => $this->applyTableSort($query))
+            ->paginate($this->perPage);
 
         $todayCounts = SmsLog::whereDate('created_at', today())
             ->selectRaw('status, COUNT(*) as count')

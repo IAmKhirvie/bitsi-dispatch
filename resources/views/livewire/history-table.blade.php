@@ -1,7 +1,23 @@
 <div class="flex h-full flex-1 flex-col gap-4 p-4">
-    <div>
-        <h1 class="text-2xl font-bold">Dispatch History</h1>
-        <p class="text-sm text-muted-foreground">Search and filter past dispatch entries</p>
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold">Dispatch History</h1>
+            <p class="text-sm text-muted-foreground">Search and filter past dispatch entries</p>
+        </div>
+
+        <x-schedule-export-buttons
+            period-route="history.export-period"
+            custom-route="history.export-custom"
+            :date-from="$dateFrom"
+            :date-to="$dateTo"
+            :filtered-query="[
+                'date_from' => $dateFrom,
+                'date_to' => $dateTo,
+                'search' => $search,
+                'direction' => $direction,
+                'status' => $status,
+            ]"
+        />
     </div>
 
     @php
@@ -104,17 +120,17 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Brand</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Bus No.</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Trip Code</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Route</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Dir.</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Sched.</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actual</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Driver</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Remarks</th>
+                            <x-sortable-th field="service_date" label="Date" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="brand" label="Brand" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="bus_number" label="Bus No." :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="trip" label="Trip Code" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="route" label="Route" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="direction" label="Dir." :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="scheduled_departure" label="Sched." :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="actual_departure" label="Actual" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="driver" label="Driver" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="status" label="Status" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="remarks" label="Remarks" :active="$sortField" :direction="$sortDirection" />
                         </tr>
                     </thead>
                     <tbody>
@@ -161,10 +177,5 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
-    @if ($entries->hasPages())
-        <div class="mt-2">
-            {{ $entries->links() }}
-        </div>
-    @endif
+    <x-table-pagination :paginator="$entries" :options="$perPageOptions" />
 </div>

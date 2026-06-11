@@ -83,6 +83,9 @@ class VehicleController extends Controller
     {
         return [
             'brand' => 'required|string|min:2|max:100',
+            'seating_capacity' => 'nullable|integer|min:0|max:120',
+            'current_kmr' => 'nullable|integer|min:0',
+            'last_pms_kmr' => 'nullable|integer|min:0',
             'bus_type' => ['required', 'string', new Enum(BusType::class)],
             'status' => ['required', 'string', new Enum(VehicleStatus::class)],
             'current_location' => 'nullable|string|max:255',

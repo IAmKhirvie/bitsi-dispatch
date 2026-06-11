@@ -21,20 +21,27 @@ class Vehicle extends Model
 
     protected $fillable = [
         "bus_number",
+        "gps_device_id",
         "brand",
         "bus_type",
+        "seating_capacity",
         "plate_number",
         "status",
         "current_location",
         "pms_unit",
         "pms_threshold",
         "current_pms_value",
+        "current_kmr",
+        "last_pms_kmr",
         "total_kilometers",
         "last_pms_date",
         "pms_interval_months",
         "next_pms_date",
         "idle_days",
         "last_used_at",
+        "last_lat",
+        "last_lng",
+        "last_position_at",
     ];
 
     protected $casts = [
@@ -43,13 +50,41 @@ class Vehicle extends Model
         "pms_unit" => PmsUnit::class,
         "pms_threshold" => "integer",
         "current_pms_value" => "integer",
+        "current_kmr" => "integer",
+        "last_pms_kmr" => "integer",
+        "seating_capacity" => "integer",
         "total_kilometers" => "integer",
         "last_pms_date" => "datetime",
         "pms_interval_months" => "integer",
         "next_pms_date" => "date",
         "idle_days" => "integer",
         "last_used_at" => "datetime",
+        "last_lat" => "float",
+        "last_lng" => "float",
+        "last_position_at" => "datetime",
     ];
+
+    public function getKmSincePmsAttribute(): int
+    {
+        return max(0, ($this->current_kmr ?? 0) - ($this->last_pms_kmr ?? 0));
+    }
+
+    public function getPmsBandAttribute(): string
+    {
+        $threshold = (int) ($this->pms_threshold ?? 0);
+        if ($threshold <= 0) return 'good';
+        $ratio = (float) (PmsSetting::query()->where('is_default', true)->value('warning_ratio') ?? 0.8);
+        if ($ratio <= 0 || $ratio > 1) $ratio = 0.8;
+        $km = $this->km_since_pms;
+        if ($km < (int) ($threshold * $ratio)) return 'good';
+        if ($km < $threshold) return 'warning';
+        return 'overdue';
+    }
+
+    public function positions(): HasMany
+    {
+        return $this->hasMany(VehiclePosition::class)->orderByDesc('recorded_at');
+    }
 
     public function dispatchEntries(): HasMany
     {

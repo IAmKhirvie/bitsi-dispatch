@@ -43,11 +43,7 @@
                     <label for="password" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
                         Password
                     </label>
-                    @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="text-sm hover:decoration-current! text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out dark:decoration-neutral-500" tabindex="5">
-                            Forgot password?
-                        </a>
-                    @endif
+                    
                 </div>
                 <input
                     id="password"
@@ -77,6 +73,11 @@
                     />
                     <span>Remember me</span>
                 </label>
+                @if (Route::has('password.request'))
+                    <a href="{{ route('password.request') }}" class="text-sm hover:decoration-current! text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out dark:decoration-neutral-500" tabindex="5">
+                        Forgot password?
+                    </a>
+                @endif
             </div>
 
             {{-- Submit --}}

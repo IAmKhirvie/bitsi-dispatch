@@ -25,6 +25,23 @@
 
 <div class="grid grid-cols-2 gap-4">
     <div class="space-y-2">
+        <label for="seating_capacity" class="text-sm font-medium leading-none">Seating Capacity</label>
+        <input id="seating_capacity" name="seating_capacity" type="number" min="0" max="120" value="{{ old('seating_capacity', $v->seating_capacity ?? '') }}" placeholder="e.g. 47" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+        @error('seating_capacity')
+            <p class="text-xs text-red-500">{{ $message }}</p>
+        @enderror
+    </div>
+    <div class="space-y-2">
+        <label for="current_kmr" class="text-sm font-medium leading-none">Current KMR (Odometer)</label>
+        <input id="current_kmr" name="current_kmr" type="number" min="0" value="{{ old('current_kmr', $v->current_kmr ?? 0) }}" placeholder="e.g. 125000" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+        @error('current_kmr')
+            <p class="text-xs text-red-500">{{ $message }}</p>
+        @enderror
+    </div>
+</div>
+
+<div class="grid grid-cols-2 gap-4">
+    <div class="space-y-2">
         <label for="bus_type" class="text-sm font-medium leading-none">Bus Type</label>
         <select id="bus_type" name="bus_type" required class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
             <option value="">-- Select Bus Type --</option>
@@ -125,6 +142,17 @@
             @enderror
         </div>
     </div>
+    <div class="mt-4">
+        <div class="space-y-2">
+            <label for="last_pms_kmr" class="text-sm font-medium leading-none">Last PMS KMR (Odometer at last service)</label>
+            <input id="last_pms_kmr" name="last_pms_kmr" type="number" min="0" value="{{ old('last_pms_kmr', $v->last_pms_kmr ?? 0) }}" placeholder="e.g. 115000" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+            <p class="text-xs text-muted-foreground">PMS status: Good &lt; 8K km · Warning 8-10K · Overdue ≥ 10K km since last PMS</p>
+            @error('last_pms_kmr')
+                <p class="text-xs text-red-500">{{ $message }}</p>
+            @enderror
+        </div>
+    </div>
+
     <div class="mt-4 grid grid-cols-2 gap-4">
         <div class="space-y-2">
             <label for="last_pms_date" class="text-sm font-medium leading-none">Last PMS Date</label>

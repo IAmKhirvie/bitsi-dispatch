@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminExportController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\DriverController;
 use App\Http\Controllers\Admin\DriverNotificationController;
+use App\Http\Controllers\Admin\TrashController;
 use App\Http\Controllers\Admin\TripCodeController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VehicleController;
@@ -11,6 +13,7 @@ use App\Http\Controllers\Dispatch\DispatchDayController;
 use App\Http\Controllers\Dispatch\DispatchEntryController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\Report\ReportController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,6 +23,8 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::get('search', SearchController::class)->name('search.index');
+    Route::get('search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 
     // Dispatch
     Route::get('dispatch', [DispatchDayController::class, 'index'])->name('dispatch.index');
@@ -43,10 +48,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/export/pdf/{date}', [ReportController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/export/weekly-excel', [ReportController::class, 'exportWeeklyExcel'])->name('export-weekly-excel');
         Route::get('/export/monthly-excel', [ReportController::class, 'exportMonthlyExcel'])->name('export-monthly-excel');
+        Route::get('/export/schedule/{period}', [ReportController::class, 'exportSchedulePeriod'])->name('export-schedule-period');
+        Route::get('/export/schedule', [ReportController::class, 'exportScheduleCustom'])->name('export-schedule-custom');
     });
 
     // History
     Route::get('history', [HistoryController::class, 'index'])->name('history.index');
+    Route::get('history/export/{period}', [HistoryController::class, 'exportPeriod'])->name('history.export-period');
+    Route::get('history/export', [HistoryController::class, 'exportCustom'])->name('history.export-custom');
+
+    // Fleet GPS Map
+    Route::get('fleet-map', fn () => view('fleet-map.index'))->name('fleet-map');
 
     // Admin routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
@@ -64,6 +76,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('drivers/{driver}/send-schedule-sms', [DriverNotificationController::class, 'sendScheduleSms'])->name('drivers.send-schedule-sms');
         Route::post('drivers/{driver}/send-custom-sms', [DriverNotificationController::class, 'sendCustomSms'])->name('drivers.send-custom-sms');
         Route::get('drivers/{driver}/schedule-preview', [DriverNotificationController::class, 'getSchedulePreview'])->name('drivers.schedule-preview');
+
+        // Trash bin (soft-deleted records)
+        Route::prefix('trash')->name('trash.')->group(function () {
+            Route::get('/', [TrashController::class, 'overview'])->name('overview');
+            Route::get('{resource}', [TrashController::class, 'index'])->name('index');
+            Route::post('{resource}/{id}/restore', [TrashController::class, 'restore'])->name('restore');
+            Route::delete('{resource}/{id}', [TrashController::class, 'forceDelete'])->name('force-delete');
+            Route::delete('{resource}', [TrashController::class, 'emptyTrash'])->name('empty');
+        });
 
         // Audit Logs
         Route::get('audit-logs', fn () => view('admin.audit-logs.index'))->name('audit-logs.index');
@@ -84,6 +105,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
         Route::get('/api/attendance/alerts', [AttendanceController::class, 'getAlerts'])->name('api.attendance.alerts');
         Route::get('/api/attendance/pending', [AttendanceController::class, 'getPendingAttendance'])->name('api.attendance.pending');
+
+        // ─── Export Routes ────────────────────────────────────────
+        Route::prefix('export')->name('export.')->group(function () {
+            Route::get('users/{period}', [AdminExportController::class, 'exportUsers'])->name('users');
+            Route::get('users', [AdminExportController::class, 'exportUsersCustom'])->name('users.custom');
+            Route::get('drivers/{period}', [AdminExportController::class, 'exportDrivers'])->name('drivers');
+            Route::get('drivers', [AdminExportController::class, 'exportDriversCustom'])->name('drivers.custom');
+            Route::get('vehicles/{period}', [AdminExportController::class, 'exportVehicles'])->name('vehicles');
+            Route::get('vehicles', [AdminExportController::class, 'exportVehiclesCustom'])->name('vehicles.custom');
+            Route::get('trip-codes/{period}', [AdminExportController::class, 'exportTripCodes'])->name('trip-codes');
+            Route::get('trip-codes', [AdminExportController::class, 'exportTripCodesCustom'])->name('trip-codes.custom');
+            Route::get('attendance/{period}', [AdminExportController::class, 'exportAttendance'])->name('attendance');
+            Route::get('attendance', [AdminExportController::class, 'exportAttendanceCustom'])->name('attendance.custom');
+            Route::get('audit-logs/{period}', [AdminExportController::class, 'exportAuditLogs'])->name('audit-logs');
+            Route::get('audit-logs', [AdminExportController::class, 'exportAuditLogsCustom'])->name('audit-logs.custom');
+            Route::get('sms-logs/{period}', [AdminExportController::class, 'exportSmsLogs'])->name('sms-logs');
+            Route::get('sms-logs', [AdminExportController::class, 'exportSmsLogsCustom'])->name('sms-logs.custom');
+        });
     });
 });
 

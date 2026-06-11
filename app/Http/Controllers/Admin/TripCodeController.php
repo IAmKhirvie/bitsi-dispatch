@@ -6,6 +6,7 @@ use App\Enums\BusType;
 use App\Enums\Direction;
 use App\Http\Controllers\Controller;
 use App\Models\TripCode;
+use App\Models\Vehicle;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -21,7 +22,9 @@ class TripCodeController extends Controller
 
     public function create(): View
     {
-        return view('admin.trip-codes.create');
+        return view('admin.trip-codes.create', [
+            'vehicles' => Vehicle::orderBy('bus_number')->get(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -39,6 +42,7 @@ class TripCodeController extends Controller
     {
         return view('admin.trip-codes.edit', [
             'tripCode' => $tripCode,
+            'vehicles' => Vehicle::orderBy('bus_number')->get(),
         ]);
     }
 
@@ -71,6 +75,9 @@ class TripCodeController extends Controller
     {
         return [
             'operator' => 'required|string|min:2|max:255',
+            'default_vehicle_id' => 'nullable|exists:vehicles,id',
+            'default_brand' => 'nullable|string|max:100',
+            'default_seating_capacity' => 'nullable|integer|min:0|max:120',
             'origin_terminal' => 'required|string|min:2|max:255',
             'destination_terminal' => 'required|string|min:2|max:255',
             'bus_type' => ['required', 'string', new Enum(BusType::class)],

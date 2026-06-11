@@ -1,14 +1,23 @@
 <div>
     {{-- Report Type Tabs --}}
-    <div class="flex items-center gap-1 rounded-lg bg-muted p-1 w-fit">
-        @foreach (['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly'] as $type => $label)
-            <button
-                wire:click="$set('reportType', '{{ $type }}')"
-                class="rounded-md px-4 py-2 text-sm font-medium transition-colors {{ $reportType === $type ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground' }}"
-            >
-                {{ $label }}
-            </button>
-        @endforeach
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex w-fit items-center gap-1 rounded-lg bg-muted p-1">
+            @foreach (['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly'] as $type => $label)
+                <button
+                    wire:click="$set('reportType', '{{ $type }}')"
+                    class="rounded-md px-4 py-2 text-sm font-medium transition-colors {{ $reportType === $type ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground' }}"
+                >
+                    {{ $label }}
+                </button>
+            @endforeach
+        </div>
+
+        <x-schedule-export-buttons
+            period-route="reports.export-schedule-period"
+            custom-route="reports.export-schedule-custom"
+            :date-from="$dateFrom"
+            :date-to="$dateTo"
+        />
     </div>
 
     {{-- Date Range Filter --}}
@@ -113,13 +122,21 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">
-                                {{ $reportType === 'daily' ? 'Date' : ($reportType === 'weekly' ? 'Week' : 'Month') }}
-                            </th>
+                            @if ($reportType === 'daily')
+                                <x-sortable-th field="service_date" label="Date" :active="$sortField" :direction="$sortDirection" />
+                            @else
+                                <th class="px-4 py-3 text-left font-medium text-muted-foreground">
+                                    {{ $reportType === 'weekly' ? 'Week' : 'Month' }}
+                                </th>
+                            @endif
                             @if ($reportType !== 'daily')
                                 <th class="px-4 py-3 text-right font-medium text-muted-foreground">Days</th>
                             @endif
-                            <th class="px-4 py-3 text-right font-medium text-muted-foreground">Total</th>
+                            @if ($reportType === 'daily')
+                                <x-sortable-th field="total_trips" label="Total" :active="$sortField" :direction="$sortDirection" class="text-right" />
+                            @else
+                                <th class="px-4 py-3 text-right font-medium text-muted-foreground">Total</th>
+                            @endif
                             <th class="px-4 py-3 text-right font-medium text-muted-foreground">SB</th>
                             <th class="px-4 py-3 text-right font-medium text-muted-foreground">NB</th>
                             <th class="px-4 py-3 text-right font-medium text-muted-foreground">Naga</th>
@@ -233,10 +250,9 @@
             </div>
         </div>
 
-        {{-- Pagination (daily only) --}}
-        @if($reportType === 'daily' && $summaries && $summaries->hasPages())
+        @if($reportType === 'daily' && $summaries)
             <div class="border-t px-6 py-4">
-                {{ $summaries->links() }}
+                <x-table-pagination :paginator="$summaries" :options="$perPageOptions" />
             </div>
         @endif
     </div>

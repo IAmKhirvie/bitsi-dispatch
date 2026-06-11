@@ -1,5 +1,0 @@
-{
-  "php": {
-    "extensions": ["gd", "zip", "iconv", "simplexml", "xmlreader", "xmlwriter", "zlib"]
-  }
-}

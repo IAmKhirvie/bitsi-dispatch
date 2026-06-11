@@ -437,15 +437,6 @@ Vehicles track current PMS value against a configurable threshold (by km or trip
 
 ## Production Deployment
 
-### Quick Deploy (One-Click Script)
-
-For a fresh production server, run the included deployment script:
-
-```bash
-chmod +x deploy-production.sh
-./deploy-production.sh
-```
-
 ### Manual Deployment Steps
 
 ```bash
@@ -505,33 +496,21 @@ sudo systemctl restart apache2
 
 #### Option B: Nginx (recommended for high traffic)
 
-Use the included `nginx-production.conf` template:
+Use a standard Laravel-on-Nginx server block — point `root` at `public/`, pass `.php` requests to `php-fpm`, and rewrite missing files to `index.php`. The official Laravel docs cover the canonical config.
 
-```bash
-# 1. Edit the config with your domain and paths
-sudo cp nginx-production.conf /etc/nginx/sites-available/bitsi-dispatch
-# Edit /etc/nginx/sites-available/bitsi-dispatch — change your-domain.com and paths
+### PHP OPcache (Recommended for Performance)
 
-# 2. Enable the site
-sudo ln -s /etc/nginx/sites-available/bitsi-dispatch /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl reload nginx
+Enable and tune opcache in your `php.ini` or a drop-in conf file:
+
+```ini
+opcache.enable=1
+opcache.memory_consumption=256
+opcache.max_accelerated_files=20000
+opcache.validate_timestamps=0   ; clear opcache on deploy
+opcache.huge_code_pages=1       ; Linux only, ~10% perf gain
 ```
 
-### PHP OPcache (Critical for Performance)
-
-Copy the included `php-opcache.ini` to your PHP configuration:
-
-```bash
-sudo cp php-opcache.ini /etc/php/8.2/fpm/conf.d/99-bitsi-opcache.ini
-sudo systemctl restart php8.2-fpm
-```
-
-Key settings:
-- `opcache.memory_consumption=256` — 256MB for compiled scripts
-- `opcache.validate_timestamps=0` — No file checks on every request (cleared on deploy)
-- `opcache.max_accelerated_files=20000` — Enough for Laravel + dependencies
-- `opcache.huge_code_pages=1` — ~10% perf gain (Linux only)
+Remember to clear opcache on every deploy (`php artisan optimize` + `php-fpm` reload).
 
 ### Environment Configuration
 

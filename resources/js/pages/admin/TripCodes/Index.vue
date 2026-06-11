@@ -1,11 +1,24 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Button } from '@/components/ui/button';
+import ExportButtons from '@/components/ExportButtons.vue';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { type BreadcrumbItem, type PaginatedData, type TripCode } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Plus, Pencil, Trash2, Search } from 'lucide-vue-next';
+import { Plus, Pencil, Trash2, Search, Check, X } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -19,7 +32,7 @@ const props = defineProps<{
 }>();
 
 const search = ref(props.filters.search || '');
-const directionFilter = ref(props.filters.direction || '');
+const directionFilter = ref(props.filters.direction || 'all');
 
 let searchTimeout: ReturnType<typeof setTimeout>;
 
@@ -28,18 +41,30 @@ watch([search, directionFilter], () => {
     searchTimeout = setTimeout(() => {
         router.get('/admin/trip-codes', {
             search: search.value || undefined,
-            direction: directionFilter.value || undefined,
+            direction: directionFilter.value === 'all' ? undefined : directionFilter.value,
         }, {
             preserveState: true,
             preserveScroll: true,
         });
-    }, 300);
+    }, 150);
 });
 
+function toggleStatus(tripCode: TripCode) {
+    // Optimistic UI update - instantly toggle for immediate feedback
+    tripCode.is_active = !tripCode.is_active;
+    
+    router.patch(`/admin/trip-codes/${tripCode.id}/toggle-active`, {}, {
+        preserveScroll: true,
+        preserveState: true,
+        onError: () => {
+            // Revert on error
+            tripCode.is_active = !tripCode.is_active;
+        },
+    });
+}
+
 function deleteTripCode(tripCode: TripCode) {
-    if (confirm(`Are you sure you want to delete trip code ${tripCode.code}?`)) {
-        router.delete(`/admin/trip-codes/${tripCode.id}`);
-    }
+    router.delete(`/admin/trip-codes/${tripCode.id}`, { preserveScroll: true });
 }
 </script>
 
@@ -53,12 +78,15 @@ function deleteTripCode(tripCode: TripCode) {
                     <h1 class="text-2xl font-bold">Trip Codes</h1>
                     <p class="text-sm text-muted-foreground">Manage trip code definitions and routes</p>
                 </div>
-                <Button as-child>
-                    <Link href="/admin/trip-codes/create">
-                        <Plus class="mr-2 h-4 w-4" />
-                        Add Trip Code
-                    </Link>
-                </Button>
+                <div class="flex items-center gap-2">
+                    <ExportButtons entity="trip-codes" />
+                    <Button as-child>
+                        <Link href="/admin/trip-codes/create" prefetch>
+                            <Plus class="mr-2 h-4 w-4" />
+                            Add Trip Code
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             <!-- Filters -->
@@ -67,11 +95,16 @@ function deleteTripCode(tripCode: TripCode) {
                     <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input v-model="search" placeholder="Search trip codes..." class="pl-9" />
                 </div>
-                <select v-model="directionFilter" class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
-                    <option value="">All Directions</option>
-                    <option value="SB">Southbound (SB)</option>
-                    <option value="NB">Northbound (NB)</option>
-                </select>
+                <Select v-model="directionFilter">
+                    <SelectTrigger class="w-[200px]">
+                        <SelectValue placeholder="All directions" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Directions</SelectItem>
+                        <SelectItem value="SB">Southbound (SB)</SelectItem>
+                        <SelectItem value="NB">Northbound (NB)</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
 
             <!-- Table -->
@@ -108,21 +141,61 @@ function deleteTripCode(tripCode: TripCode) {
                                         </span>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
-                                            :class="tc.is_active ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'">
-                                            {{ tc.is_active ? 'Active' : 'Inactive' }}
-                                        </span>
+                                        <div class="flex items-center gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                class="h-7 w-7 rounded-full"
+                                                :class="tc.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300' : 'text-muted-foreground hover:text-green-600'"
+                                                :title="tc.is_active ? 'Active (click to deactivate)' : 'Set Active'"
+                                                @click="!tc.is_active && toggleStatus(tc)"
+                                            >
+                                                <Check class="h-3.5 w-3.5" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                class="h-7 w-7 rounded-full"
+                                                :class="!tc.is_active ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-300' : 'text-muted-foreground hover:text-red-600'"
+                                                :title="!tc.is_active ? 'Inactive (click to activate)' : 'Set Inactive'"
+                                                @click="tc.is_active && toggleStatus(tc)"
+                                            >
+                                                <X class="h-3.5 w-3.5" />
+                                            </Button>
+                                        </div>
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-2">
                                             <Button as-child variant="ghost" size="icon" class="h-8 w-8">
-                                                <Link :href="`/admin/trip-codes/${tc.id}/edit`">
+                                                <Link :href="`/admin/trip-codes/${tc.id}/edit`" prefetch>
                                                     <Pencil class="h-4 w-4" />
                                                 </Link>
                                             </Button>
-                                            <Button variant="ghost" size="icon" class="h-8 w-8 text-red-500 hover:text-red-700" @click="deleteTripCode(tc)">
-                                                <Trash2 class="h-4 w-4" />
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger
+                                                    :class="buttonVariants({ variant: 'ghost', size: 'icon' }) + ' h-8 w-8 text-destructive hover:text-destructive'"
+                                                    title="Delete trip code"
+                                                >
+                                                    <Trash2 class="h-4 w-4" />
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Delete trip code {{ tc.code }}?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            The trip code will be moved to Trash. Restore from Admin → Trash.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            :class="buttonVariants({ variant: 'destructive' })"
+                                                            @click="deleteTripCode(tc)"
+                                                        >
+                                                            Delete
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </div>
                                     </td>
                                 </tr>

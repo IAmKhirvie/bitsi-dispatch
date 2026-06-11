@@ -6,11 +6,14 @@
             <h1 class="text-2xl font-bold">Trip Codes</h1>
             <p class="text-sm text-muted-foreground">Manage trip code definitions and routes</p>
         </div>
-        <a href="{{ route('admin.trip-codes.create') }}"
-           class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Trip Code
-        </a>
+        <div class="flex items-center gap-3">
+            <x-export-buttons resource="trip-codes" />
+            <a href="{{ route('admin.trip-codes.create') }}"
+               class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Trip Code
+            </a>
+        </div>
     </div>
 
     {{-- Flash Messages --}}
@@ -56,13 +59,13 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Code</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Operator</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Route</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Bus Type</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Departure</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Direction</th>
-                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+                            <x-sortable-th field="code" label="Code" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="operator" label="Operator" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="origin_terminal" label="Route" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="bus_type" label="Bus Type" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="scheduled_departure_time" label="Departure" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="direction" label="Direction" :active="$sortField" :direction="$sortDirection" />
+                            <x-sortable-th field="is_active" label="Status" :active="$sortField" :direction="$sortDirection" />
                             <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
                         </tr>
                     </thead>
@@ -125,10 +128,5 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
-    @if ($tripCodes->hasPages())
-        <div class="mt-2">
-            {{ $tripCodes->links() }}
-        </div>
-    @endif
+    <x-table-pagination :paginator="$tripCodes" :options="$perPageOptions" />
 </div>

@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DriverAttendance extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     use \App\Traits\Auditable;
 
     protected $fillable = [
@@ -60,7 +61,7 @@ class DriverAttendance extends Model
      */
     public function scopeForDate(Builder $query, string $date): Builder
     {
-        return $query->where('attendance_date', $date);
+        return $query->where($query->getModel()->getTable() . '.attendance_date', $date);
     }
 
     /**

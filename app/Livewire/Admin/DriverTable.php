@@ -2,17 +2,25 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\HasTableControls;
 use App\Models\Driver;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class DriverTable extends Component
 {
+    use HasTableControls;
     use WithPagination;
 
     public string $search = '';
     public string $statusFilter = '';
     public bool $showTrashed = false;
+    public int $perPage = 15;
+    public array $perPageOptions = [5, 10, 15, 20, 30, 40, 50, 100];
+    public string $sortField = 'name';
+    public string $sortDirection = 'asc';
+
+    protected array $sortableFields = ['name', 'phone', 'license_number', 'status', 'is_active', 'created_at'];
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -68,8 +76,8 @@ class DriverTable extends Component
                   ->orWhere('license_number', 'like', "%{$this->search}%");
             }))
             ->when($this->statusFilter, fn ($q) => $q->where('status', $this->statusFilter))
-            ->latest()
-            ->paginate(15);
+            ->tap(fn ($query) => $this->applyTableSort($query))
+            ->paginate($this->perPage);
 
         return view('livewire.admin.driver-table', compact('drivers'));
     }

@@ -117,6 +117,7 @@ export interface DispatchEntry {
     arrival_terminal: string | null;
     scheduled_departure: string | null;
     actual_departure: string | null;
+    actual_arrival: string | null;
     direction: 'SB' | 'NB' | null;
     status: string;
     remarks: string | null;

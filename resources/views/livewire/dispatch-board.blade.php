@@ -9,6 +9,16 @@
             'arrived' => 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
         ];
         $statusOptions = ['scheduled', 'departed', 'on_route', 'delayed', 'cancelled', 'arrived'];
+        $sortHeaderClass = 'inline-flex w-full items-center gap-1 text-left font-medium text-muted-foreground transition-colors hover:text-foreground';
+        $sortIcon = function (string $field) use ($sortField, $sortDirection) {
+            if ($sortField !== $field) {
+                return '';
+            }
+
+            return $sortDirection === 'asc'
+                ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+        };
     @endphp
 
     {{-- Header with date picker --}}
@@ -18,6 +28,15 @@
             <p class="text-sm text-muted-foreground">Manage daily bus dispatch operations</p>
         </div>
         <div class="flex items-center gap-3">
+            <div class="relative">
+                <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input
+                    type="text"
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Search dispatch..."
+                    class="flex h-9 w-56 rounded-md border border-input bg-transparent px-3 py-1 pl-9 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                />
+            </div>
             <span class="text-xs text-muted-foreground" title="Auto-refreshes every 10 seconds">
                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 inline h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                 Live
@@ -89,56 +108,115 @@
                 <div>
                     <h3 class="text-base font-semibold leading-none tracking-tight">
                         Entries for {{ $dispatchDay->service_date }}
-                        <span class="ml-2 text-sm font-normal text-muted-foreground">({{ $dispatchDay->entries->count() }} entries)</span>
+                        <span class="ml-2 text-sm font-normal text-muted-foreground">({{ $entries->total() }} entries)</span>
                     </h3>
                 </div>
-                <button
-                    wire:click="$set('showAddDialog', true)"
-                    class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Add Entry
-                </button>
+                <div class="flex flex-wrap items-center justify-end gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-medium text-muted-foreground">Export:</span>
+                        <a href="{{ route('reports.export-excel', $dispatchDay->service_date, false) }}" class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground" title="Export daily Excel">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-3.5 w-3.5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
+                            Excel
+                        </a>
+                        <a href="{{ route('reports.export-pdf', $dispatchDay->service_date, false) }}" class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground" title="Export daily PDF">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-3.5 w-3.5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            PDF
+                        </a>
+                    </div>
+                    <button
+                        type="button"
+                        wire:click="$set('showAddDialog', true)"
+                        class="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Entry
+                    </button>
+                </div>
             </div>
+
+            @if (session('dispatch_error'))
+                <div class="mx-4 mb-2 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                    {{ session('dispatch_error') }}
+                </div>
+            @endif
+
             <div class="p-0">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-xs">
+                    <table class="min-w-[1120px] w-full text-xs table-fixed">
                         <thead>
                             <tr class="border-b bg-muted/50">
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">#</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Brand</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Bus No.</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Trip Code</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Route</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Bus Type</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Dep. Terminal</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Arr. Terminal</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Sched. Dep.</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Actual Dep.</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Dir.</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Driver 1</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Driver 2</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Status</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Remarks</th>
-                                <th class="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">Actions</th>
+                                <th class="w-8 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('sort_order')" class="{{ $sortHeaderClass }}">
+                                        #
+                                        {!! $sortIcon('sort_order') !!}
+                                    </button>
+                                </th>
+                                <th class="w-20 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('trip')" class="{{ $sortHeaderClass }}">
+                                        Trip
+                                        {!! $sortIcon('trip') !!}
+                                    </button>
+                                </th>
+                                <th class="w-24 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('bus_number')" class="{{ $sortHeaderClass }}">
+                                        Bus
+                                        {!! $sortIcon('bus_number') !!}
+                                    </button>
+                                </th>
+                                <th class="w-12 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('direction')" class="{{ $sortHeaderClass }}">
+                                        Dir
+                                        {!! $sortIcon('direction') !!}
+                                    </button>
+                                </th>
+                                <th class="w-36 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('route')" class="{{ $sortHeaderClass }}">
+                                        Route
+                                        {!! $sortIcon('route') !!}
+                                    </button>
+                                </th>
+                                <th class="w-24 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('scheduled_departure')" class="{{ $sortHeaderClass }}">
+                                        Times
+                                        {!! $sortIcon('scheduled_departure') !!}
+                                    </button>
+                                </th>
+                                <th class="w-40 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('driver')" class="{{ $sortHeaderClass }}">
+                                        Drivers
+                                        {!! $sortIcon('driver') !!}
+                                    </button>
+                                </th>
+                                <th class="w-48 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('status')" class="{{ $sortHeaderClass }}">
+                                        Status
+                                        {!! $sortIcon('status') !!}
+                                    </button>
+                                </th>
+                                <th class="w-56 px-2 py-2 text-left">
+                                    <button type="button" wire:click="sortBy('remarks')" class="{{ $sortHeaderClass }}">
+                                        Remarks
+                                        {!! $sortIcon('remarks') !!}
+                                    </button>
+                                </th>
+                                <th class="w-16 px-2 py-2 text-left font-medium text-muted-foreground">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($dispatchDay->entries as $index => $entry)
-                                <tr class="border-b hover:bg-muted/30 transition-colors">
-                                    <td class="whitespace-nowrap px-3 py-1.5 text-muted-foreground">{{ $index + 1 }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5 font-medium">{{ $entry->brand ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5 font-semibold">{{ $entry->bus_number ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->tripCode->code ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->route ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->bus_type ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->departure_terminal ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->arrival_terminal ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->scheduled_departure ? Str::substr($entry->scheduled_departure, 0, 5) : '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->actual_departure ? Str::substr($entry->actual_departure, 0, 5) : '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">
-                                        @if ($entry->direction)
-                                            @php $dir = $entry->direction?->value ?? $entry->direction; @endphp
+                            @forelse ($entries as $index => $entry)
+                                @php
+                                    $entryStatus = $entry->status?->value ?? $entry->status ?? 'scheduled';
+                                    $dir = $entry->direction?->value ?? $entry->direction;
+                                @endphp
+                                <tr class="border-b align-top hover:bg-muted/30 transition-colors">
+                                    <td class="px-2 py-1.5 text-muted-foreground">{{ ($entries->currentPage() - 1) * $entries->perPage() + $index + 1 }}</td>
+                                    <td class="px-2 py-1.5">{{ $entry->tripCode->code ?? '--' }}</td>
+                                    <td class="px-2 py-1.5">
+                                        <div class="font-semibold truncate">{{ $entry->bus_number ?? '--' }}</div>
+                                        <div class="text-[10px] text-muted-foreground truncate">{{ $entry->brand ?? '' }}{{ $entry->bus_type ? ' · ' . $entry->bus_type : '' }}</div>
+                                    </td>
+                                    <td class="px-2 py-1.5">
+                                        @if ($dir)
                                             <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium {{ $dir === 'SB' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' }}">
                                                 {{ $dir }}
                                             </span>
@@ -146,16 +224,65 @@
                                             --
                                         @endif
                                     </td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->driver->name ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ $entry->driver2->name ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">
-                                        @php $entryStatus = $entry->status?->value ?? $entry->status ?? 'scheduled'; @endphp
-                                        <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium {{ $statusClasses[$entryStatus] ?? $statusClasses['scheduled'] }}">
-                                            {{ ucwords(str_replace('_', ' ', $entryStatus)) }}
-                                        </span>
+                                    <td class="px-2 py-1.5 truncate" title="{{ $entry->route ?? '' }}">{{ $entry->route ?? '--' }}</td>
+                                    <td class="px-2 py-1.5 text-[11px] leading-tight">
+                                        <div><span class="text-muted-foreground">S:</span> {{ $entry->scheduled_departure ? \Illuminate\Support\Str::substr($entry->scheduled_departure, 0, 5) : '--' }}</div>
+                                        <div><span class="text-muted-foreground">D:</span> {{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i') : '--' }}</div>
+                                        <div><span class="text-muted-foreground">A:</span> {{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i') : '--' }}</div>
                                     </td>
-                                    <td class="max-w-[120px] truncate px-3 py-1.5" title="{{ $entry->remarks ?? '' }}">{{ $entry->remarks ?? '--' }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">
+                                    <td class="px-2 py-1.5 text-[11px] leading-tight">
+                                        <div class="truncate">{{ $entry->driver->name ?? '--' }}</div>
+                                        <div class="truncate text-muted-foreground">{{ $entry->driver2->name ?? '' }}</div>
+                                    </td>
+                                    <td class="px-2 py-1.5">
+                                        <div class="flex flex-col gap-1">
+                                            <span class="inline-flex w-fit items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide {{ $statusClasses[$entryStatus] ?? $statusClasses['scheduled'] }}">
+                                                {{ ucwords(str_replace('_', ' ', $entryStatus)) }}
+                                            </span>
+                                            <div class="flex flex-wrap gap-1">
+                                                @if (in_array($entryStatus, ['scheduled', 'delayed']))
+                                                    <button
+                                                        type="button"
+                                                        wire:click="openStatusDialog({{ $entry->id }}, 'departed')"
+                                                        class="rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-blue-700"
+                                                        title="Mark departed (stamps time + KMR out)"
+                                                    >Depart</button>
+                                                @endif
+                                                @if (in_array($entryStatus, ['departed', 'on_route', 'delayed']))
+                                                    <button
+                                                        type="button"
+                                                        wire:click="openStatusDialog({{ $entry->id }}, 'arrived')"
+                                                        class="rounded bg-green-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-green-700"
+                                                        title="Mark arrived (stamps time + KMR in)"
+                                                    >Arrive</button>
+                                                @endif
+                                                @if (in_array($entryStatus, ['scheduled', 'departed', 'on_route']))
+                                                    <button
+                                                        type="button"
+                                                        wire:click="transitionStatus({{ $entry->id }}, 'delayed')"
+                                                        class="rounded bg-orange-500 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-orange-600"
+                                                    >Delay</button>
+                                                @endif
+                                                @if (in_array($entryStatus, ['scheduled', 'departed', 'delayed']))
+                                                    <button
+                                                        type="button"
+                                                        wire:click="transitionStatus({{ $entry->id }}, 'cancelled')"
+                                                        wire:confirm="Cancel this dispatch entry?"
+                                                        class="rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-red-700"
+                                                    >Cancel</button>
+                                                @endif
+                                                @if ($entryStatus === 'cancelled')
+                                                    <button
+                                                        type="button"
+                                                        wire:click="transitionStatus({{ $entry->id }}, 'scheduled')"
+                                                        class="rounded bg-gray-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-gray-700"
+                                                    >Reschedule</button>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-2 py-1.5 truncate" title="{{ $entry->remarks ?? '' }}">{{ $entry->remarks ?? '--' }}</td>
+                                    <td class="px-2 py-1.5">
                                         <div class="flex items-center gap-1">
                                             <button
                                                 wire:click="openEditDialog({{ $entry->id }})"
@@ -177,13 +304,34 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="16" class="px-3 py-8 text-center text-sm text-muted-foreground">
+                                    <td colspan="10" class="px-3 py-8 text-center text-sm text-muted-foreground">
                                         No entries yet. Click "Add Entry" to start dispatching.
                                     </td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            {{-- Pagination footer --}}
+            <div class="flex flex-wrap items-center justify-between gap-2 border-t p-3 text-xs">
+                <div class="flex items-center gap-2">
+                    <label class="text-muted-foreground">Rows per page:</label>
+                    <select
+                        wire:model.live="perPage"
+                        class="rounded border border-input bg-transparent px-2 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                        @foreach ($perPageOptions as $opt)
+                            <option value="{{ $opt }}">{{ $opt }}</option>
+                        @endforeach
+                    </select>
+                    <span class="text-muted-foreground">
+                        Showing {{ $entries->firstItem() ?? 0 }}–{{ $entries->lastItem() ?? 0 }} of {{ $entries->total() }}
+                    </span>
+                </div>
+                <div>
+                    {{ $entries->onEachSide(1)->links() }}
                 </div>
             </div>
         </div>
@@ -221,6 +369,57 @@
                     >
                         Add Entry
                     </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Status Transition (KMR) Modal --}}
+    <div
+        x-data
+        x-show="$wire.showStatusDialog"
+        x-transition.opacity
+        class="fixed inset-0 z-50 overflow-y-auto"
+        style="display: none;"
+    >
+        <div class="fixed inset-0 bg-black/50" x-on:click="$wire.showStatusDialog = false"></div>
+        <div class="relative mx-auto my-16 max-w-sm rounded-lg bg-background p-6 shadow-lg border">
+            <div class="mb-4">
+                <h2 class="text-lg font-semibold">
+                    {{ $statusTo === 'departed' ? 'Mark Departed' : 'Mark Arrived' }}
+                </h2>
+                <p class="text-sm text-muted-foreground">
+                    {{ $statusEntryLabel ?: 'Dispatch entry' }} — stamps {{ $statusTo === 'departed' ? 'departure' : 'arrival' }} time now.
+                </p>
+            </div>
+            <form wire:submit.prevent="confirmStatusDialog" class="space-y-4">
+                <div>
+                    <label class="mb-1 block text-sm font-medium">
+                        KMR {{ $statusTo === 'departed' ? 'Out' : 'In' }} reading
+                    </label>
+                    <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        wire:model="statusKmr"
+                        placeholder="{{ $statusKmrSuggested ?? '—' }}"
+                        class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        autofocus
+                    />
+                    @if ($statusKmrSuggested)
+                        <p class="mt-1 text-xs text-muted-foreground">Current vehicle KMR: {{ number_format($statusKmrSuggested) }}</p>
+                    @endif
+                </div>
+                <div class="flex justify-end gap-2 pt-1">
+                    <button
+                        type="button"
+                        x-on:click="$wire.showStatusDialog = false"
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+                    >Cancel</button>
+                    <button
+                        type="submit"
+                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
+                    >Confirm</button>
                 </div>
             </form>
         </div>
