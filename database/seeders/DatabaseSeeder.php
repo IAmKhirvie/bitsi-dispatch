@@ -17,6 +17,7 @@ use App\Models\PmsSetting;
 use App\Models\TripCode;
 use App\Models\User;
 use App\Models\Vehicle;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -147,5 +148,8 @@ class DatabaseSeeder extends Seeder
                 ['trip_count' => $count]
             );
         }
+
+        // Assign Spatie roles based on the role column
+        $this->call(RoleSeeder::class);
     }
 }
