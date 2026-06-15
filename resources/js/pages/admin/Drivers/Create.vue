@@ -62,8 +62,8 @@ function submit() {
                                     <p v-if="form.errors.phone" class="text-xs text-red-500">{{ form.errors.phone }}</p>
                                 </div>
                                 <div class="space-y-2">
-                                    <Label for="license_number">License Number</Label>
-                                    <Input id="license_number" v-model="form.license_number" placeholder="Driver's license number" />
+                                    <Label for="license_number">ID Number</Label>
+                                    <Input id="license_number" v-model="form.license_number" placeholder="Driver ID number" />
                                     <p v-if="form.errors.license_number" class="text-xs text-red-500">{{ form.errors.license_number }}</p>
                                 </div>
                             </div>

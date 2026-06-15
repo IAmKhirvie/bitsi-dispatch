@@ -18,7 +18,7 @@ class AttendanceExport implements FromCollection, WithHeadings, WithMapping, Sho
 
     public function collection(): Collection
     {
-        return DriverAttendance::with('driver')
+        return DriverAttendance::with(['driver', 'dispatchEntry.tripCode'])
             ->when($this->dateFrom, fn ($q) => $q->whereDate('attendance_date', '>=', $this->dateFrom))
             ->when($this->dateTo, fn ($q) => $q->whereDate('attendance_date', '<=', $this->dateTo))
             ->orderBy('attendance_date', 'desc')
@@ -28,14 +28,17 @@ class AttendanceExport implements FromCollection, WithHeadings, WithMapping, Sho
 
     public function headings(): array
     {
-        return ['Driver', 'Date', 'Check In', 'Check Out', 'Status', 'Minutes Late', 'Notes', 'Recorded At'];
+        return ['Driver', 'Bus Number', 'Trip Code', 'Date', 'Scheduled', 'Check In', 'Check Out', 'Status', 'Minutes Late', 'Notes', 'Recorded At'];
     }
 
     public function map($attendance): array
     {
         return [
             $attendance->driver?->name ?? 'N/A',
+            $attendance->dispatchEntry?->bus_number ?? '--',
+            $attendance->dispatchEntry?->tripCode?->code ?? '--',
             $attendance->attendance_date?->format('Y-m-d') ?? '',
+            $attendance->dispatchEntry?->scheduled_departure ?? '--',
             $attendance->check_in_time ?? '--',
             $attendance->check_out_time ?? '--',
             ucfirst($attendance->status ?? 'pending'),

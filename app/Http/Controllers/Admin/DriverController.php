@@ -77,7 +77,7 @@ class DriverController extends Controller
         return [
             'name' => ['required', 'string', 'min:2', 'max:255', 'regex:/^[a-zA-ZÀ-ÿ\s.\-]+$/'],
             'phone' => ['nullable', 'string', 'regex:/^09\d{9}$/'],
-            'license_number' => ['nullable', 'string', 'min:5', 'max:50', 'regex:/^[A-Z0-9\-]+$/i'],
+            'license_number' => ['nullable', 'string', 'min:1', 'max:50', 'regex:/^[A-Z0-9\-]+$/i'],
             'is_active' => 'boolean',
             'status' => ['nullable', 'string', new Enum(DriverStatus::class)],
         ];

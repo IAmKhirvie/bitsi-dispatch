@@ -24,7 +24,7 @@ class DispatchEntryObserver
         $this->regenerateSummary($entry);
 
         if ($entry->wasChanged('status')) {
-            $status = $entry->status?->value ?? $entry->status;
+            $status = $entry->status instanceof \BackedEnum ? $entry->status->value : $entry->status;
 
             // Auto-set actual departure when status changes to departed
             if ($status === 'departed' && !$entry->actual_departure) {
@@ -34,7 +34,7 @@ class DispatchEntryObserver
             $this->syncDriverVehicleStatus($entry);
 
             // SMS notification
-            $statusLabel = is_string($entry->status) ? $entry->status : $entry->status->value;
+            $statusLabel = $entry->status instanceof \BackedEnum ? $entry->status->value : $entry->status;
             $message = "BITSI Dispatch: Trip {$entry->tripCode?->code} ({$entry->route}) status updated to {$statusLabel}.";
 
             if ($entry->driver_id && $entry->driver?->phone) {
@@ -69,13 +69,14 @@ class DispatchEntryObserver
 
     private function syncDriverVehicleStatus(DispatchEntry $entry): void
     {
-        $status = $entry->status?->value ?? $entry->status;
+        $status = $entry->status instanceof \BackedEnum ? $entry->status->value : $entry->status;
 
         match ($status) {
             'departed' => $this->setStatuses($entry, DriverStatus::Dispatched, VehicleStatus::InTransit),
             'on_route' => $this->setStatuses($entry, DriverStatus::OnRoute, VehicleStatus::InTransit),
             'arrived' => $this->setStatuses($entry, DriverStatus::Available, VehicleStatus::OK, updateLocation: true),
             'cancelled' => $this->setStatuses($entry, DriverStatus::Available, VehicleStatus::OK),
+            'breakdown' => $this->setStatuses($entry, DriverStatus::Available, VehicleStatus::UR),
             default => null,
         };
     }

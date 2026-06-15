@@ -66,32 +66,35 @@
                                 <td class="px-4 py-3 font-medium">{{ $user->name }}</td>
                                 <td class="px-4 py-3">{{ $user->email }}</td>
                                 <td class="px-4 py-3">
-                                    @php $userRole = is_string($user->role) || is_int($user->role) ? UserRole::tryFrom($user->role) : $user->role; @endphp
-                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $userRole?->badgeClass() ?? 'bg-gray-100 text-gray-700' }}">
-                                        {{ $userRole?->label() ?? ucwords(str_replace('_', ' ', $user->role?->value ?? $user->role)) }}
-                                    </span>
+                                    @php
+                                        $userRole = is_string($user->role) || is_int($user->role) ? UserRole::tryFrom($user->role) : $user->role;
+                                        $roleValue = $userRole?->value ?? ($user->role?->value ?? $user->role);
+                                    @endphp
+                                    <x-role-badge :role="$roleValue" :label="$userRole?->label()" />
                                 </td>
                                 <td class="px-4 py-3">{{ $user->phone ?? '--' }}</td>
                                 <td class="px-4 py-3">
-                                    <button wire:click="toggleActive({{ $user->id }})" class="cursor-pointer">
-                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $user->is_active ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' }}">
-                                            {{ $user->is_active ? 'Active' : 'Inactive' }}
-                                        </span>
+                                    <button wire:click="toggleActive({{ $user->id }})" class="cursor-pointer" title="Toggle active">
+                                        <x-status-badge :status="$user->is_active ? 'active' : 'inactive'" :label="$user->is_active ? 'Active' : 'Inactive'" />
                                     </button>
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-2">
                                         <a href="{{ route('admin.users.edit', $user) }}"
+                                           title="Edit user"
                                            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-8">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                                         </a>
-                                        <button
+                                        <x-confirm-dialog
+                                            trigger-class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-destructive/10 h-8 w-8 text-destructive"
+                                            trigger-title="Delete user"
+                                            title="Delete {{ $user->name }}?"
+                                            message="The user will be moved to Trash. Restore from Admin → Trash."
+                                            confirm-label="Delete"
                                             wire:click="deleteUser({{ $user->id }})"
-                                            wire:confirm="Are you sure you want to delete {{ $user->name }}?"
-                                            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-8 text-red-500 hover:text-red-700"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                        </button>
+                                        </x-confirm-dialog>
                                     </div>
                                 </td>
                             </tr>

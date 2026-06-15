@@ -11,11 +11,14 @@ use App\Models\Driver;
 use App\Models\TripCode;
 use App\Models\Vehicle;
 use App\Services\DispatchService;
+use Carbon\Carbon;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 class DispatchBoard extends Component
 {
+    use WithFileUploads;
     use WithPagination;
 
     public string $date;
@@ -54,6 +57,7 @@ class DispatchBoard extends Component
     public string $addDirection = '';
     public string $addStatus = 'scheduled';
     public string $addRemarks = '';
+    public $addEvidencePhoto = null;
 
     // Edit entry form
     public ?int $editingEntryId = null;
@@ -84,6 +88,20 @@ class DispatchBoard extends Component
     public ?int $statusKmr = null;
     public ?int $statusKmrSuggested = null;
     public string $statusEntryLabel = '';
+    public string $statusOccurredAt = '';
+    public string $statusReason = '';
+    public string $statusNotes = '';
+
+    // Driver event modal
+    public bool $showDriverEventDialog = false;
+    public ?int $driverEventEntryId = null;
+    public string $driverEventSlot = 'driver1';
+    public string $driverEventType = 'arrived';
+    public string $driverEventOccurredAt = '';
+    public ?int $driverEventReplacementDriverId = null;
+    public string $driverEventReason = '';
+    public string $driverEventNotes = '';
+    public string $driverEventEntryLabel = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -210,7 +228,14 @@ class DispatchBoard extends Component
         }
     }
 
-    public function transitionStatus(int $entryId, string $to, ?int $kmr = null): void
+    public function transitionStatus(
+        int $entryId,
+        string $to,
+        ?int $kmr = null,
+        ?string $occurredAt = null,
+        ?string $reason = null,
+        ?string $notes = null,
+    ): void
     {
         try {
             $entry = DispatchEntry::with('vehicle')->findOrFail($entryId);
@@ -219,6 +244,9 @@ class DispatchBoard extends Component
                 DispatchStatus::from($to),
                 auth()->user(),
                 $kmr,
+                $occurredAt ? Carbon::parse($occurredAt) : null,
+                $reason,
+                $notes,
             );
         } catch (\InvalidArgumentException $e) {
             session()->flash('dispatch_error', $e->getMessage());
@@ -235,30 +263,116 @@ class DispatchBoard extends Component
             : ($entry->kmr_at_dispatch ?? $entry->vehicle?->current_kmr ?? null);
         $this->statusKmr = $this->statusKmrSuggested;
         $this->statusEntryLabel = trim(($entry->tripCode->code ?? '') . ' · ' . ($entry->bus_number ?? ''), ' ·');
+        $this->statusOccurredAt = now()->format('Y-m-d\TH:i');
+        $this->statusReason = '';
+        $this->statusNotes = '';
         $this->showStatusDialog = true;
     }
 
     public function confirmStatusDialog(): void
     {
         if (!$this->statusEntryId || !$this->statusTo) return;
-        $this->transitionStatus($this->statusEntryId, $this->statusTo, $this->statusKmr ?: null);
+        $this->validate([
+            'statusOccurredAt' => 'required|date',
+            'statusReason' => 'nullable|string|max:255',
+            'statusNotes' => 'nullable|string|max:1000',
+        ]);
+
+        $this->transitionStatus(
+            $this->statusEntryId,
+            $this->statusTo,
+            in_array($this->statusTo, ['departed', 'arrived'], true) ? ($this->statusKmr ?: null) : null,
+            $this->statusOccurredAt,
+            $this->statusReason ?: null,
+            $this->statusNotes ?: null,
+        );
         $this->showStatusDialog = false;
         $this->statusEntryId = null;
         $this->statusTo = '';
         $this->statusKmr = null;
         $this->statusKmrSuggested = null;
         $this->statusEntryLabel = '';
+        $this->statusOccurredAt = '';
+        $this->statusReason = '';
+        $this->statusNotes = '';
+    }
+
+    public function openDriverEventDialog(int $entryId, string $slot, string $type): void
+    {
+        $entry = DispatchEntry::with(['tripCode', 'driver', 'driver2'])->findOrFail($entryId);
+        $this->driverEventEntryId = $entry->id;
+        $this->driverEventSlot = in_array($slot, ['driver1', 'driver2'], true) ? $slot : 'driver1';
+        $this->driverEventType = in_array($type, ['arrived', 'cutoff'], true) ? $type : 'arrived';
+        $this->driverEventOccurredAt = now()->format('Y-m-d\TH:i');
+        $this->driverEventReplacementDriverId = null;
+        $this->driverEventReason = '';
+        $this->driverEventNotes = '';
+        $this->driverEventEntryLabel = trim(($entry->tripCode->code ?? '') . ' · ' . ($entry->bus_number ?? ''), ' ·');
+        $this->showDriverEventDialog = true;
+    }
+
+    public function confirmDriverEventDialog(): void
+    {
+        if (!$this->driverEventEntryId) return;
+
+        $this->validate([
+            'driverEventOccurredAt' => 'required|date',
+            'driverEventReplacementDriverId' => 'nullable|exists:drivers,id',
+            'driverEventReason' => 'nullable|string|max:255',
+            'driverEventNotes' => 'nullable|string|max:1000',
+        ]);
+
+        $entry = DispatchEntry::findOrFail($this->driverEventEntryId);
+        $occurredAt = Carbon::parse($this->driverEventOccurredAt);
+        $isDriver1 = $this->driverEventSlot === 'driver1';
+        $driverId = $isDriver1 ? $entry->driver_id : $entry->driver2_id;
+
+        if ($this->driverEventType === 'arrived') {
+            $entry->{$isDriver1 ? 'driver1_arrived_at' : 'driver2_arrived_at'} = $occurredAt;
+        } else {
+            $entry->{$isDriver1 ? 'driver1_cutoff_at' : 'driver2_cutoff_at'} = $occurredAt;
+            $entry->{$isDriver1 ? 'replacement_driver1_id' : 'replacement_driver2_id'} = $this->driverEventReplacementDriverId;
+        }
+
+        if ($this->driverEventNotes) {
+            $entry->operations_notes = trim(($entry->operations_notes ? $entry->operations_notes . "\n" : '') . $this->driverEventNotes);
+        }
+        $entry->save();
+
+        $entry->events()->create([
+            'event_type' => $this->driverEventType === 'arrived' ? $this->driverEventSlot . '_arrived' : $this->driverEventSlot . '_cutoff',
+            'occurred_at' => $occurredAt,
+            'actor_user_id' => auth()->id(),
+            'driver_id' => $driverId,
+            'vehicle_id' => $entry->vehicle_id,
+            'old_value' => $driverId ? (string) $driverId : null,
+            'new_value' => $this->driverEventReplacementDriverId ? (string) $this->driverEventReplacementDriverId : null,
+            'reason' => $this->driverEventReason ?: null,
+            'notes' => $this->driverEventNotes ?: null,
+        ]);
+
+        $this->showDriverEventDialog = false;
+        $this->driverEventEntryId = null;
     }
 
     public function createDispatchDay(): void
     {
-        $day = DispatchDay::firstOrCreate(
-            ['service_date' => $this->date],
-            ['created_by' => auth()->id(), 'notes' => '']
-        );
+        $day = DispatchDay::withTrashed()
+            ->whereDate('service_date', $this->date)
+            ->first();
+
+        if (! $day) {
+            $day = DispatchDay::create([
+                'service_date' => $this->date,
+                'created_by' => auth()->id(),
+                'notes' => '',
+            ]);
+        } elseif ($day->trashed()) {
+            $day->restore();
+        }
 
         // Auto-populate from active trip codes
-        if ($day->wasRecentlyCreated) {
+        if ($day->wasRecentlyCreated || $day->entries()->count() === 0) {
             app(DispatchService::class)->populateFromTripCodes($day);
         }
     }
@@ -273,6 +387,7 @@ class DispatchBoard extends Component
             'addVehicleId' => 'nullable|exists:vehicles,id',
             'addDriverId' => 'nullable|exists:drivers,id',
             'addDriver2Id' => 'nullable|exists:drivers,id',
+            'addEvidencePhoto' => 'nullable|image|max:5120',
         ]);
 
         $entry = $dispatchDay->entries()->create([
@@ -296,6 +411,18 @@ class DispatchBoard extends Component
             'sort_order' => $dispatchDay->entries()->count(),
         ]);
 
+        if ($this->addEvidencePhoto) {
+            $path = $this->addEvidencePhoto->store('dispatch-evidence', 'local');
+            $entry->attachments()->create([
+                'file_name' => $this->addEvidencePhoto->getClientOriginalName(),
+                'file_path' => $path,
+                'file_type' => $this->addEvidencePhoto->getMimeType(),
+                'file_size' => $this->addEvidencePhoto->getSize(),
+                'label' => 'Dispatch evidence',
+                'uploaded_by' => auth()->id(),
+            ]);
+        }
+
         $this->resetAddForm();
         $this->showAddDialog = false;
     }
@@ -315,8 +442,8 @@ class DispatchBoard extends Component
         $this->editBusType = $entry->bus_type ?? '';
         $this->editDepartureTerminal = $entry->departure_terminal ?? '';
         $this->editArrivalTerminal = $entry->arrival_terminal ?? '';
-        $this->editScheduledDeparture = $entry->scheduled_departure ?? '';
-        $this->editActualDeparture = $entry->actual_departure ?? '';
+        $this->editScheduledDeparture = $entry->scheduled_departure ? \Carbon\Carbon::parse($entry->scheduled_departure)->format('H:i') : '';
+        $this->editActualDeparture = $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i') : '';
         $this->editDirection = $entry->direction ?? '';
         $this->editStatus = $entry->status?->value ?? $entry->status ?? 'scheduled';
         $this->editRemarks = $entry->remarks ?? '';
@@ -374,6 +501,7 @@ class DispatchBoard extends Component
         $this->addDirection = '';
         $this->addStatus = 'scheduled';
         $this->addRemarks = '';
+        $this->addEvidencePhoto = null;
     }
 
     public function render()
@@ -384,7 +512,7 @@ class DispatchBoard extends Component
 
         $entries = $dispatchDay
             ? DispatchEntry::where('dispatch_day_id', $dispatchDay->id)
-                ->with(['tripCode', 'vehicle', 'driver', 'driver2'])
+                ->with(['tripCode', 'vehicle', 'driver', 'driver2', 'replacementDriver1', 'replacementDriver2'])
                 ->leftJoin('trip_codes as sort_trip_codes', 'dispatch_entries.trip_code_id', '=', 'sort_trip_codes.id')
                 ->leftJoin('drivers as sort_drivers', 'dispatch_entries.driver_id', '=', 'sort_drivers.id')
                 ->select('dispatch_entries.*')

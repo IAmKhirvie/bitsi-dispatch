@@ -152,8 +152,9 @@
                     <tbody>
                         @if ($reportType === 'daily' && $summaries)
                             @forelse($summaries as $row)
+                                @php $reportDate = $row->dispatchDay?->service_date?->format('Y-m-d'); @endphp
                                 <tr class="border-b last:border-0 transition-colors hover:bg-muted/30">
-                                    <td class="px-4 py-3 font-medium">{{ $row->dispatchDay->service_date ?? '' }}</td>
+                                    <td class="px-4 py-3 font-medium">{{ $reportDate ?? '' }}</td>
                                     <td class="px-4 py-3 text-right font-semibold">{{ $row->total_trips }}</td>
                                     <td class="px-4 py-3 text-right">{{ $row->tripCount('sb') }}</td>
                                     <td class="px-4 py-3 text-right">{{ $row->tripCount('nb') }}</td>
@@ -164,11 +165,11 @@
                                     <td class="px-4 py-3 text-right">{{ $row->tripCount('visayas') }}</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center gap-1">
-                                            <a href="{{ route('reports.daily', $row->dispatchDay->service_date ?? '') }}" class="inline-flex items-center rounded-md px-2.5 py-1.5 text-sm font-medium hover:bg-accent hover:text-accent-foreground">View</a>
-                                            <a href="{{ route('reports.export-excel', $row->dispatchDay->service_date ?? '') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent" title="Export Excel">
+                                            <a href="{{ $reportDate ? route('reports.daily', $reportDate) : '#' }}" class="inline-flex items-center rounded-md px-2.5 py-1.5 text-sm font-medium hover:bg-accent hover:text-accent-foreground">View</a>
+                                            <a href="{{ $reportDate ? route('reports.export-excel', $reportDate) : '#' }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent" title="Export Excel">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-green-600"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
                                             </a>
-                                            <a href="{{ route('reports.export-pdf', $row->dispatchDay->service_date ?? '') }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent" title="Export PDF">
+                                            <a href="{{ $reportDate ? route('reports.export-pdf', $reportDate) : '#' }}" class="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent" title="Export PDF">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-red-600"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
                                             </a>
                                         </div>

@@ -69,6 +69,7 @@ class TripCodeTable extends Component
     {
         $tc = TripCode::findOrFail($tripCodeId);
         $tc->update(['is_active' => !$tc->is_active]);
+        session()->flash('status', 'Trip code status updated.');
     }
 
     public function render()

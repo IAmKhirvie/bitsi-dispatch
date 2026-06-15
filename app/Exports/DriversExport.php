@@ -23,7 +23,7 @@ class DriversExport implements FromCollection, WithHeadings, WithMapping, Should
 
     public function headings(): array
     {
-        return ['Name', 'Phone', 'License Number', 'Active', 'Status', 'Created At', 'Updated At'];
+        return ['Name', 'Phone', 'ID Number', 'Active', 'Status', 'Created At', 'Updated At'];
     }
 
     public function map($driver): array

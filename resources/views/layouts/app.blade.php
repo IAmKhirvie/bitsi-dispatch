@@ -230,16 +230,28 @@
                     </div>
                 </header>
 
-                {{-- Flash Messages --}}
-                @if(session('status'))
-                    <div class="mx-4 mt-4 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300">
-                        {{ session('status') }}
-                    </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="mx-4 mt-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
-                        {{ session('error') }}
+                {{-- Flash Toasts --}}
+                @if(session('status') || session('success') || session('error'))
+                    <div class="fixed right-4 top-4 z-[100] flex w-full max-w-sm flex-col gap-2">
+                        @foreach (['status' => 'green', 'success' => 'green', 'error' => 'red'] as $flashKey => $flashColor)
+                            @if(session($flashKey))
+                                <div
+                                    x-data="{ show: true }"
+                                    x-init="setTimeout(() => show = false, 5000)"
+                                    x-show="show"
+                                    x-transition
+                                    class="rounded-md border bg-background p-4 text-sm shadow-lg {{ $flashColor === 'red' ? 'border-red-200 text-red-700 dark:border-red-800 dark:text-red-300' : 'border-green-200 text-green-700 dark:border-green-800 dark:text-green-300' }}"
+                                >
+                                    <div class="flex items-start justify-between gap-3">
+                                        <span>{{ session($flashKey) }}</span>
+                                        <button type="button" x-on:click="show = false" class="-mr-1 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
+                                            <span class="sr-only">Dismiss</span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
                     </div>
                 @endif
 

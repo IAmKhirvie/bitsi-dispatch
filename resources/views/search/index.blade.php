@@ -50,7 +50,7 @@
                             @elseif ($key === 'drivers')
                                 <a href="{{ route('admin.drivers.index', ['search' => $query], false) }}" class="block px-4 py-3 hover:bg-muted/40">
                                     <div class="font-medium">{{ $result->name }}</div>
-                                    <div class="text-xs text-muted-foreground">{{ $result->phone ?? 'No phone' }} · {{ $result->license_number ?? 'No license' }}</div>
+                                    <div class="text-xs text-muted-foreground">{{ $result->phone ?? 'No phone' }} · {{ $result->license_number ?? 'No ID number' }}</div>
                                 </a>
                             @elseif ($key === 'users')
                                 <a href="{{ route('admin.users.index', ['search' => $query], false) }}" class="block px-4 py-3 hover:bg-muted/40">

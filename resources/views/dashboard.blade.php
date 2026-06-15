@@ -4,46 +4,42 @@
 
 @section('content')
     <div class="flex h-full flex-1 flex-col gap-6 p-4">
-        {{-- Trip Stat Cards (All Roles) --}}
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="rounded-xl border bg-card text-card-foreground shadow">
-                <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
-                    <h3 class="text-sm font-medium">Today's Trips</h3>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-muted-foreground"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg>
-                </div>
-                <div class="p-6 pt-0">
-                    <div class="text-2xl font-bold">{{ $stats['today_trips'] }}</div>
-                    <p class="text-xs text-muted-foreground">Total dispatched trips today</p>
-                </div>
-            </div>
-            <div class="rounded-xl border bg-card text-card-foreground shadow">
-                <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
-                    <h3 class="text-sm font-medium">Departed</h3>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-blue-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                </div>
-                <div class="p-6 pt-0">
-                    <div class="text-2xl font-bold">{{ $stats['departed'] }}</div>
-                    <p class="text-xs text-muted-foreground">Buses that have departed</p>
+        {{-- Hero: Today's Trips (focal point) + compact secondary strip --}}
+        <div class="grid gap-4 lg:grid-cols-2">
+            <div class="rounded-xl border bg-gradient-to-br from-primary/5 to-primary/10 text-card-foreground shadow">
+                <div class="flex items-center justify-between gap-6 p-6">
+                    <div>
+                        <p class="text-sm font-medium text-muted-foreground">Today's Trips</p>
+                        <p class="mt-1 text-5xl font-bold tracking-tight">{{ $stats['today_trips'] }}</p>
+                        <p class="mt-2 text-sm text-muted-foreground">
+                            {{ $stats['departed'] }} departed · {{ $stats['on_route'] }} on route · {{ $stats['cancelled'] }} cancelled
+                        </p>
+                    </div>
+                    <div class="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg>
+                    </div>
                 </div>
             </div>
-            <div class="rounded-xl border bg-card text-card-foreground shadow">
-                <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
-                    <h3 class="text-sm font-medium">On Route</h3>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-indigo-500"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                </div>
-                <div class="p-6 pt-0">
-                    <div class="text-2xl font-bold">{{ $stats['on_route'] }}</div>
-                    <p class="text-xs text-muted-foreground">Currently in transit</p>
-                </div>
-            </div>
-            <div class="rounded-xl border bg-card text-card-foreground shadow">
-                <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
-                    <h3 class="text-sm font-medium">Cancelled</h3>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-red-500"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
-                </div>
-                <div class="p-6 pt-0">
-                    <div class="text-2xl font-bold">{{ $stats['cancelled'] }}</div>
-                    <p class="text-xs text-muted-foreground">Cancelled trips today</p>
+
+            <div class="rounded-xl border bg-card p-4 shadow">
+                <p class="text-sm font-medium">Status at a glance</p>
+                <div class="mt-3 grid grid-cols-2 gap-2">
+                    <div class="rounded-lg bg-muted/40 px-3 py-2">
+                        <p class="text-xs text-muted-foreground">Departed</p>
+                        <p class="mt-0.5 text-xl font-semibold">{{ $stats['departed'] }}</p>
+                    </div>
+                    <div class="rounded-lg bg-muted/40 px-3 py-2">
+                        <p class="text-xs text-muted-foreground">On route</p>
+                        <p class="mt-0.5 text-xl font-semibold">{{ $stats['on_route'] }}</p>
+                    </div>
+                    <div class="rounded-lg bg-muted/40 px-3 py-2">
+                        <p class="text-xs text-muted-foreground">Cancelled</p>
+                        <p class="mt-0.5 text-xl font-semibold">{{ $stats['cancelled'] }}</p>
+                    </div>
+                    <div class="rounded-lg bg-muted/40 px-3 py-2">
+                        <p class="text-xs text-muted-foreground">Arrived</p>
+                        <p class="mt-0.5 text-xl font-semibold">{{ max(0, $stats['today_trips'] - $stats['departed'] - $stats['on_route'] - $stats['cancelled']) }}</p>
+                    </div>
                 </div>
             </div>
         </div>

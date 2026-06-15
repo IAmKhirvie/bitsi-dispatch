@@ -50,6 +50,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/export/monthly-excel', [ReportController::class, 'exportMonthlyExcel'])->name('export-monthly-excel');
         Route::get('/export/schedule/{period}', [ReportController::class, 'exportSchedulePeriod'])->name('export-schedule-period');
         Route::get('/export/schedule', [ReportController::class, 'exportScheduleCustom'])->name('export-schedule-custom');
+        Route::post('/templates', [ReportController::class, 'storeTemplate'])->name('templates.store');
+        Route::delete('/templates/{template}', [ReportController::class, 'destroyTemplate'])->name('templates.destroy');
     });
 
     // History

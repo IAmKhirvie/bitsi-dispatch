@@ -32,7 +32,7 @@ class DispatchEntryController extends Controller
             'scheduled_departure' => 'nullable|date_format:H:i',
             'actual_departure' => 'nullable|date_format:H:i',
             'direction' => 'nullable|string|in:SB,NB',
-            'status' => 'nullable|string|in:scheduled,departed,on_route,delayed,cancelled,arrived',
+            'status' => 'nullable|string|in:scheduled,departed,on_route,delayed,cancelled,breakdown,arrived',
             'remarks' => 'nullable|string|max:1000',
         ]);
 
@@ -62,7 +62,7 @@ class DispatchEntryController extends Controller
             'scheduled_departure' => 'nullable|date_format:H:i',
             'actual_departure' => 'nullable|date_format:H:i',
             'direction' => 'nullable|string|in:SB,NB',
-            'status' => 'nullable|string|in:scheduled,departed,on_route,delayed,cancelled,arrived',
+            'status' => 'nullable|string|in:scheduled,departed,on_route,delayed,cancelled,breakdown,arrived',
             'remarks' => 'nullable|string|max:1000',
         ]);
 
@@ -81,7 +81,7 @@ class DispatchEntryController extends Controller
     public function updateStatus(Request $request, DispatchDay $dispatchDay, DispatchEntry $entry, TransitionStatus $transition): RedirectResponse
     {
         $validated = $request->validate([
-            'status' => 'required|string|in:scheduled,departed,on_route,delayed,cancelled,arrived',
+            'status' => 'required|string|in:scheduled,departed,on_route,delayed,cancelled,breakdown,arrived',
             'kmr' => 'nullable|integer|min:0',
         ]);
 

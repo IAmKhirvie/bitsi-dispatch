@@ -197,4 +197,18 @@
             class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
     </div>
+
+    @if ($prefix === 'add')
+        <div class="col-span-2 space-y-2">
+            <label class="text-sm font-medium leading-none">Photo Evidence</label>
+            <input
+                type="file"
+                wire:model="addEvidencePhoto"
+                accept="image/*"
+                class="block w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm file:mr-3 file:border-0 file:bg-transparent file:text-sm file:font-medium"
+            />
+            <div wire:loading wire:target="addEvidencePhoto" class="text-xs text-muted-foreground">Uploading...</div>
+            @error('addEvidencePhoto') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+        </div>
+    @endif
 </div>

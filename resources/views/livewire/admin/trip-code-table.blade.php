@@ -78,16 +78,18 @@
                                 <td class="px-4 py-3">{{ $tc->bus_type?->label() ?? $tc->bus_type }}</td>
                                 <td class="px-4 py-3">{{ $tc->scheduled_departure_time ? Str::substr($tc->scheduled_departure_time, 0, 5) : '--' }}</td>
                                 <td class="px-4 py-3">
-                                    @php $tcDir = $tc->direction ?? Direction::SB; @endphp
-                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $tcDir->badgeClass() }}">
-                                        {{ $tcDir->value }}
+                                    @php
+                                        $tcDir = $tc->direction instanceof \App\Enums\Direction
+                                            ? $tc->direction
+                                            : \App\Enums\Direction::tryFrom((string) ($tc->direction ?? 'SB'));
+                                    @endphp
+                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $tcDir?->badgeClass() ?? 'bg-gray-100 text-gray-700' }}">
+                                        {{ $tcDir?->value ?? ($tc->direction ?: '--') }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <button wire:click="toggleActive({{ $tc->id }})" class="cursor-pointer">
-                                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $tc->is_active ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' }}">
-                                            {{ $tc->is_active ? 'Active' : 'Inactive' }}
-                                        </span>
+                                    <button wire:click="toggleActive({{ $tc->id }})" class="cursor-pointer" title="Toggle active">
+                                        <x-status-badge :status="$tc->is_active ? 'active' : 'inactive'" :label="$tc->is_active ? 'Active' : 'Inactive'" />
                                     </button>
                                 </td>
                                 <td class="px-4 py-3">
@@ -95,24 +97,28 @@
                                         @if ($tc->trashed())
                                             <button
                                                 wire:click="restoreTripCode({{ $tc->id }})"
-                                                wire:confirm="Restore trip code {{ $tc->code }}?"
                                                 class="inline-flex items-center rounded-md bg-green-50 px-2.5 py-1.5 text-xs font-medium text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
+                                                title="Restore trip code"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                                                 Restore
                                             </button>
                                         @else
                                             <a href="{{ route('admin.trip-codes.edit', $tc) }}"
+                                               title="Edit trip code"
                                                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-8">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                                             </a>
-                                            <button
+                                            <x-confirm-dialog
+                                                trigger-class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-destructive/10 h-8 w-8 text-destructive"
+                                                trigger-title="Delete trip code"
+                                                title="Delete trip code {{ $tc->code }}?"
+                                                message="The trip code will be moved to Trash. Restore from Admin → Trash."
+                                                confirm-label="Delete"
                                                 wire:click="deleteTripCode({{ $tc->id }})"
-                                                wire:confirm="Are you sure you want to delete trip code {{ $tc->code }}?"
-                                                class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-8 text-red-500 hover:text-red-700"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                            </button>
+                                            </x-confirm-dialog>
                                         @endif
                                     </div>
                                 </td>

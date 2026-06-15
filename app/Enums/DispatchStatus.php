@@ -9,6 +9,7 @@ enum DispatchStatus: string
     case OnRoute = 'on_route';
     case Delayed = 'delayed';
     case Cancelled = 'cancelled';
+    case Breakdown = 'breakdown';
     case Arrived = 'arrived';
 
     public function label(): string
@@ -19,6 +20,7 @@ enum DispatchStatus: string
             self::OnRoute => 'On Route',
             self::Delayed => 'Delayed',
             self::Cancelled => 'Cancelled',
+            self::Breakdown => 'Breakdown',
             self::Arrived => 'Arrived',
         };
     }
@@ -31,6 +33,7 @@ enum DispatchStatus: string
             self::OnRoute => 'indigo',
             self::Delayed => 'orange',
             self::Cancelled => 'red',
+            self::Breakdown => 'yellow',
             self::Arrived => 'green',
         };
     }

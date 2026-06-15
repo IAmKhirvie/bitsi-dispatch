@@ -167,7 +167,7 @@ function deleteEntry(entry: DispatchEntry) {
     router.delete(`/dispatch/${props.dispatchDay.id}/entries/${entry.id}`, { preserveScroll: true });
 }
 
-const statusOptions = ['scheduled', 'departed', 'on_route', 'delayed', 'arrived', 'cancelled'];
+const statusOptions = ['scheduled', 'departed', 'on_route', 'delayed', 'breakdown', 'arrived', 'cancelled'];
 
 function setEntryStatus(entry: DispatchEntry, status: string) {
     if (!props.dispatchDay || entry.status === status) return;

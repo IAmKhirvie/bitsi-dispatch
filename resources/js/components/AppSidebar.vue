@@ -4,7 +4,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BarChart3, Bus, Clock, History, LayoutGrid, Route, Trash2, Truck, UserCheck, Users } from 'lucide-vue-next';
+import { BarChart3, Bus, Clock, FileText, History, LayoutGrid, Map, MessageSquare, Route, Trash2, Truck, UserCheck, Users } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
@@ -14,6 +14,7 @@ const isAdmin = computed(() => page.props.auth.user.role === 'admin');
 const mainNavItems: NavItem[] = [
     { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
     { title: 'Dispatch Board', href: '/dispatch', icon: Bus },
+    { title: 'Fleet Map', href: '/fleet-map', icon: Map },
     { title: 'Reports', href: '/reports', icon: BarChart3 },
     { title: 'History', href: '/history', icon: History },
 ];
@@ -21,9 +22,11 @@ const mainNavItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
     { title: 'Users', href: '/admin/users', icon: Users },
     { title: 'Trip Codes', href: '/admin/trip-codes', icon: Route },
-    { title: 'Vehicles', href: '/admin/vehicles', icon: Truck },
+    { title: 'Buses', href: '/admin/vehicles', icon: Truck },
     { title: 'Drivers', href: '/admin/drivers', icon: UserCheck },
     { title: 'Attendance', href: '/admin/attendance', icon: Clock },
+    { title: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
+    { title: 'SMS Logs', href: '/admin/sms-logs', icon: MessageSquare },
     { title: 'Trash', href: '/admin/trash', icon: Trash2 },
 ];
 </script>

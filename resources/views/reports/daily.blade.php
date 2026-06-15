@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
-@section('title', "Daily Report - {$dispatchDay->service_date ?? ''} - BITSI Dispatch")
+@php
+    $reportTitleDate = $dispatchDay->service_date ?? '';
+@endphp
+
+@section('title', 'Daily Report - ' . $reportTitleDate . ' - BITSI Dispatch')
 
 @section('content')
     @php
@@ -11,6 +15,7 @@
             'delayed' => 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
             'cancelled' => 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
             'arrived' => 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+            'breakdown' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
         ];
         $date = $dispatchDay->service_date ?? '';
     @endphp
@@ -105,10 +110,13 @@
                                 <th class="px-4 py-3 text-left font-medium text-muted-foreground">#</th>
                                 <th class="px-4 py-3 text-left font-medium text-muted-foreground">Brand</th>
                                 <th class="px-4 py-3 text-left font-medium text-muted-foreground">Bus No.</th>
+                                <th class="px-4 py-3 text-left font-medium text-muted-foreground">PAX</th>
                                 <th class="px-4 py-3 text-left font-medium text-muted-foreground">Route</th>
                                 <th class="px-4 py-3 text-left font-medium text-muted-foreground">Dir.</th>
-                                <th class="px-4 py-3 text-left font-medium text-muted-foreground">Sched.</th>
-                                <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actual</th>
+                                <th class="px-4 py-3 text-left font-medium text-muted-foreground">Scheduled</th>
+                                <th class="px-4 py-3 text-left font-medium text-muted-foreground">Actual Time</th>
+                                <th class="px-4 py-3 text-left font-medium text-muted-foreground">Late Dispatch</th>
+                                <th class="px-4 py-3 text-left font-medium text-muted-foreground">KMR</th>
                                 <th class="px-4 py-3 text-left font-medium text-muted-foreground">Driver</th>
                                 <th class="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
                                 <th class="px-4 py-3 text-left font-medium text-muted-foreground">Remarks</th>
@@ -120,9 +128,10 @@
                                     <td class="px-4 py-2 text-muted-foreground">{{ $index + 1 }}</td>
                                     <td class="px-4 py-2">{{ $entry->brand ?? '--' }}</td>
                                     <td class="px-4 py-2 font-semibold">{{ $entry->bus_number ?? '--' }}</td>
+                                    <td class="px-4 py-2">{{ $entry->seating_capacity ?? $entry->tripCode?->default_seating_capacity ?? '--' }}</td>
                                     <td class="px-4 py-2">{{ $entry->route ?? '--' }}</td>
                                     <td class="px-4 py-2">
-                                        @php $dir = $entry->direction?->value ?? $entry->direction; @endphp
+                                        @php $dir = $entry->direction instanceof \BackedEnum ? $entry->direction->value : $entry->direction; @endphp
                                         @if($dir)
                                             <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium {{ $dir === 'SB' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' }}">
                                                 {{ $dir }}
@@ -132,10 +141,26 @@
                                         @endif
                                     </td>
                                     <td class="px-4 py-2">{{ $entry->scheduled_departure ? Str::substr($entry->scheduled_departure, 0, 5) : '--' }}</td>
-                                    <td class="px-4 py-2">{{ $entry->actual_departure ? Str::substr($entry->actual_departure, 0, 5) : '--' }}</td>
+                                    <td class="px-4 py-2">{{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i') : '--' }}</td>
+                                    <td class="px-4 py-2">
+                                        @php
+                                            $lateMinutes = null;
+                                            if ($entry->scheduled_departure && $entry->actual_departure) {
+                                                $lateMinutes = \Carbon\Carbon::parse($entry->scheduled_departure)->diffInMinutes(\Carbon\Carbon::parse($entry->actual_departure), false);
+                                            }
+                                        @endphp
+                                        {{ $lateMinutes && $lateMinutes > 0 ? $lateMinutes . ' min' : '--' }}
+                                    </td>
+                                    <td class="px-4 py-2">
+                                        @if($entry->km_run !== null)
+                                            {{ number_format($entry->km_run) }}
+                                        @else
+                                            --
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-2">{{ $entry->driver->name ?? '--' }}</td>
                                     <td class="px-4 py-2">
-                                        @php $entryStatus = $entry->status?->value ?? $entry->status ?? 'scheduled'; @endphp
+                                        @php $entryStatus = $entry->status instanceof \BackedEnum ? $entry->status->value : ($entry->status ?? 'scheduled'); @endphp
                                         <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium {{ $statusClasses[$entryStatus] ?? $statusClasses['scheduled'] }}">
                                             {{ ucwords(str_replace('_', ' ', $entryStatus)) }}
                                         </span>
@@ -144,7 +169,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="10" class="px-4 py-8 text-center text-muted-foreground">No entries for this date.</td>
+                                    <td colspan="14" class="px-4 py-8 text-center text-muted-foreground">No entries for this date.</td>
                                 </tr>
                             @endforelse
                         </tbody>

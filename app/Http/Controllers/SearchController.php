@@ -60,7 +60,7 @@ class SearchController extends Controller
             $items[] = [
                 'category' => 'Drivers',
                 'title' => $result->name,
-                'subtitle' => trim(($result->phone ?? 'No phone') . ' · ' . ($result->license_number ?? 'No license'), ' ·'),
+                'subtitle' => trim(($result->phone ?? 'No phone') . ' · ' . ($result->license_number ?? 'No ID number'), ' ·'),
                 'url' => route('admin.drivers.index', ['search' => $query], false),
             ];
         }

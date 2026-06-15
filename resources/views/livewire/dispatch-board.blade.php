@@ -6,9 +6,10 @@
             'on_route' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300',
             'delayed' => 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
             'cancelled' => 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+            'breakdown' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
             'arrived' => 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
         ];
-        $statusOptions = ['scheduled', 'departed', 'on_route', 'delayed', 'cancelled', 'arrived'];
+        $statusOptions = ['scheduled', 'departed', 'on_route', 'delayed', 'cancelled', 'breakdown', 'arrived'];
         $sortHeaderClass = 'inline-flex w-full items-center gap-1 text-left font-medium text-muted-foreground transition-colors hover:text-foreground';
         $sortIcon = function (string $field) use ($sortField, $sortDirection) {
             if ($sortField !== $field) {
@@ -205,8 +206,8 @@
                         <tbody>
                             @forelse ($entries as $index => $entry)
                                 @php
-                                    $entryStatus = $entry->status?->value ?? $entry->status ?? 'scheduled';
-                                    $dir = $entry->direction?->value ?? $entry->direction;
+                                    $entryStatus = $entry->status instanceof \BackedEnum ? $entry->status->value : ($entry->status ?? 'scheduled');
+                                    $dir = $entry->direction instanceof \BackedEnum ? $entry->direction->value : $entry->direction;
                                 @endphp
                                 <tr class="border-b align-top hover:bg-muted/30 transition-colors">
                                     <td class="px-2 py-1.5 text-muted-foreground">{{ ($entries->currentPage() - 1) * $entries->perPage() + $index + 1 }}</td>
@@ -233,6 +234,20 @@
                                     <td class="px-2 py-1.5 text-[11px] leading-tight">
                                         <div class="truncate">{{ $entry->driver->name ?? '--' }}</div>
                                         <div class="truncate text-muted-foreground">{{ $entry->driver2->name ?? '' }}</div>
+                                        @if ($entry->driver1_arrived_at || $entry->driver1_cutoff_at || $entry->replacementDriver1)
+                                            <div class="mt-0.5 text-[10px] text-muted-foreground">
+                                                D1 {{ $entry->driver1_arrived_at ? 'arr ' . $entry->driver1_arrived_at->format('H:i') : '' }}
+                                                {{ $entry->driver1_cutoff_at ? 'cut ' . $entry->driver1_cutoff_at->format('H:i') : '' }}
+                                                {{ $entry->replacementDriver1 ? '-> ' . $entry->replacementDriver1->name : '' }}
+                                            </div>
+                                        @endif
+                                        @if ($entry->driver2_arrived_at || $entry->driver2_cutoff_at || $entry->replacementDriver2)
+                                            <div class="text-[10px] text-muted-foreground">
+                                                D2 {{ $entry->driver2_arrived_at ? 'arr ' . $entry->driver2_arrived_at->format('H:i') : '' }}
+                                                {{ $entry->driver2_cutoff_at ? 'cut ' . $entry->driver2_cutoff_at->format('H:i') : '' }}
+                                                {{ $entry->replacementDriver2 ? '-> ' . $entry->replacementDriver2->name : '' }}
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-2 py-1.5">
                                         <div class="flex flex-col gap-1">
@@ -259,15 +274,22 @@
                                                 @if (in_array($entryStatus, ['scheduled', 'departed', 'on_route']))
                                                     <button
                                                         type="button"
-                                                        wire:click="transitionStatus({{ $entry->id }}, 'delayed')"
+                                                        wire:click="openStatusDialog({{ $entry->id }}, 'delayed')"
                                                         class="rounded bg-orange-500 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-orange-600"
                                                     >Delay</button>
+                                                @endif
+                                                @if (in_array($entryStatus, ['scheduled', 'departed', 'on_route', 'delayed']))
+                                                    <button
+                                                        type="button"
+                                                        wire:click="openStatusDialog({{ $entry->id }}, 'breakdown')"
+                                                        class="rounded bg-yellow-500 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-yellow-600"
+                                                        title="Mark bus as under repair; trip details remain editable"
+                                                    >Breakdown</button>
                                                 @endif
                                                 @if (in_array($entryStatus, ['scheduled', 'departed', 'delayed']))
                                                     <button
                                                         type="button"
-                                                        wire:click="transitionStatus({{ $entry->id }}, 'cancelled')"
-                                                        wire:confirm="Cancel this dispatch entry?"
+                                                        wire:click="openStatusDialog({{ $entry->id }}, 'cancelled')"
                                                         class="rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-red-700"
                                                     >Cancel</button>
                                                 @endif
@@ -277,6 +299,23 @@
                                                         wire:click="transitionStatus({{ $entry->id }}, 'scheduled')"
                                                         class="rounded bg-gray-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-gray-700"
                                                     >Reschedule</button>
+                                                @endif
+                                                @if ($entryStatus === 'breakdown')
+                                                    <button
+                                                        type="button"
+                                                        wire:click="transitionStatus({{ $entry->id }}, 'scheduled')"
+                                                        class="rounded bg-gray-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-gray-700"
+                                                    >Reset</button>
+                                                @endif
+                                            </div>
+                                            <div class="mt-1 flex flex-wrap gap-1">
+                                                @if ($entry->driver_id)
+                                                    <button type="button" wire:click="openDriverEventDialog({{ $entry->id }}, 'driver1', 'arrived')" class="rounded border px-1.5 py-0.5 text-[10px] hover:bg-muted">D1 Arr</button>
+                                                    <button type="button" wire:click="openDriverEventDialog({{ $entry->id }}, 'driver1', 'cutoff')" class="rounded border px-1.5 py-0.5 text-[10px] hover:bg-muted">D1 Cut</button>
+                                                @endif
+                                                @if ($entry->driver2_id)
+                                                    <button type="button" wire:click="openDriverEventDialog({{ $entry->id }}, 'driver2', 'arrived')" class="rounded border px-1.5 py-0.5 text-[10px] hover:bg-muted">D2 Arr</button>
+                                                    <button type="button" wire:click="openDriverEventDialog({{ $entry->id }}, 'driver2', 'cutoff')" class="rounded border px-1.5 py-0.5 text-[10px] hover:bg-muted">D2 Cut</button>
                                                 @endif
                                             </div>
                                         </div>
@@ -374,7 +413,7 @@
         </div>
     </div>
 
-    {{-- Status Transition (KMR) Modal --}}
+    {{-- Status Transition Modal --}}
     <div
         x-data
         x-show="$wire.showStatusDialog"
@@ -386,29 +425,59 @@
         <div class="relative mx-auto my-16 max-w-sm rounded-lg bg-background p-6 shadow-lg border">
             <div class="mb-4">
                 <h2 class="text-lg font-semibold">
-                    {{ $statusTo === 'departed' ? 'Mark Departed' : 'Mark Arrived' }}
+                    {{ $statusTo ? 'Mark ' . ucwords(str_replace('_', ' ', $statusTo)) : 'Update Status' }}
                 </h2>
                 <p class="text-sm text-muted-foreground">
-                    {{ $statusEntryLabel ?: 'Dispatch entry' }} — stamps {{ $statusTo === 'departed' ? 'departure' : 'arrival' }} time now.
+                    {{ $statusEntryLabel ?: 'Dispatch entry' }} — records a dispatch event with timestamp and notes.
                 </p>
             </div>
             <form wire:submit.prevent="confirmStatusDialog" class="space-y-4">
                 <div>
-                    <label class="mb-1 block text-sm font-medium">
-                        KMR {{ $statusTo === 'departed' ? 'Out' : 'In' }} reading
-                    </label>
-                    <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        wire:model="statusKmr"
-                        placeholder="{{ $statusKmrSuggested ?? '—' }}"
-                        class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        autofocus
-                    />
-                    @if ($statusKmrSuggested)
-                        <p class="mt-1 text-xs text-muted-foreground">Current vehicle KMR: {{ number_format($statusKmrSuggested) }}</p>
-                    @endif
+                    <label class="mb-1 block text-sm font-medium">Event time</label>
+                    <input type="datetime-local" wire:model="statusOccurredAt" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+                    @error('statusOccurredAt') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                </div>
+                @if (in_array($statusTo, ['departed', 'arrived'], true))
+                    <div>
+                        <label class="mb-1 block text-sm font-medium">
+                            KMR {{ $statusTo === 'departed' ? 'Out' : 'In' }} reading
+                        </label>
+                        <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            wire:model="statusKmr"
+                            placeholder="{{ $statusKmrSuggested ?? '—' }}"
+                            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        />
+                        @if ($statusKmrSuggested)
+                            <p class="mt-1 text-xs text-muted-foreground">Current vehicle KMR: {{ number_format($statusKmrSuggested) }}</p>
+                        @endif
+                    </div>
+                @endif
+                @if (in_array($statusTo, ['delayed', 'cancelled', 'breakdown'], true))
+                    <div>
+                        <label class="mb-1 block text-sm font-medium">Reason</label>
+                        <select wire:model="statusReason" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                            <option value="">-- Select reason --</option>
+                            @foreach ([
+                                'Traffic / road condition',
+                                'Terminal congestion',
+                                'Driver late / unavailable',
+                                'Bus mechanical issue',
+                                'Passenger loading delay',
+                                'Weather',
+                                'Operations decision',
+                                'Other',
+                            ] as $reason)
+                                <option value="{{ $reason }}">{{ $reason }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+                <div>
+                    <label class="mb-1 block text-sm font-medium">Notes</label>
+                    <textarea wire:model="statusNotes" rows="3" class="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" placeholder="Optional operations notes"></textarea>
                 </div>
                 <div class="flex justify-end gap-2 pt-1">
                     <button
@@ -420,6 +489,61 @@
                         type="submit"
                         class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
                     >Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Driver Arrival / Cut-off Modal --}}
+    <div
+        x-data
+        x-show="$wire.showDriverEventDialog"
+        x-transition.opacity
+        class="fixed inset-0 z-50 overflow-y-auto"
+        style="display: none;"
+    >
+        <div class="fixed inset-0 bg-black/50" x-on:click="$wire.showDriverEventDialog = false"></div>
+        <div class="relative mx-auto my-16 max-w-md rounded-lg bg-background p-6 shadow-lg border">
+            <div class="mb-4">
+                <h2 class="text-lg font-semibold">
+                    {{ strtoupper($driverEventSlot === 'driver1' ? 'D1' : 'D2') }} {{ $driverEventType === 'cutoff' ? 'Cut-off' : 'Arrival' }}
+                </h2>
+                <p class="text-sm text-muted-foreground">{{ $driverEventEntryLabel ?: 'Dispatch entry' }}</p>
+            </div>
+            <form wire:submit.prevent="confirmDriverEventDialog" class="space-y-4">
+                <div>
+                    <label class="mb-1 block text-sm font-medium">Event time</label>
+                    <input type="datetime-local" wire:model="driverEventOccurredAt" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+                </div>
+                @if ($driverEventType === 'cutoff')
+                    <div>
+                        <label class="mb-1 block text-sm font-medium">Replacement driver</label>
+                        <select wire:model="driverEventReplacementDriverId" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                            <option value="">-- No replacement --</option>
+                            @foreach ($drivers as $driver)
+                                <option value="{{ $driver->id }}">{{ $driver->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-medium">Reason</label>
+                        <select wire:model="driverEventReason" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                            <option value="">-- Select reason --</option>
+                            <option value="Reassigned to another bus">Reassigned to another bus</option>
+                            <option value="End of duty / cutoff">End of duty / cutoff</option>
+                            <option value="Medical / personal reason">Medical / personal reason</option>
+                            <option value="Operations decision">Operations decision</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                @endif
+                <div>
+                    <label class="mb-1 block text-sm font-medium">Notes</label>
+                    <textarea wire:model="driverEventNotes" rows="3" class="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" placeholder="Optional driver event notes"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-1">
+                    <button type="button" x-on:click="$wire.showDriverEventDialog = false" class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium shadow-sm hover:bg-accent">Cancel</button>
+                    <button type="submit" class="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">Save</button>
                 </div>
             </form>
         </div>

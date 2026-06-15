@@ -35,8 +35,21 @@ class DispatchEntry extends Model
         "scheduled_departure",
         "actual_departure",
         "actual_arrival",
+        "delayed_at",
+        "cancelled_at",
+        "breakdown_at",
+        "driver1_arrived_at",
+        "driver2_arrived_at",
+        "driver1_cutoff_at",
+        "driver2_cutoff_at",
+        "replacement_driver1_id",
+        "replacement_driver2_id",
         "kmr_at_dispatch",
         "kmr_at_arrival",
+        "delay_reason",
+        "cancel_reason",
+        "breakdown_reason",
+        "operations_notes",
         "direction",
         "status",
         "remarks",
@@ -47,6 +60,13 @@ class DispatchEntry extends Model
         "status" => DispatchStatus::class,
         "actual_departure" => "datetime",
         "actual_arrival" => "datetime",
+        "delayed_at" => "datetime",
+        "cancelled_at" => "datetime",
+        "breakdown_at" => "datetime",
+        "driver1_arrived_at" => "datetime",
+        "driver2_arrived_at" => "datetime",
+        "driver1_cutoff_at" => "datetime",
+        "driver2_cutoff_at" => "datetime",
         "seating_capacity" => "integer",
         "kmr_at_dispatch" => "integer",
         "kmr_at_arrival" => "integer",
@@ -88,6 +108,21 @@ class DispatchEntry extends Model
     public function driver2(): BelongsTo
     {
         return $this->belongsTo(Driver::class, 'driver2_id');
+    }
+
+    public function replacementDriver1(): BelongsTo
+    {
+        return $this->belongsTo(Driver::class, 'replacement_driver1_id');
+    }
+
+    public function replacementDriver2(): BelongsTo
+    {
+        return $this->belongsTo(Driver::class, 'replacement_driver2_id');
+    }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(DispatchEvent::class)->latest('occurred_at');
     }
 
     public function smsLogs(): HasMany

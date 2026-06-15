@@ -20,8 +20,8 @@
         @enderror
     </div>
     <div class="space-y-2">
-        <label for="license_number" class="text-sm font-medium leading-none">License Number</label>
-        <input id="license_number" name="license_number" type="text" value="{{ old('license_number', $isEdit ? $driver->license_number : '') }}" placeholder="Driver's license number" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+        <label for="license_number" class="text-sm font-medium leading-none">ID Number</label>
+        <input id="license_number" name="license_number" type="text" value="{{ old('license_number', $isEdit ? $driver->license_number : '') }}" placeholder="Driver ID number" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
         @error('license_number')
             <p class="text-xs text-red-500">{{ $message }}</p>
         @enderror
