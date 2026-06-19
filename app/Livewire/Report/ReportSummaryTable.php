@@ -107,6 +107,10 @@ class ReportSummaryTable extends Component
 
     private function renderWeekly(array $categories)
     {
+        $isSqlite = DB::connection()->getDriverName() === 'sqlite';
+        $yearSql = $isSqlite ? "strftime('%Y', dispatch_days.service_date)" : "YEAR(dispatch_days.service_date)";
+        $weekSql = $isSqlite ? "strftime('%W', dispatch_days.service_date)" : "WEEK(dispatch_days.service_date, 1)";
+
         // Aggregate by ISO week
         $rows = DB::table('daily_summaries')
             ->join('dispatch_days', 'daily_summaries.dispatch_day_id', '=', 'dispatch_days.id')
@@ -114,14 +118,14 @@ class ReportSummaryTable extends Component
             ->whereDate('dispatch_days.service_date', '>=', $this->dateFrom)
             ->whereDate('dispatch_days.service_date', '<=', $this->dateTo)
             ->selectRaw("
-                YEAR(dispatch_days.service_date) as yr,
-                WEEK(dispatch_days.service_date, 1) as wk,
+                $yearSql as yr,
+                $weekSql as wk,
                 MIN(dispatch_days.service_date) as week_start,
                 MAX(dispatch_days.service_date) as week_end,
                 COUNT(DISTINCT daily_summaries.id) as days_count,
                 SUM(daily_summaries.total_trips) / COUNT(DISTINCT daily_summary_items.daily_summary_id) * COUNT(DISTINCT daily_summaries.id) as raw_trips
             ")
-            ->groupByRaw('YEAR(dispatch_days.service_date), WEEK(dispatch_days.service_date, 1)')
+            ->groupByRaw("$yearSql, $weekSql")
             ->orderByRaw('yr DESC, wk DESC')
             ->get();
 
@@ -132,12 +136,12 @@ class ReportSummaryTable extends Component
             ->whereDate('dispatch_days.service_date', '>=', $this->dateFrom)
             ->whereDate('dispatch_days.service_date', '<=', $this->dateTo)
             ->selectRaw("
-                YEAR(dispatch_days.service_date) as yr,
-                WEEK(dispatch_days.service_date, 1) as wk,
+                $yearSql as yr,
+                $weekSql as wk,
                 daily_summary_items.category,
                 SUM(daily_summary_items.trip_count) as total
             ")
-            ->groupByRaw('YEAR(dispatch_days.service_date), WEEK(dispatch_days.service_date, 1), daily_summary_items.category')
+            ->groupByRaw("$yearSql, $weekSql, daily_summary_items.category")
             ->get()
             ->groupBy(fn ($row) => $row->yr . '-' . $row->wk);
 
@@ -147,12 +151,12 @@ class ReportSummaryTable extends Component
             ->whereDate('dispatch_days.service_date', '>=', $this->dateFrom)
             ->whereDate('dispatch_days.service_date', '<=', $this->dateTo)
             ->selectRaw("
-                YEAR(dispatch_days.service_date) as yr,
-                WEEK(dispatch_days.service_date, 1) as wk,
+                $yearSql as yr,
+                $weekSql as wk,
                 SUM(daily_summaries.total_trips) as total_trips,
                 COUNT(*) as days_count
             ")
-            ->groupByRaw('YEAR(dispatch_days.service_date), WEEK(dispatch_days.service_date, 1)')
+            ->groupByRaw("$yearSql, $weekSql")
             ->orderByRaw('yr DESC, wk DESC')
             ->get();
 

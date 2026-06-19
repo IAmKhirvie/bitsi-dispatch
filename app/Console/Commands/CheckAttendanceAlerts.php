@@ -32,7 +32,7 @@ class CheckAttendanceAlerts extends Command
     public function handle(): int
     {
         $date = today()->toDateString();
-        $currentTime = now()->format('H:i');
+        $currentTime = now()->format('H:i:s');
 
         // Initialize settings if not exists
         AttendanceSetting::initializeDefaults();
@@ -80,7 +80,7 @@ class CheckAttendanceAlerts extends Command
         int &$count
     ): void {
         // Calculate the time threshold for upcoming alerts
-        $timeThreshold = now()->addMinutes($preDepartureMinutes)->format('H:i');
+        $timeThreshold = now()->addMinutes($preDepartureMinutes)->format('H:i:s');
 
         $entries = DispatchEntry::where('dispatch_day_id', $dispatchDay->id)
             ->where('status', 'scheduled')
@@ -95,7 +95,7 @@ class CheckAttendanceAlerts extends Command
             ->get();
 
         foreach ($entries as $entry) {
-            $alertTime = now()->subMinutes(5)->format('H:i'); // Only alert every 5 minutes
+            $alertTime = now()->subMinutes(5)->format('H:i:s'); // Only alert every 5 minutes
 
             // Check if alert was already created recently
             $existingAlert = AttendanceAlert::where('dispatch_entry_id', $entry->id)

@@ -138,7 +138,7 @@ trait DispatchRowMapper
     {
         if (!$value) return null;
         try {
-            return Carbon::parse($value)->format('H:i');
+            return Carbon::parse($value)->format('H:i:s');
         } catch (\Throwable $e) {
             return (string) $value;
         }

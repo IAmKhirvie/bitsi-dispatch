@@ -213,7 +213,7 @@ class AttendanceController extends Controller
         }
 
         // Get entries with scheduled departure in the next 2 hours
-        $twoHoursFromNow = now()->addHours(2)->format('H:i');
+        $twoHoursFromNow = now()->addHours(2)->format('H:i:s');
 
         $entries = DispatchEntry::where('dispatch_day_id', $dispatchDay->id)
             ->where('status', 'scheduled')

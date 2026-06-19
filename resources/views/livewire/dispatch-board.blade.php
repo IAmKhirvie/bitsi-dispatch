@@ -228,23 +228,23 @@
                                     <td class="px-2 py-1.5 truncate" title="{{ $entry->route ?? '' }}">{{ $entry->route ?? '--' }}</td>
                                     <td class="px-2 py-1.5 text-[11px] leading-tight">
                                         <div><span class="text-muted-foreground">S:</span> {{ $entry->scheduled_departure ? \Illuminate\Support\Str::substr($entry->scheduled_departure, 0, 5) : '--' }}</div>
-                                        <div><span class="text-muted-foreground">D:</span> {{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i') : '--' }}</div>
-                                        <div><span class="text-muted-foreground">A:</span> {{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i') : '--' }}</div>
+                                        <div><span class="text-muted-foreground">D:</span> {{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i:s') : '--' }}</div>
+                                        <div><span class="text-muted-foreground">A:</span> {{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i:s') : '--' }}</div>
                                     </td>
                                     <td class="px-2 py-1.5 text-[11px] leading-tight">
                                         <div class="truncate">{{ $entry->driver->name ?? '--' }}</div>
                                         <div class="truncate text-muted-foreground">{{ $entry->driver2->name ?? '' }}</div>
                                         @if ($entry->driver1_arrived_at || $entry->driver1_cutoff_at || $entry->replacementDriver1)
                                             <div class="mt-0.5 text-[10px] text-muted-foreground">
-                                                D1 {{ $entry->driver1_arrived_at ? 'arr ' . $entry->driver1_arrived_at->format('H:i') : '' }}
-                                                {{ $entry->driver1_cutoff_at ? 'cut ' . $entry->driver1_cutoff_at->format('H:i') : '' }}
+                                                D1 {{ $entry->driver1_arrived_at ? 'arr ' . $entry->driver1_arrived_at->format('H:i:s') : '' }}
+                                                {{ $entry->driver1_cutoff_at ? 'cut ' . $entry->driver1_cutoff_at->format('H:i:s') : '' }}
                                                 {{ $entry->replacementDriver1 ? '-> ' . $entry->replacementDriver1->name : '' }}
                                             </div>
                                         @endif
                                         @if ($entry->driver2_arrived_at || $entry->driver2_cutoff_at || $entry->replacementDriver2)
                                             <div class="text-[10px] text-muted-foreground">
-                                                D2 {{ $entry->driver2_arrived_at ? 'arr ' . $entry->driver2_arrived_at->format('H:i') : '' }}
-                                                {{ $entry->driver2_cutoff_at ? 'cut ' . $entry->driver2_cutoff_at->format('H:i') : '' }}
+                                                D2 {{ $entry->driver2_arrived_at ? 'arr ' . $entry->driver2_arrived_at->format('H:i:s') : '' }}
+                                                {{ $entry->driver2_cutoff_at ? 'cut ' . $entry->driver2_cutoff_at->format('H:i:s') : '' }}
                                                 {{ $entry->replacementDriver2 ? '-> ' . $entry->replacementDriver2->name : '' }}
                                             </div>
                                         @endif

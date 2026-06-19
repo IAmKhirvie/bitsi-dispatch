@@ -28,7 +28,7 @@ class DispatchEntryObserver
 
             // Auto-set actual departure when status changes to departed
             if ($status === 'departed' && !$entry->actual_departure) {
-                $entry->updateQuietly(['actual_departure' => now()->format('H:i')]);
+                $entry->updateQuietly(['actual_departure' => now()->format('H:i:s')]);
             }
 
             $this->syncDriverVehicleStatus($entry);

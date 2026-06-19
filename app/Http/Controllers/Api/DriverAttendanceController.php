@@ -34,7 +34,7 @@ class DriverAttendanceController extends Controller
         }
 
         $date = today()->toDateString();
-        $time = $validated['time'] ?? now()->format('H:i');
+        $time = $validated['time'] ?? now()->format('H:i:s');
 
         // Find or create attendance record
         $attendance = DriverAttendance::firstOrCreate(
@@ -83,7 +83,7 @@ class DriverAttendanceController extends Controller
         }
 
         $date = today()->toDateString();
-        $time = $validated['time'] ?? now()->format('H:i');
+        $time = $validated['time'] ?? now()->format('H:i:s');
 
         $attendance = DriverAttendance::where('driver_id', $driver->id)
             ->where('dispatch_entry_id', $validated['dispatch_entry_id'])

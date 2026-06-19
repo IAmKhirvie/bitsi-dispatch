@@ -150,7 +150,7 @@ class DispatchBoard extends Component
     public function updatedAddEvidencePhoto(): void
     {
         if ($this->addEvidencePhoto && !$this->addActualDeparture) {
-            $this->addActualDeparture = now()->format('H:i');
+            $this->addActualDeparture = now()->format('H:i:s');
         }
     }
 
@@ -453,8 +453,8 @@ class DispatchBoard extends Component
         $this->editBusType = $entry->bus_type ?? '';
         $this->editDepartureTerminal = $entry->departure_terminal ?? '';
         $this->editArrivalTerminal = $entry->arrival_terminal ?? '';
-        $this->editScheduledDeparture = $entry->scheduled_departure ? \Carbon\Carbon::parse($entry->scheduled_departure)->format('H:i') : '';
-        $this->editActualDeparture = $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i') : '';
+        $this->editScheduledDeparture = $entry->scheduled_departure ? \Carbon\Carbon::parse($entry->scheduled_departure)->format('H:i:s') : '';
+        $this->editActualDeparture = $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i:s') : '';
         $this->editDirection = $entry->direction ?? '';
         $this->editStatus = $entry->status?->value ?? $entry->status ?? 'scheduled';
         $this->editRemarks = $entry->remarks ?? '';

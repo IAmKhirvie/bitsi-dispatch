@@ -60,9 +60,9 @@
                 <td>{{ $entry->driver?->name }}</td>
                 <td>{{ $entry->driver2?->name }}</td>
                 <td>{{ $entry->dispatcher?->name }}</td>
-                <td>{{ $entry->scheduled_departure ? \Carbon\Carbon::parse($entry->scheduled_departure)->format('H:i') : '' }}</td>
-                <td>{{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i') : '' }}</td>
-                <td>{{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i') : '' }}</td>
+                <td>{{ $entry->scheduled_departure ? \Carbon\Carbon::parse($entry->scheduled_departure)->format('H:i:s') : '' }}</td>
+                <td>{{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i:s') : '' }}</td>
+                <td>{{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i:s') : '' }}</td>
                 <td>{{ $entry->kmr_at_dispatch ? number_format($entry->kmr_at_dispatch) : '' }}</td>
                 <td>{{ $entry->kmr_at_arrival ? number_format($entry->kmr_at_arrival) : '' }}</td>
                 <td>{{ $kmRun !== null ? number_format($kmRun) : '' }}</td>

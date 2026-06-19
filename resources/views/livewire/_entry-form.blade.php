@@ -161,7 +161,7 @@
     <div class="space-y-2">
         <label class="text-sm font-medium leading-none">Sched. Departure</label>
         <input
-            type="time"
+            type="time" step="1"
             wire:model="{{ $prefix }}ScheduledDeparture"
             class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
@@ -171,7 +171,7 @@
     <div class="space-y-2">
         <label class="text-sm font-medium leading-none">Actual Departure</label>
         <input
-            type="time"
+            type="time" step="1"
             wire:model="{{ $prefix }}ActualDeparture"
             class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
