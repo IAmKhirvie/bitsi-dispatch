@@ -28,8 +28,9 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type BreadcrumbItem, type DispatchDay, type DispatchEntry, type TripCode, type Vehicle, type Driver } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { Plus, Pencil, Trash2, Calendar, ChevronLeft, ChevronRight, Check } from 'lucide-vue-next';
-import { ref, watch, computed } from 'vue';
+import { Plus, Pencil, Trash2, Calendar, ChevronLeft, ChevronRight, Check, Search } from 'lucide-vue-next';
+import { ref, shallowRef, watch, computed } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -47,11 +48,22 @@ const props = defineProps<{
 const selectedDate = ref(props.date);
 const showAddDialog = ref(false);
 const showEditDialog = ref(false);
-const editingEntry = ref<DispatchEntry | null>(null);
+const editingEntry = shallowRef<DispatchEntry | null>(null);
 
-watch(selectedDate, (newDate) => {
+// Debounced date navigation avoids firing a request on every keystroke / picker tick.
+const navigateToDate = useDebounceFn((newDate: string) => {
     router.get('/dispatch', { date: newDate }, { preserveState: true, preserveScroll: true });
-});
+}, 300);
+watch(selectedDate, (newDate) => navigateToDate(newDate));
+
+// O(1) lookups for related resources — rebuilt only when the prop arrays change.
+const tripCodeMap = computed(() => new Map<number, TripCode>(props.tripCodes.map((t) => [t.id, t])));
+const vehicleMap = computed(() => new Map<number, Vehicle>(props.vehicles.map((v) => [v.id, v])));
+const driverMap = computed(() => new Map<number, Driver>(props.drivers.map((d) => [d.id, d])));
+
+function getById<T extends { id: number }>(map: Map<number, T>, id: number | null | undefined): T | undefined {
+    return id == null ? undefined : map.get(id);
+}
 
 const createDayForm = useForm({ service_date: props.date, notes: '' });
 
@@ -96,7 +108,7 @@ const stepLabels = ['Trip & crew', 'Route & times', 'Status & remarks'];
 
 function onTripCodeChange(form: typeof addForm, tripCodeId: number | null) {
     if (!tripCodeId) return;
-    const tc = props.tripCodes.find((t) => t.id === tripCodeId);
+    const tc = tripCodeMap.value.get(tripCodeId);
     if (tc) {
         form.route = `${tc.origin_terminal} - ${tc.destination_terminal}`;
         form.bus_type = tc.bus_type;
@@ -109,7 +121,7 @@ function onTripCodeChange(form: typeof addForm, tripCodeId: number | null) {
 
 function onVehicleChange(form: typeof addForm, vehicleId: number | null) {
     if (!vehicleId) return;
-    const v = props.vehicles.find((vv) => vv.id === vehicleId);
+    const v = vehicleMap.value.get(vehicleId);
     if (v) {
         form.brand = v.brand;
         form.bus_number = v.bus_number;
@@ -190,6 +202,11 @@ function formatStatus(status: string): string {
     return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+// Precompute labels once instead of recomputing for every button on every render.
+const statusLabels: Record<string, string> = Object.fromEntries(
+    statusOptions.map((s) => [s, formatStatus(s)]),
+);
+
 function formatTime(time: string | null): string {
     if (!time) return '--';
     return time.substring(0, 5);
@@ -198,6 +215,56 @@ function formatTime(time: string | null): string {
 const entries = computed(() => props.dispatchDay?.entries || []);
 const summary = computed(() => props.dispatchDay?.summary);
 
+// --- Client-side filtering (debounced) + pagination to handle large datasets efficiently ---
+const searchInput = ref('');
+const search = ref('');
+const applySearch = useDebounceFn((value: string) => {
+    search.value = value;
+    currentPage.value = 1;
+}, 200);
+watch(searchInput, (value) => applySearch(value));
+
+const perPage = ref(50);
+const perPageOptions = [25, 50, 100, 200];
+const currentPage = ref(1);
+
+const filteredEntries = computed(() => {
+    const q = search.value.trim().toLowerCase();
+    if (!q) return entries.value;
+    return entries.value.filter((e) =>
+        (e.bus_number ?? '').toLowerCase().includes(q) ||
+        (e.brand ?? '').toLowerCase().includes(q) ||
+        (e.route ?? '').toLowerCase().includes(q) ||
+        (e.bus_type ?? '').toLowerCase().includes(q) ||
+        (e.departure_terminal ?? '').toLowerCase().includes(q) ||
+        (e.arrival_terminal ?? '').toLowerCase().includes(q) ||
+        (e.trip_code?.code ?? '').toLowerCase().includes(q) ||
+        (e.driver?.name ?? '').toLowerCase().includes(q) ||
+        (e.driver2?.name ?? '').toLowerCase().includes(q) ||
+        (e.status ?? '').toLowerCase().includes(q) ||
+        (e.remarks ?? '').toLowerCase().includes(q),
+    );
+});
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredEntries.value.length / perPage.value)));
+
+const paginatedEntries = computed(() => {
+    const start = (currentPage.value - 1) * perPage.value;
+    return filteredEntries.value.slice(start, start + perPage.value);
+});
+
+// Keep the current page in bounds when the dataset shrinks.
+watch(totalPages, (tp) => {
+    if (currentPage.value > tp) currentPage.value = tp;
+});
+
+// Reset view state when the dispatch day changes (e.g. navigating to another date).
+watch(() => props.dispatchDay?.id, () => {
+    currentPage.value = 1;
+    search.value = '';
+    searchInput.value = '';
+});
+
 // Step 1 requires trip code + vehicle + driver 1
 function canAdvance(form: typeof addForm, step: number): boolean {
     if (step === 1) return !!(form.trip_code_id && form.vehicle_id && form.driver_id);
@@ -205,11 +272,12 @@ function canAdvance(form: typeof addForm, step: number): boolean {
     return true;
 }
 
-// Direction badge colors via inline style — same source of truth as StatusBadge
-const directionStyle = (dir: string) =>
-    dir === 'SB'
-        ? { backgroundColor: 'hsl(214 95% 93%)', color: 'hsl(217 76% 38%)' }
-        : { backgroundColor: 'hsl(280 65% 92%)', color: 'hsl(280 60% 38%)' };
+// Direction badge colors — static constants so we don't allocate objects on every render.
+const DIRECTION_STYLES: Record<string, { backgroundColor: string; color: string }> = {
+    SB: { backgroundColor: 'hsl(214 95% 93%)', color: 'hsl(217 76% 38%)' },
+    NB: { backgroundColor: 'hsl(280 65% 92%)', color: 'hsl(280 60% 38%)' },
+};
+const directionStyle = (dir: string) => DIRECTION_STYLES[dir] ?? {};
 </script>
 
 <template>
@@ -401,7 +469,7 @@ const directionStyle = (dir: string) =>
                                         <Select v-model="addForm.status">
                                             <SelectTrigger><SelectValue /></SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem v-for="s in statusOptions" :key="s" :value="s">{{ formatStatus(s) }}</SelectItem>
+                                                <SelectItem v-for="s in statusOptions" :key="s" :value="s">{{ statusLabels[s] }}</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -412,9 +480,9 @@ const directionStyle = (dir: string) =>
                                     <div class="rounded-md border bg-muted/30 p-3 text-sm">
                                         <p class="mb-2 font-medium">Review</p>
                                         <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                                            <span>Trip code:</span><span class="text-foreground">{{ tripCodes.find(t => t.id === addForm.trip_code_id)?.code || '—' }}</span>
-                                            <span>Vehicle:</span><span class="text-foreground">{{ vehicles.find(v => v.id === addForm.vehicle_id)?.bus_number || '—' }}</span>
-                                            <span>Driver 1:</span><span class="text-foreground">{{ drivers.find(d => d.id === addForm.driver_id)?.name || '—' }}</span>
+                                            <span>Trip code:</span><span class="text-foreground">{{ getById(tripCodeMap, addForm.trip_code_id)?.code || '—' }}</span>
+                                            <span>Vehicle:</span><span class="text-foreground">{{ getById(vehicleMap, addForm.vehicle_id)?.bus_number || '—' }}</span>
+                                            <span>Driver 1:</span><span class="text-foreground">{{ getById(driverMap, addForm.driver_id)?.name || '—' }}</span>
                                             <span>Route:</span><span class="text-foreground">{{ addForm.route || '—' }}</span>
                                             <span>Scheduled:</span><span class="text-foreground">{{ addForm.scheduled_departure || '—' }}</span>
                                             <span>Direction:</span><span class="text-foreground">{{ addForm.direction || '—' }}</span>
@@ -449,6 +517,24 @@ const directionStyle = (dir: string) =>
                     </Dialog>
                 </CardHeader>
                 <CardContent class="p-0">
+                    <!-- Toolbar: debounced search + per-page selector -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2">
+                        <div class="relative">
+                            <Search class="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                            <Input v-model="searchInput" placeholder="Search entries..." class="h-8 w-56 pl-7" />
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>{{ filteredEntries.length }} of {{ entries.length }}</span>
+                            <Select :model-value="String(perPage)" @update:model-value="(v) => { perPage = Number(v); currentPage = 1 }">
+                                <SelectTrigger class="h-8 w-[4.5rem]"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem v-for="n in perPageOptions" :key="n" :value="String(n)">{{ n }}</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <span>per page</span>
+                        </div>
+                    </div>
+
                     <div class="overflow-x-auto">
                         <table class="w-full text-xs">
                             <thead>
@@ -479,8 +565,18 @@ const directionStyle = (dir: string) =>
                                         No entries yet. Click "Add Entry" to start dispatching.
                                     </td>
                                 </tr>
-                                <tr v-for="(entry, index) in entries" :key="entry.id" class="border-b hover:bg-muted/30 transition-colors">
-                                    <td class="whitespace-nowrap px-3 py-1.5 text-muted-foreground">{{ index + 1 }}</td>
+                                <tr v-else-if="filteredEntries.length === 0">
+                                    <td colspan="18" class="px-3 py-8 text-center text-sm text-muted-foreground">
+                                        No entries match your search.
+                                    </td>
+                                </tr>
+                                <tr
+                                    v-for="(entry, index) in paginatedEntries"
+                                    :key="entry.id"
+                                    class="border-b hover:bg-muted/30 transition-colors"
+                                    v-memo="[entry.id, entry.status, entry.actual_departure, entry.actual_arrival, entry.updated_at, index, currentPage, perPage]"
+                                >
+                                    <td class="whitespace-nowrap px-3 py-1.5 text-muted-foreground">{{ (currentPage - 1) * perPage + index + 1 }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5 font-medium">{{ entry.brand || '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5 font-semibold">{{ entry.bus_number || '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ entry.trip_code?.code || '--' }}</td>
@@ -512,9 +608,9 @@ const directionStyle = (dir: string) =>
                                                 :class="entry.status === s
                                                     ? 'bg-primary text-primary-foreground'
                                                     : 'bg-muted text-muted-foreground hover:bg-muted/80'"
-                                                :title="`Set ${formatStatus(s)}`"
+                                                :title="`Set ${statusLabels[s]}`"
                                             >
-                                                {{ formatStatus(s) }}
+                                                {{ statusLabels[s] }}
                                             </button>
                                         </div>
                                     </td>
@@ -554,6 +650,19 @@ const directionStyle = (dir: string) =>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Pagination controls -->
+                    <div v-if="entries.length > 0" class="flex items-center justify-between border-t px-3 py-2 text-xs text-muted-foreground">
+                        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+                        <div class="flex items-center gap-1">
+                            <Button size="sm" variant="outline" class="h-7 px-2" :disabled="currentPage === 1" @click="currentPage--">
+                                <ChevronLeft class="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="outline" class="h-7 px-2" :disabled="currentPage === totalPages" @click="currentPage++">
+                                <ChevronRight class="h-4 w-4" />
+                            </Button>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -671,7 +780,7 @@ const directionStyle = (dir: string) =>
                                 <Select v-model="editForm.status">
                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem v-for="s in statusOptions" :key="s" :value="s">{{ formatStatus(s) }}</SelectItem>
+                                        <SelectItem v-for="s in statusOptions" :key="s" :value="s">{{ statusLabels[s] }}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
