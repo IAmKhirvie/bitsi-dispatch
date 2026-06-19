@@ -227,7 +227,7 @@
                                     </td>
                                     <td class="px-2 py-1.5 truncate" title="{{ $entry->route ?? '' }}">{{ $entry->route ?? '--' }}</td>
                                     <td class="px-2 py-1.5 text-[11px] leading-tight">
-                                        <div><span class="text-muted-foreground">S:</span> {{ $entry->scheduled_departure ? \Illuminate\Support\Str::substr($entry->scheduled_departure, 0, 5) : '--' }}</div>
+                                        <div><span class="text-muted-foreground">S:</span> {{ $entry->scheduled_departure ? \Carbon\Carbon::parse($entry->scheduled_departure)->format('H:i:s') : '--' }}</div>
                                         <div><span class="text-muted-foreground">D:</span> {{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i:s') : '--' }}</div>
                                         <div><span class="text-muted-foreground">A:</span> {{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i:s') : '--' }}</div>
                                     </td>
@@ -434,7 +434,7 @@
             <form wire:submit.prevent="confirmStatusDialog" class="space-y-4">
                 <div>
                     <label class="mb-1 block text-sm font-medium">Event time</label>
-                    <input type="datetime-local" wire:model="statusOccurredAt" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+                    <input type="datetime-local" step="1" wire:model="statusOccurredAt" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
                     @error('statusOccurredAt') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
                 @if (in_array($statusTo, ['departed', 'arrived'], true))
@@ -513,7 +513,7 @@
             <form wire:submit.prevent="confirmDriverEventDialog" class="space-y-4">
                 <div>
                     <label class="mb-1 block text-sm font-medium">Event time</label>
-                    <input type="datetime-local" wire:model="driverEventOccurredAt" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+                    <input type="datetime-local" step="1" wire:model="driverEventOccurredAt" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
                 </div>
                 @if ($driverEventType === 'cutoff')
                     <div>

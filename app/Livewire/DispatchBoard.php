@@ -273,7 +273,7 @@ class DispatchBoard extends Component
             : ($entry->kmr_at_dispatch ?? $entry->vehicle?->current_kmr ?? null);
         $this->statusKmr = $this->statusKmrSuggested;
         $this->statusEntryLabel = trim(($entry->tripCode->code ?? '') . ' · ' . ($entry->bus_number ?? ''), ' ·');
-        $this->statusOccurredAt = now()->format('Y-m-d\TH:i');
+        $this->statusOccurredAt = now()->format('Y-m-d\TH:i:s');
         $this->statusReason = '';
         $this->statusNotes = '';
         $this->showStatusDialog = true;
@@ -313,7 +313,7 @@ class DispatchBoard extends Component
         $this->driverEventEntryId = $entry->id;
         $this->driverEventSlot = in_array($slot, ['driver1', 'driver2'], true) ? $slot : 'driver1';
         $this->driverEventType = in_array($type, ['arrived', 'cutoff'], true) ? $type : 'arrived';
-        $this->driverEventOccurredAt = now()->format('Y-m-d\TH:i');
+        $this->driverEventOccurredAt = now()->format('Y-m-d\TH:i:s');
         $this->driverEventReplacementDriverId = null;
         $this->driverEventReason = '';
         $this->driverEventNotes = '';

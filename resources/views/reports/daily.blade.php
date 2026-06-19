@@ -140,7 +140,7 @@
                                             --
                                         @endif
                                     </td>
-                                    <td class="px-4 py-2">{{ $entry->scheduled_departure ? Str::substr($entry->scheduled_departure, 0, 5) : '--' }}</td>
+                                    <td class="px-4 py-2">{{ $entry->scheduled_departure ? \Carbon\Carbon::parse($entry->scheduled_departure)->format('H:i:s') : '--' }}</td>
                                     <td class="px-4 py-2">{{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i:s') : '--' }}</td>
                                     <td class="px-4 py-2">
                                         @php
