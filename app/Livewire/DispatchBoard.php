@@ -57,6 +57,7 @@ class DispatchBoard extends Component
     public string $addDirection = '';
     public string $addStatus = 'scheduled';
     public string $addRemarks = '';
+    public string $addManualTripCode = '';
     public $addEvidencePhoto = null;
 
     // Edit entry form
@@ -77,6 +78,7 @@ class DispatchBoard extends Component
     public string $editDirection = '';
     public string $editStatus = 'scheduled';
     public string $editRemarks = '';
+    public string $editManualTripCode = '';
 
     public bool $showAddDialog = false;
     public bool $showEditDialog = false;
@@ -142,6 +144,14 @@ class DispatchBoard extends Component
         }
 
         $this->resetPage();
+    }
+
+    // Auto-set actual departure time when evidence photo is uploaded
+    public function updatedAddEvidencePhoto(): void
+    {
+        if ($this->addEvidencePhoto && !$this->addActualDeparture) {
+            $this->addActualDeparture = now()->format('H:i');
+        }
     }
 
     // Auto-fill from trip code (Add form)
@@ -379,7 +389,7 @@ class DispatchBoard extends Component
 
     public function submitAddEntry(): void
     {
-        $dispatchDay = DispatchDay::where('service_date', $this->date)->first();
+        $dispatchDay = DispatchDay::whereDate('service_date', $this->date)->first();
         if (!$dispatchDay) return;
 
         $this->validate([
@@ -392,6 +402,7 @@ class DispatchBoard extends Component
 
         $entry = $dispatchDay->entries()->create([
             'trip_code_id' => $this->addTripCodeId,
+            'manual_trip_code' => $this->addManualTripCode ?: null,
             'vehicle_id' => $this->addVehicleId,
             'driver_id' => $this->addDriverId,
             'driver2_id' => $this->addDriver2Id,
@@ -447,6 +458,7 @@ class DispatchBoard extends Component
         $this->editDirection = $entry->direction ?? '';
         $this->editStatus = $entry->status?->value ?? $entry->status ?? 'scheduled';
         $this->editRemarks = $entry->remarks ?? '';
+        $this->editManualTripCode = $entry->manual_trip_code ?? '';
         $this->showEditDialog = true;
     }
 
@@ -457,6 +469,7 @@ class DispatchBoard extends Component
         $entry = DispatchEntry::findOrFail($this->editingEntryId);
         $entry->update([
             'trip_code_id' => $this->editTripCodeId,
+            'manual_trip_code' => $this->editManualTripCode ?: null,
             'vehicle_id' => $this->editVehicleId,
             'driver_id' => $this->editDriverId,
             'driver2_id' => $this->editDriver2Id,
@@ -501,13 +514,14 @@ class DispatchBoard extends Component
         $this->addDirection = '';
         $this->addStatus = 'scheduled';
         $this->addRemarks = '';
+        $this->addManualTripCode = '';
         $this->addEvidencePhoto = null;
     }
 
     public function render()
     {
         $dispatchDay = DispatchDay::with('summary.items')
-            ->where('service_date', $this->date)
+            ->whereDate('service_date', $this->date)
             ->first();
 
         $entries = $dispatchDay

@@ -211,7 +211,7 @@
                                 @endphp
                                 <tr class="border-b align-top hover:bg-muted/30 transition-colors">
                                     <td class="px-2 py-1.5 text-muted-foreground">{{ ($entries->currentPage() - 1) * $entries->perPage() + $index + 1 }}</td>
-                                    <td class="px-2 py-1.5">{{ $entry->tripCode->code ?? '--' }}</td>
+                                    <td class="px-2 py-1.5">{{ $entry->manual_trip_code ?: $entry->tripCode->code ?? '--' }}</td>
                                     <td class="px-2 py-1.5">
                                         <div class="font-semibold truncate">{{ $entry->bus_number ?? '--' }}</div>
                                         <div class="text-[10px] text-muted-foreground truncate">{{ $entry->brand ?? '' }}{{ $entry->bus_type ? ' · ' . $entry->bus_type : '' }}</div>

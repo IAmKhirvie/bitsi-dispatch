@@ -99,7 +99,7 @@ trait DispatchRowMapper
         return [
             'date' => optional($entry->dispatchDay)->service_date?->format('Y-m-d'),
             'service_class' => $this->enumLabel($entry->bus_type),
-            'trip_code' => $entry->tripCode?->code,
+            'trip_code' => $entry->manual_trip_code ?: $entry->tripCode?->code,
             'pax' => $entry->seating_capacity ?? $entry->tripCode?->default_seating_capacity,
             'origin' => $entry->departure_terminal,
             'destination' => $entry->arrival_terminal,

@@ -27,7 +27,7 @@
                 <th>Trip Code</th>
                 <th>Bus No.</th>
                 <th>Brand</th>
-                <th>Seat</th>
+                <th>PAX</th>
                 <th>Route</th>
                 <th>Dir.</th>
                 <th>Driver 1</th>
@@ -51,7 +51,7 @@
                 @endphp
             <tr>
                 <td>{{ $index + 1 }}</td>
-                <td>{{ $entry->tripCode?->code }}</td>
+                <td>{{ $entry->manual_trip_code ?: $entry->tripCode?->code }}</td>
                 <td>{{ $entry->bus_number }}</td>
                 <td>{{ $entry->brand }}</td>
                 <td>{{ $entry->seating_capacity }}</td>

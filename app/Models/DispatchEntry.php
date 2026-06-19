@@ -22,6 +22,7 @@ class DispatchEntry extends Model
         "dispatch_day_id",
         "vehicle_id",
         "trip_code_id",
+        "manual_trip_code",
         "driver_id",
         "driver2_id",
         "dispatcher_user_id",

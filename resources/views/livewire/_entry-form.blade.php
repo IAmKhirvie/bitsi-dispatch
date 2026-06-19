@@ -15,6 +15,22 @@
             @endforeach
         </select>
         @error($prefix . 'TripCodeId') <p class="text-xs text-red-500">{{ $message }}</p> @enderror
+
+        {{-- Manual Trip Code override (visible on breakdown) --}}
+        @php $currentStatus = $this->{$prefix . 'Status'} ?? 'scheduled'; @endphp
+        @if ($currentStatus === 'breakdown')
+            <div class="mt-2">
+                <label class="text-xs font-medium leading-none text-yellow-700 dark:text-yellow-400">Manual Trip Code Override</label>
+                <input
+                    type="text"
+                    wire:model="{{ $prefix }}ManualTripCode"
+                    placeholder="e.g. TC-REPLACEMENT"
+                    maxlength="50"
+                    class="mt-1 flex h-9 w-full rounded-md border border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-yellow-500"
+                />
+                <p class="mt-0.5 text-xs text-muted-foreground">Optional: type a custom trip code for this breakdown entry</p>
+            </div>
+        @endif
     </div>
 
     {{-- Vehicle --}}
@@ -86,7 +102,7 @@
 
     {{-- Seating Capacity --}}
     <div class="space-y-2">
-        <label class="text-sm font-medium leading-none">Seating Capacity</label>
+        <label class="text-sm font-medium leading-none">PAX</label>
         <input
             type="number"
             min="0"

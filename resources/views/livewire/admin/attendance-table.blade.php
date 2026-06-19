@@ -143,6 +143,8 @@
                         <tr class="border-b bg-muted/50">
                             <x-sortable-th field="driver" label="Driver" :active="$sortField" :direction="$sortDirection" />
                             <x-sortable-th field="trip" label="Trip / Route" :active="$sortField" :direction="$sortDirection" />
+                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Bus No.</th>
+                            <th class="px-4 py-3 text-left font-medium text-muted-foreground">Trip Code</th>
                             <x-sortable-th field="scheduled_departure" label="Scheduled" :active="$sortField" :direction="$sortDirection" />
                             <x-sortable-th field="check_in_time" label="Check In" :active="$sortField" :direction="$sortDirection" />
                             <x-sortable-th field="check_out_time" label="Check Out" :active="$sortField" :direction="$sortDirection" />
@@ -157,6 +159,8 @@
                                 <td class="px-4 py-3">
                                     {{ $att->dispatchEntry->route ?? $att->dispatchEntry->tripCode->code ?? '--' }}
                                 </td>
+                                <td class="px-4 py-3">{{ $att->dispatchEntry->bus_number ?? '--' }}</td>
+                                <td class="px-4 py-3">{{ $att->dispatchEntry->tripCode->code ?? '--' }}</td>
                                 <td class="px-4 py-3">{{ $att->dispatchEntry->scheduled_departure ?? '--' }}</td>
                                 <td class="px-4 py-3">{{ $att->check_in_time ?? '--' }}</td>
                                 <td class="px-4 py-3">{{ $att->check_out_time ?? '--' }}</td>
@@ -212,7 +216,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-8 text-center text-muted-foreground">
+                                <td colspan="9" class="px-4 py-8 text-center text-muted-foreground">
                                     No attendance records found for this date.
                                     Click "Initialize Today" to create records for scheduled drivers.
                                 </td>
