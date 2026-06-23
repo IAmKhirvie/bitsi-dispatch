@@ -22,6 +22,10 @@ return [
         'ingest_token' => env('GPS_INGEST_TOKEN'),
     ],
 
+    'mobile' => [
+        'attendance_token' => env('MOBILE_ATTENDANCE_TOKEN'),
+    ],
+
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),

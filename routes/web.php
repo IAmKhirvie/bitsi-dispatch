@@ -64,15 +64,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Admin routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::resource('users', UserController::class);
+        Route::resource('users', UserController::class)->except(['show']);
         Route::patch('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
 
-        Route::resource('trip-codes', TripCodeController::class);
+        Route::resource('trip-codes', TripCodeController::class)->except(['show']);
         Route::patch('trip-codes/{tripCode}/toggle-active', [TripCodeController::class, 'toggleActive'])->name('trip-codes.toggle-active');
 
-        Route::resource('vehicles', VehicleController::class);
+        Route::resource('vehicles', VehicleController::class)->except(['show']);
 
-        Route::resource('drivers', DriverController::class);
+        Route::resource('drivers', DriverController::class)->except(['show']);
         Route::patch('drivers/{driver}/toggle-active', [DriverController::class, 'toggleActive'])->name('drivers.toggle-active');
         Route::patch('drivers/{driver}/update-status', [DriverController::class, 'updateStatus'])->name('drivers.update-status');
         Route::post('drivers/{driver}/send-schedule-sms', [DriverNotificationController::class, 'sendScheduleSms'])->name('drivers.send-schedule-sms');
