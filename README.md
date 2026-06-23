@@ -22,6 +22,29 @@ A real-time bus dispatch management system for **Bicol Isarog Transport System, 
 
 ---
 
+## Scope and Limitations
+
+### Application Scope
+- Manage daily bus dispatch operations, including dispatch days, trip entries, trip codes, routes, schedules, directions, vehicles, and assigned drivers
+- Maintain fleet records for buses, vehicle status, PMS thresholds, idle days, and basic operational availability
+- Maintain driver records, active/inactive status, dispatch availability, attendance records, and schedule assignment history
+- Provide role-based dashboards for Admin, Operations Manager, and Dispatcher users
+- Generate dispatch reports, daily summaries, historical records, Excel exports, and PDF exports
+- Keep audit logs for major CRUD operations so administrators can review system changes
+- Provide scaffolding for future company integrations such as SMS notifications, fleet map/GPS tracking, and mobile attendance
+
+### Application Limitations
+- SMS notifications are **not working yet out of the box**. The company must implement/configure the SMS provider account, approved sender name, credentials, queue worker, compliance rules, testing, and monitoring.
+- Fleet Map/GPS tracking is **not working yet out of the box**. The company must provide GPS devices or a trusted location data source, configure production ingestion, and validate live map behavior.
+- The repository does not include a production mobile app. It only includes backend mobile attendance endpoints that require a company-provided client and secure token configuration.
+- The app is not a payroll, accounting, ticketing, payment, customer booking, route optimization, or full ERP system.
+- Offline dispatching, biometric attendance, geofencing, ETA prediction, hardware integrations, and advanced GPS analytics are not included unless the company implements them separately.
+- Reports depend on accurate dispatch, vehicle, driver, and attendance data entered by users or imported through future integrations.
+- Seeded accounts and sample data are for testing/demo use only and must not be used as production credentials.
+- Production hosting, SSL, backups, queue supervision, monitoring, data privacy compliance, access policies, and operational procedures are company responsibilities.
+
+---
+
 ## Features Overview
 
 ### Dispatch Operations
@@ -326,6 +349,76 @@ Open http://127.0.0.1:8000 in your browser.
 | Dispatcher          | dispatcher@bitsi.com    | password   |
 
 > Admin users can access all management pages (Users, Vehicles, Drivers, Trip Codes, Attendance, Audit Logs, SMS Logs) via the sidebar.
+
+---
+
+## User Manual
+
+### 1. Sign In
+- Open the application and sign in using an assigned account
+- Use the sidebar to access available modules based on your role
+- Admin users can manage users, vehicles, drivers, trip codes, attendance, audit logs, and SMS logs
+- Operations Managers can review fleet and PMS information
+- Dispatchers can manage daily dispatch operations, reports, and history
+
+### 2. Prepare Master Data
+Admin users should prepare the system data before daily dispatch use:
+- Go to **Users** to create staff accounts and assign roles
+- Go to **Vehicles** to register buses, plate numbers, bus types, PMS thresholds, and current status
+- Go to **Drivers** to register drivers, phone numbers, license numbers, active status, and availability
+- Go to **Trip Codes** to define route codes, origin, destination, terminal, scheduled time, direction, and bus type
+
+### 3. Manage Daily Dispatch
+- Go to **Dispatch Board**
+- Select or initialize the dispatch date
+- Add a dispatch entry and choose a trip code
+- Confirm the auto-filled route, terminal, schedule, direction, and bus type
+- Assign the vehicle, Driver 1, and optional Driver 2
+- Update the entry status as the trip moves through Scheduled, Departed, On Route, Arrived, Delayed, or Cancelled
+- Edit, delete, and reorder entries as needed during the day
+
+### 4. Monitor Dashboard
+- Go to **Dashboard** after signing in
+- Review today's dispatch summary, quick actions, vehicle statistics, driver statistics, and PMS alerts
+- Admin users can also review audit log summaries and SMS log summaries
+- PMS warning and overdue indicators should be checked before assigning vehicles
+
+### 5. Manage Vehicle PMS
+- Go to **Vehicles** to update current PMS values, vehicle status, and idle days
+- Use dashboard PMS alerts to identify vehicles near or past their maintenance threshold
+- Mark vehicles as For Maintenance, Under Repair, In Transit, OK, or Lutaw as appropriate
+
+### 6. Manage Drivers and Attendance
+- Go to **Drivers** to update driver availability and active status
+- Go to **Attendance** to initialize attendance for the day
+- Mark check-in/check-out times and attendance status
+- Use late, absent, and excused statuses to keep attendance records accurate
+- Mobile attendance endpoints exist for future integration, but a production mobile app is not included
+
+### 7. Review Reports and History
+- Go to **Reports** to review daily summaries and trip breakdowns
+- Use date filters to narrow report results
+- Export reports as Excel or PDF when needed
+- Go to **History** to search previous dispatch entries by date, route, status, vehicle, or trip code
+
+### 8. Review Audit Logs
+- Admin users can go to **Audit Logs** to review create, update, delete, and restore actions
+- Use filters to search by user, action, model type, or date range
+- Expand log rows to compare old and new values
+
+### 9. SMS Notifications
+- SMS screens, jobs, logs, retry buttons, and driver message previews are included as scaffolding only
+- SMS is not operational until the company configures a real provider, sender approval, credentials, queue worker, compliance rules, and production testing
+- Do not rely on SMS buttons or logs for live operations until the company completes the SMS implementation
+
+### 10. Fleet Map / GPS
+- The Fleet Map page and GPS ingest endpoint are included as scaffolding only
+- Fleet Map/GPS is not operational until the company provides GPS devices or a location data source, configures secure ingestion, and validates live map data
+- Do not rely on the Fleet Map for live tracking until the company completes the GPS implementation
+
+### 11. Profile and Appearance
+- Go to **Profile** to update account details, password, profile photo, two-factor authentication, and browser sessions
+- Go to **Appearance** to switch between light and dark mode
 
 ---
 
