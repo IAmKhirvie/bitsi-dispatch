@@ -1,6 +1,6 @@
 # BITSI Dispatch
 
-A real-time bus dispatch management system for **Bicol Isarog Transport System, Inc. (BITSI)**. Digitizes the daily bus status report into a modern web application with a live dispatch board, fleet management, driver operations, attendance tracking, SMS notifications, reporting, and a full audit trail.
+A real-time bus dispatch management system for **Bicol Isarog Transport System, Inc. (BITSI)**. Digitizes the daily bus status report into a modern web application with a live dispatch board, fleet management, driver operations, attendance tracking, reporting, and a full audit trail.
 
 ---
 
@@ -15,7 +15,7 @@ A real-time bus dispatch management system for **Bicol Isarog Transport System, 
 | Database         | MySQL 8+ (recommended) / SQLite (dev)          |
 | Queue            | Database driver                                |
 | Permissions      | Spatie laravel-permission                       |
-| SMS              | Semaphore API (Philippine provider)             |
+| SMS              | Integration hooks only; provider setup required |
 | Excel Export     | maatwebsite/excel                               |
 | PDF Export       | barryvdh/laravel-dompdf                         |
 | Build Tool       | Vite 6                                          |
@@ -38,13 +38,14 @@ A real-time bus dispatch management system for **Bicol Isarog Transport System, 
 - **PMS Tracking** — Preventive Maintenance Schedule monitoring by kilometers or trip count
 - **PMS Dashboard Alerts** — Vehicles at 80%+ PMS threshold appear as WARNING (orange) or OVERDUE (red) on the dashboard with progress bars
 - **Idle Day Tracking** — Track how many days a vehicle has been unused
+- **Fleet Map / GPS Tracking** — Not working yet out of the box. The company must provide and implement the GPS device feed, map provider setup, and production ingestion workflow.
 
 ### Driver Management
 - **Driver Registry** — Full CRUD with name, phone, license number, and active status
 - **Quick Status Toggles** — Set drivers to Available, Dispatched, On Route, or On Leave with inline buttons
 - **Active/Inactive Toggle** — Enable or disable drivers from being assigned
-- **SMS to Drivers** — Send schedule notifications or custom messages via Semaphore API
-- **Schedule Preview** — Preview the SMS schedule message before sending
+- **SMS to Drivers** — Not working yet out of the box. The app includes UI, queue, and log scaffolding, but the company must implement/configure the SMS provider credentials, sender approval, queue worker, and production delivery process.
+- **Schedule Preview** — Preview the driver schedule message before sending once SMS integration is completed
 
 ### Driver Attendance
 - **Daily Attendance Tracking** — Initialize attendance for each dispatch day, track check-in/check-out times
@@ -54,13 +55,20 @@ A real-time bus dispatch management system for **Bicol Isarog Transport System, 
 - **Attendance Alerts** — Automatic upcoming/late/absent alerts generated every 5 minutes
 - **Mobile Check-in API** — REST API endpoints for future mobile app integration
 
-### SMS Notifications
-- **Semaphore Integration** — Philippine SMS provider for driver notifications
-- **Queued Delivery** — SMS sent via database queue with 3 retries and 30-second backoff
-- **Priority Messages** — Schedule notifications use the `high` queue priority
-- **SMS Log Dashboard** — Admin view of all SMS history with sent/failed/pending stats
-- **Retry Failed SMS** — One-click retry for failed messages from the SMS dashboard
-- **Custom SMS** — Send custom messages (max 160 chars) to any driver from their management page
+### SMS Notifications (Company Implementation Required)
+- **Current Status** — SMS is not working yet out of the box. The repository includes the screens, queue job, service class, and logging tables, but production SMS delivery must be implemented/configured by the company.
+- **Provider Setup Required** — The company must provide a working SMS provider account, approved sender name, API key, message templates/compliance rules, and queue worker deployment.
+- **Queued Delivery Scaffolding** — SMS jobs are designed to run through the database queue with retries once the provider integration is completed
+- **SMS Log Dashboard** — Admin view for SMS history with sent/failed/pending stats once delivery is enabled
+- **Retry Failed SMS** — Retry flow is present, but depends on the company-configured provider integration
+- **Custom SMS** — Custom driver messages are scaffolded, but should not be treated as operational until the provider is configured and tested in production
+
+### Integration Status
+| Feature | Current Status | Required Company Work |
+| --- | --- | --- |
+| Fleet Map / GPS Tracking | Not working yet out of the box | Provide GPS devices/data source, configure map provider if needed, set production `GPS_INGEST_TOKEN`, and validate live position ingestion |
+| SMS Notifications | Not working yet out of the box | Provide SMS provider account/API key/sender approval, configure `SEMAPHORE_API_KEY`, run queue workers, and test delivery/compliance |
+| Mobile Attendance API | Backend endpoints available | Provide the mobile client/app and configure `MOBILE_ATTENDANCE_TOKEN` securely |
 
 ### Reporting
 - **Daily Summary Reports** — Trip breakdown by direction (SB/NB) and destination (Naga, Legazpi, Sorsogon, Virac, Masbate, Tabaco, Visayas, Cargo)
@@ -97,11 +105,11 @@ A real-time bus dispatch management system for **Bicol Isarog Transport System, 
 | --- | --- | --- |
 | **Users** | `/admin/users` | Create, Read, Update, Delete users. Assign roles (Admin/Ops Manager/Dispatcher). Toggle active status. Search by name/email, filter by role |
 | **Vehicles** | `/admin/vehicles` | Create, Read, Update, Delete vehicles. Track bus number, brand, type, plate, PMS values. Show deleted + restore. Search by bus no/brand/plate, filter by status |
-| **Drivers** | `/admin/drivers` | Create, Read, Update, Delete drivers. Toggle active, set status (Available/Dispatched/On Route/On Leave). Send SMS. Show deleted + restore. Search by name/phone/license, filter by status |
+| **Drivers** | `/admin/drivers` | Create, Read, Update, Delete drivers. Toggle active, set status (Available/Dispatched/On Route/On Leave). SMS controls are scaffolded but require company implementation before use. Show deleted + restore. Search by name/phone/license, filter by status |
 | **Trip Codes** | `/admin/trip-codes` | Create, Read, Update, Delete trip codes. Toggle active. Define operator, origin, destination, bus type, scheduled time, direction. Show deleted + restore. Search by code/operator/terminal, filter by direction |
 | **Attendance** | `/admin/attendance` | Initialize daily attendance. Mark late/absent/excused. Override status. Configure thresholds. View alerts |
 | **Audit Logs** | `/admin/audit-logs` | Read-only. View all CRUD audit trails. Expand rows to see old/new value diffs. Filter by user, action, model, date range |
-| **SMS Logs** | `/admin/sms-logs` | Read-only + Retry. View SMS delivery history. Retry failed messages. Today's stats (sent/failed/pending). Filter by phone/message, status, date |
+| **SMS Logs** | `/admin/sms-logs` | Read-only + Retry scaffolding. Useful after the company implements and configures production SMS delivery |
 
 ### All-Role Modules
 
@@ -321,20 +329,38 @@ Open http://127.0.0.1:8000 in your browser.
 
 ---
 
-## SMS Setup (Optional)
+## SMS Setup (Company Implementation Required)
 
-SMS notifications are powered by [Semaphore](https://semaphore.co/).
+SMS notifications are **not working yet out of the box**. The codebase includes the screens, queue job, `SemaphoreService`, and SMS log table, but the company must implement and validate the production SMS setup themselves.
+
+The existing scaffolding assumes [Semaphore](https://semaphore.co/) as the SMS provider:
 
 ```env
 SEMAPHORE_API_KEY=your_api_key_here
 SEMAPHORE_SENDER_NAME=BITSI
 ```
 
-When configured, the system:
-- Sends SMS to drivers when assigned to a dispatch or when status changes
-- Queues messages with 3 retries and 30-second backoff
-- Logs all SMS attempts in the SMS dashboard
-- Allows retry of failed messages from the admin SMS Log page
+Before using SMS in production, the company must:
+- Create and verify the provider account
+- Secure sender-name approval and confirm Philippine SMS compliance requirements
+- Configure production credentials in `.env`
+- Run and monitor the queue worker
+- Test delivery, failure handling, retries, and message copy with real devices
+
+Until those steps are completed, the SMS buttons, logs, and retry tools should be treated as integration scaffolding only.
+
+---
+
+## Fleet Map / GPS Setup (Company Implementation Required)
+
+Fleet Map and GPS tracking are **not working yet out of the box**. The app includes a fleet map page and GPS ingest endpoint, but the company must provide the operational GPS integration.
+
+Required company work:
+- Provide GPS devices or a trusted vehicle-position data source
+- Configure secure production ingestion with `GPS_INGEST_TOKEN`
+- Decide and configure the map provider/key if a production map service is required
+- Validate live vehicle identifiers, coordinates, timestamps, and data retention
+- Monitor bad data, offline vehicles, and stale location states
 
 ---
 
@@ -350,10 +376,11 @@ When configured, the system:
 | Users          | `/admin/users`             | User management (Admin)                  |
 | Trip Codes     | `/admin/trip-codes`        | Trip code management (Admin)             |
 | Vehicles       | `/admin/vehicles`          | Vehicle/bus management (Admin)           |
-| Drivers        | `/admin/drivers`           | Driver management + SMS (Admin)          |
+| Drivers        | `/admin/drivers`           | Driver management; SMS controls require company implementation |
 | Attendance     | `/admin/attendance`        | Driver attendance tracking (Admin)       |
 | Audit Logs     | `/admin/audit-logs`        | CRUD audit trail viewer (Admin)          |
-| SMS Logs       | `/admin/sms-logs`          | SMS delivery log + retry (Admin)         |
+| SMS Logs       | `/admin/sms-logs`          | SMS log/retry scaffolding; requires company SMS setup |
+| Fleet Map      | `/fleet-map`               | Fleet map/GPS scaffolding; requires company GPS setup |
 | Profile        | `/settings/profile`        | Profile, password, 2FA, sessions         |
 | Appearance     | `/settings/appearance`     | Dark/light mode toggle                   |
 
@@ -383,7 +410,7 @@ bitsi-dispatch/
 │   │   ├── DispatchBoard.php    # Live dispatch board with auto-refresh
 │   │   └── HistoryTable.php     # Historical records search
 │   ├── Models/                  # 14 Eloquent models
-│   ├── Observers/               # DispatchEntryObserver (auto SMS + summary)
+│   ├── Observers/               # DispatchEntryObserver (summary + SMS hooks)
 │   ├── Services/                # SemaphoreService, SummaryService, DispatchService
 │   └── Traits/                  # Auditable (auto audit logging)
 ├── config/
@@ -428,7 +455,10 @@ The dispatch board uses Livewire's `wire:poll.10s` for auto-refresh, allowing mu
 Vehicles track current PMS value against a configurable threshold (by km or trips). Dashboard alerts surface vehicles at 80%+ threshold. Three preset PMS settings ship with the seeder.
 
 ### SMS Architecture
-`SemaphoreService` → `SendSmsJob` (queued, 3 retries, 30s backoff) → `SmsLog`. All attempts are logged. Failed messages can be retried from the admin dashboard.
+`SemaphoreService` → `SendSmsJob` (queued, 3 retries, 30s backoff) → `SmsLog`. This is integration scaffolding only until the company configures a real SMS provider, credentials, queue worker, sender approval, and production delivery monitoring.
+
+### Fleet Map / GPS Architecture
+The app includes a fleet map route and GPS ingest endpoint, but live tracking depends on company-provided GPS devices/data feeds and production configuration. It should not be considered operational until the company implements and validates the full GPS workflow.
 
 ### Scheduled Commands
 `attendance:check-alerts` runs every 5 minutes to detect upcoming, late, and absent drivers against configurable thresholds.
@@ -614,7 +644,7 @@ php artisan migrate
 # Fresh database with sample data
 php artisan migrate:fresh --seed
 
-# Run the queue worker (for SMS)
+# Run the queue worker (required if the company enables SMS jobs)
 php artisan queue:work --queue=high,default
 
 # Run attendance alert check manually
@@ -668,11 +698,15 @@ Run `php artisan storage:link` to create the `public/storage` symlink.
 </details>
 
 <details>
-<summary><strong>SMS not sending</strong></summary>
+<summary><strong>SMS not sending / not enabled yet</strong></summary>
 
-1. Check `SEMAPHORE_API_KEY` is set in `.env`
-2. Run the queue worker: `php artisan queue:work`
-3. Check SMS Logs at `/admin/sms-logs` for error details
+SMS is not expected to work until the company implements the provider setup.
+
+1. Confirm the company has an active SMS provider account and approved sender name
+2. Check `SEMAPHORE_API_KEY` and `SEMAPHORE_SENDER_NAME` are set in production `.env`
+3. Run the queue worker: `php artisan queue:work --queue=high,default`
+4. Check SMS Logs at `/admin/sms-logs` for error details
+5. Test with real devices before treating SMS as operational
 </details>
 
 ---
@@ -681,7 +715,7 @@ Run `php artisan storage:link` to create the `public/storage` symlink.
 
 ### v1.3 (2026-02-19)
 - Added Audit Log Viewer with search, filters, and expandable change diffs
-- Added SMS Dashboard with delivery stats and retry for failed messages
+- Added SMS Dashboard scaffolding with delivery stats and retry for failed messages
 - Added Vehicle PMS maintenance alerts on dashboard
 - Added real-time dispatch board with 10-second auto-refresh
 - Added role-based dashboard (Admin / Ops Manager / Dispatcher)
@@ -697,15 +731,15 @@ Run `php artisan storage:link` to create the `public/storage` symlink.
 - Added Laravel Jetstream authentication with 2FA support
 - Added Spatie laravel-permission for role-based access
 - Added driver attendance management with alerts and configurable thresholds
-- Added Force SMS and custom SMS features for drivers
+- Added Force SMS and custom SMS scaffolding for drivers; company SMS implementation still required
 - Added dual driver support (Driver 1 & Driver 2) per dispatch entry
-- Removed GPS tracking feature
+- Removed the earlier GPS tracking implementation; current Fleet Map/GPS requires company implementation before production use
 - Extracted shared form partials and validation rules
 - Added enum-driven badge classes and filter dropdowns
 
 ### v1.1
 - Initial Vue 3 / Inertia.js implementation
-- Dispatch board, reports, GPS tracking, SMS notifications
+- Dispatch board and reports, with early GPS/SMS integration ideas that now require company implementation before production use
 
 ### v1.0
 - Project scaffolding and database design
