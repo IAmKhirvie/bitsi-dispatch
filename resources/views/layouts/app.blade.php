@@ -92,7 +92,7 @@
                 class="relative flex min-h-svh flex-1 flex-col bg-background peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow"
             >
                 {{-- Header with sidebar trigger and breadcrumbs --}}
-                <header class="flex h-16 shrink-0 items-center gap-4 border-b border-sidebar-border/70 px-6 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 md:px-4">
+                <header class="app-header flex h-16 shrink-0 items-center gap-4 border-b border-sidebar-border/70 px-6 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 md:px-4">
                     <div class="flex min-w-0 items-center">
                         {{-- Sidebar Trigger --}}
                         <button
@@ -107,7 +107,7 @@
                     <form
                         action="{{ route('search.index') }}"
                         method="GET"
-                        class="relative flex min-w-0 flex-1 items-center"
+                        class="app-shell-search relative flex min-w-0 flex-1 items-center"
                         x-data="{
                             query: @js(request('q', request('search', ''))),
                             category: @js($searchCategory),
@@ -201,7 +201,7 @@
                         </div>
                     </form>
 
-                    <div class="flex shrink-0 items-center">
+                    <div class="app-breadcrumbs flex shrink-0 items-center">
                         {{-- Breadcrumbs --}}
                         @isset($breadcrumbs)
                             <nav aria-label="breadcrumb">
@@ -232,7 +232,7 @@
 
                 {{-- Flash Toasts --}}
                 @if(session('status') || session('success') || session('error'))
-                    <div class="fixed right-4 top-4 z-[100] flex w-full max-w-sm flex-col gap-2">
+                    <div class="app-flash-stack fixed right-4 top-4 z-[100] flex w-full max-w-sm flex-col gap-2">
                         @foreach (['status' => 'green', 'success' => 'green', 'error' => 'red'] as $flashKey => $flashColor)
                             @if(session($flashKey))
                                 <div

@@ -3,7 +3,7 @@
 @section('title', 'Appearance Settings - BITSI Dispatch')
 
 @section('content')
-    <div class="flex h-full flex-1 flex-col gap-4 p-4">
+    <div class="app-page flex h-full flex-1 flex-col gap-4 p-4">
         {{-- Settings Navigation --}}
         <div class="mx-auto w-full max-w-2xl">
             <nav class="flex gap-1 rounded-lg bg-muted p-1">
@@ -39,7 +39,7 @@
                         this.applyTheme(value);
                     }
                 }">
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-3">
                         {{-- Light --}}
                         <button
                             @click="setTheme('light')"

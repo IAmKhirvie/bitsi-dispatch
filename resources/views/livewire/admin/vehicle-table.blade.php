@@ -1,12 +1,12 @@
 @php use App\Enums\VehicleStatus; @endphp
 
-<div class="flex h-full flex-1 flex-col gap-4 p-4">
-    <div class="flex flex-wrap items-center justify-between gap-4">
+<div class="app-page flex h-full flex-1 flex-col gap-4 p-4">
+    <div class="app-toolbar flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold">Buses</h1>
             <p class="text-sm text-muted-foreground">Manage fleet buses and maintenance status</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="app-toolbar-actions flex items-center gap-3">
             <x-export-buttons resource="vehicles" />
             <a href="{{ route('admin.vehicles.create') }}"
                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
@@ -24,7 +24,7 @@
     @endif
 
     {{-- Filters --}}
-    <div class="flex flex-wrap items-center gap-3">
+    <div class="app-filterbar flex flex-wrap items-center gap-3">
         <div class="relative flex-1 min-w-[200px] max-w-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input
@@ -55,7 +55,7 @@
     {{-- Table --}}
     <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
         <div class="p-0">
-            <div class="overflow-x-auto">
+            <div class="app-mobile-table app-table-scroll overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
@@ -83,11 +83,11 @@
                                 $bandBadgeClass = $isPmsOver ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' : ($isPmsWarning ? 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300' : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300');
                             @endphp
                             <tr class="border-b last:border-0 transition-colors {{ $rowClass }} {{ $vehicle->trashed() ? 'opacity-60' : '' }}">
-                                <td class="px-4 py-3 font-semibold {{ $isPmsOver ? 'text-red-700 dark:text-red-400' : '' }}">{{ $vehicle->bus_number }}</td>
-                                <td class="px-4 py-3 {{ $isPmsOver ? 'text-red-700 dark:text-red-400' : '' }}">{{ $vehicle->brand }}</td>
-                                <td class="px-4 py-3 {{ $isPmsOver ? 'text-red-700 dark:text-red-400' : '' }}">{{ $vehicle->bus_type?->label() ?? $vehicle->bus_type }}</td>
-                                <td class="px-4 py-3 {{ $isPmsOver ? 'text-red-700 dark:text-red-400' : '' }}">{{ $vehicle->plate_number }}</td>
-                                <td class="px-4 py-3">
+                                <td data-label="Bus No." class="px-4 py-3 font-semibold {{ $isPmsOver ? 'text-red-700 dark:text-red-400' : '' }}">{{ $vehicle->bus_number }}</td>
+                                <td data-label="Brand" class="px-4 py-3 {{ $isPmsOver ? 'text-red-700 dark:text-red-400' : '' }}">{{ $vehicle->brand }}</td>
+                                <td data-label="Type" class="px-4 py-3 {{ $isPmsOver ? 'text-red-700 dark:text-red-400' : '' }}">{{ $vehicle->bus_type?->label() ?? $vehicle->bus_type }}</td>
+                                <td data-label="Plate No." class="px-4 py-3 {{ $isPmsOver ? 'text-red-700 dark:text-red-400' : '' }}">{{ $vehicle->plate_number }}</td>
+                                <td data-label="Status" class="px-4 py-3">
                                     @php
                                         $vStatus = $vehicle->status instanceof \App\Enums\VehicleStatus
                                             ? $vehicle->status
@@ -97,9 +97,9 @@
                                         {{ $vStatus?->label() ?? ($vehicle->status ?: 'Unknown') }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3">{{ $vehicle->current_location ?? '--' }}</td>
-                                <td class="px-4 py-3">{{ $vehicle->current_kmr ? number_format($vehicle->current_kmr) : '--' }}</td>
-                                <td class="px-4 py-3">
+                                <td data-label="Location" class="px-4 py-3">{{ $vehicle->current_location ?? '--' }}</td>
+                                <td data-label="Current KMR" class="px-4 py-3">{{ $vehicle->current_kmr ? number_format($vehicle->current_kmr) : '--' }}</td>
+                                <td data-label="PMS Status" class="px-4 py-3">
                                     <div class="flex items-center gap-2">
                                         <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold uppercase {{ $bandBadgeClass }}">
                                             {{ $pmsBand }}
@@ -107,7 +107,7 @@
                                         <span class="text-xs text-muted-foreground">{{ number_format($kmSincePms) }} km</span>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3">
+                                <td data-label="Next PMS" class="px-4 py-3">
                                     @if ($vehicle->next_pms_date)
                                         <span class="{{ $vehicle->is_pms_schedule_due ? 'text-red-500 font-medium' : ($vehicle->is_pms_schedule_approaching ? 'text-orange-500' : '') }}">
                                             {{ $vehicle->next_pms_date->format('M d, Y') }}
@@ -116,12 +116,12 @@
                                         --
                                     @endif
                                 </td>
-                                <td class="px-4 py-3">
+                                <td data-label="Idle Days" class="px-4 py-3">
                                     <span class="{{ ($vehicle->idle_days ?? 0) > 7 ? 'text-red-500 font-medium' : '' }}">
                                         {{ $vehicle->idle_days ?? 0 }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3">
+                                <td data-label="Actions" class="px-4 py-3">
                                     <div class="flex items-center gap-2">
                                         @if ($vehicle->trashed())
                                             <button

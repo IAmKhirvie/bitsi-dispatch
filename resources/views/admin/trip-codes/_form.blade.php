@@ -4,7 +4,7 @@
     $isEdit = isset($tripCode);
 @endphp
 
-<div class="grid grid-cols-2 gap-4">
+<div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div class="space-y-2">
         <label for="code" class="text-sm font-medium leading-none">Trip Code</label>
         <input id="code" name="code" type="text" value="{{ old('code', $isEdit ? $tripCode->code : '') }}" placeholder="e.g. TC-001" required class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
@@ -23,7 +23,7 @@
 
 <div class="rounded-md border border-dashed p-4 space-y-3">
     <p class="text-xs font-medium text-muted-foreground">Defaults for autofill (used when adding a dispatch entry with this trip code)</p>
-    <div class="grid grid-cols-3 gap-4">
+    <div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div class="space-y-2">
             <label for="default_vehicle_id" class="text-sm font-medium leading-none">Default Bus</label>
             <select id="default_vehicle_id" name="default_vehicle_id" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm">
@@ -49,7 +49,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-2 gap-4">
+<div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div class="space-y-2">
         <label for="origin_terminal" class="text-sm font-medium leading-none">Origin Terminal</label>
         <input id="origin_terminal" name="origin_terminal" type="text" value="{{ old('origin_terminal', $isEdit ? $tripCode->origin_terminal : '') }}" placeholder="e.g. Cubao" required class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
@@ -66,7 +66,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-2 gap-4">
+<div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div class="space-y-2">
         <label for="bus_type" class="text-sm font-medium leading-none">Bus Type</label>
         <select id="bus_type" name="bus_type" required class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">

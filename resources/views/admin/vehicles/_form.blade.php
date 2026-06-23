@@ -6,7 +6,7 @@
     $v = $isEdit ? (is_array($vehicle) ? (object) $vehicle : $vehicle) : null;
 @endphp
 
-<div class="grid grid-cols-2 gap-4">
+<div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div class="space-y-2">
         <label for="bus_number" class="text-sm font-medium leading-none">Bus Number</label>
         <input id="bus_number" name="bus_number" type="text" value="{{ old('bus_number', $v->bus_number ?? '') }}" placeholder="e.g. 2801" required class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
@@ -23,7 +23,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-2 gap-4">
+<div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div class="space-y-2">
         <label for="seating_capacity" class="text-sm font-medium leading-none">Seating Capacity</label>
         <input id="seating_capacity" name="seating_capacity" type="number" min="0" max="120" value="{{ old('seating_capacity', $v->seating_capacity ?? '') }}" placeholder="e.g. 47" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
@@ -40,7 +40,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-2 gap-4">
+<div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div class="space-y-2">
         <label for="bus_type" class="text-sm font-medium leading-none">Bus Type</label>
         <select id="bus_type" name="bus_type" required class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
@@ -64,7 +64,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-2 gap-4">
+<div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div class="space-y-2">
         <label for="status" class="text-sm font-medium leading-none">Status</label>
         <select id="status" name="status" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
@@ -87,7 +87,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-2 gap-4">
+<div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div class="space-y-2">
         <label for="total_kilometers" class="text-sm font-medium leading-none">Total Kilometers (Odometer)</label>
         <input id="total_kilometers" name="total_kilometers" type="number" value="{{ old('total_kilometers', $v->total_kilometers ?? 0) }}" min="0" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
@@ -99,7 +99,7 @@
 
 <div class="border-t pt-4">
     <h3 class="mb-3 font-semibold">Preventive Maintenance Schedule (PMS)</h3>
-    <div class="grid grid-cols-3 gap-4">
+    <div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div class="space-y-2">
             <label for="pms_unit" class="text-sm font-medium leading-none">PMS Unit</label>
             <select id="pms_unit" name="pms_unit" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
@@ -153,7 +153,7 @@
         </div>
     </div>
 
-    <div class="mt-4 grid grid-cols-2 gap-4">
+    <div class="app-form-grid mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div class="space-y-2">
             <label for="last_pms_date" class="text-sm font-medium leading-none">Last PMS Date</label>
             <div class="relative">

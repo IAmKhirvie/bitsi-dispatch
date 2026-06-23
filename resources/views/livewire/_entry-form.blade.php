@@ -1,7 +1,7 @@
 {{-- Shared dispatch entry form fields --}}
 {{-- Expects: $prefix ('add' or 'edit'), $tripCodes, $vehicles, $drivers, $statusOptions --}}
 
-<div class="grid grid-cols-2 gap-4">
+<div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
     {{-- Trip Code --}}
     <div class="space-y-2">
         <label class="text-sm font-medium leading-none">Trip Code</label>

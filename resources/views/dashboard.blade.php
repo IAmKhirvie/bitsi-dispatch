@@ -189,7 +189,7 @@
                 </div>
                 <div class="p-6 pt-0">
                     @if ($smsStats)
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div class="rounded-lg bg-green-50 p-4 text-center dark:bg-green-900/20">
                                 <div class="text-2xl font-bold text-green-600">{{ $smsStats['sent_today'] }}</div>
                                 <p class="text-xs text-muted-foreground">Sent Today</p>
@@ -214,7 +214,7 @@
                         <p class="text-sm text-muted-foreground">Trip breakdown by direction and destination</p>
                     </div>
                     <div class="p-6 pt-0">
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div class="space-y-3">
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-muted-foreground">SB Trips</span>
@@ -323,7 +323,7 @@
                         No dispatch entries for today yet.
                     </div>
                 @else
-                    <div class="overflow-x-auto">
+                    <div class="app-table-scroll overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="border-b text-left">

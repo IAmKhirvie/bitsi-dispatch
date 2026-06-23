@@ -1,5 +1,5 @@
-<div class="flex h-full flex-1 flex-col gap-4 p-4">
-    <div class="flex flex-wrap items-center justify-between gap-4">
+<div class="app-page flex h-full flex-1 flex-col gap-4 p-4">
+    <div class="app-toolbar flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold">Dispatch History</h1>
             <p class="text-sm text-muted-foreground">Search and filter past dispatch entries</p>
@@ -35,7 +35,7 @@
     <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
         <div class="p-6">
             <div class="space-y-4">
-                <div class="flex flex-wrap items-end gap-4">
+                <div class="app-filterbar flex flex-wrap items-end gap-4">
                     <div class="flex-1 min-w-[200px] max-w-sm space-y-2">
                         <label class="text-sm font-medium leading-none">Search</label>
                         <div class="relative">
@@ -116,7 +116,7 @@
             </h3>
         </div>
         <div class="p-0">
-            <div class="overflow-x-auto">
+            <div class="app-mobile-table app-table-scroll overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
@@ -136,12 +136,12 @@
                     <tbody>
                         @forelse ($entries as $entry)
                             <tr class="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                                <td class="whitespace-nowrap px-4 py-2 text-muted-foreground">{{ $entry->dispatchDay->service_date ?? '--' }}</td>
-                                <td class="px-4 py-2">{{ $entry->brand ?? '--' }}</td>
-                                <td class="px-4 py-2 font-semibold">{{ $entry->bus_number ?? '--' }}</td>
-                                <td class="px-4 py-2">{{ $entry->tripCode->code ?? '--' }}</td>
-                                <td class="px-4 py-2">{{ $entry->route ?? '--' }}</td>
-                                <td class="px-4 py-2">
+                                <td data-label="Date" class="whitespace-nowrap px-4 py-2 text-muted-foreground">{{ $entry->dispatchDay->service_date ?? '--' }}</td>
+                                <td data-label="Brand" class="px-4 py-2">{{ $entry->brand ?? '--' }}</td>
+                                <td data-label="Bus No." class="px-4 py-2 font-semibold">{{ $entry->bus_number ?? '--' }}</td>
+                                <td data-label="Trip Code" class="px-4 py-2">{{ $entry->tripCode->code ?? '--' }}</td>
+                                <td data-label="Route" class="px-4 py-2">{{ $entry->route ?? '--' }}</td>
+                                <td data-label="Direction" class="px-4 py-2">
                                     @if ($entry->direction)
                                         @php $dir = $entry->direction?->value ?? $entry->direction; @endphp
                                         <span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium {{ $dir === 'SB' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' }}">
@@ -151,10 +151,10 @@
                                         --
                                     @endif
                                 </td>
-                                <td class="px-4 py-2">{{ $entry->scheduled_departure ? Str::substr($entry->scheduled_departure, 0, 5) : '--' }}</td>
-                                <td class="px-4 py-2">{{ $entry->actual_departure ? Str::substr($entry->actual_departure, 0, 5) : '--' }}</td>
-                                <td class="px-4 py-2">{{ $entry->driver->name ?? '--' }}</td>
-                                <td class="px-4 py-2">
+                                <td data-label="Sched." class="px-4 py-2">{{ $entry->scheduled_departure ? Str::substr($entry->scheduled_departure, 0, 5) : '--' }}</td>
+                                <td data-label="Actual" class="px-4 py-2">{{ $entry->actual_departure ? Str::substr($entry->actual_departure, 0, 5) : '--' }}</td>
+                                <td data-label="Driver" class="px-4 py-2">{{ $entry->driver->name ?? '--' }}</td>
+                                <td data-label="Status" class="px-4 py-2">
                                     @php
                                         $entryStatus = $entry->status?->value ?? $entry->status ?? 'scheduled';
                                     @endphp
@@ -162,7 +162,7 @@
                                         {{ ucwords(str_replace('_', ' ', $entryStatus)) }}
                                     </span>
                                 </td>
-                                <td class="max-w-[120px] truncate px-4 py-2" title="{{ $entry->remarks ?? '' }}">{{ $entry->remarks ?? '--' }}</td>
+                                <td data-label="Remarks" class="max-w-[120px] truncate px-4 py-2" title="{{ $entry->remarks ?? '' }}">{{ $entry->remarks ?? '--' }}</td>
                             </tr>
                         @empty
                             <tr>

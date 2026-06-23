@@ -1,4 +1,4 @@
-<div class="flex h-full flex-1 flex-col gap-4 p-4" wire:poll.10s>
+<div class="app-page flex h-full flex-1 flex-col gap-4 p-4" wire:poll.10s>
     @php
         $statusClasses = [
             'scheduled' => 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
@@ -23,12 +23,12 @@
     @endphp
 
     {{-- Header with date picker --}}
-    <div class="flex flex-wrap items-center justify-between gap-4">
+    <div class="app-toolbar flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold">Dispatch Board</h1>
             <p class="text-sm text-muted-foreground">Manage daily bus dispatch operations</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="app-toolbar-actions flex items-center gap-3">
             <div class="relative">
                 <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 <input
@@ -142,7 +142,7 @@
             @endif
 
             <div class="p-0">
-                <div class="overflow-x-auto">
+                <div class="app-table-scroll overflow-x-auto">
                     <table class="min-w-[1120px] w-full text-xs table-fixed">
                         <thead>
                             <tr class="border-b bg-muted/50">
@@ -385,7 +385,7 @@
         style="display: none;"
     >
         <div class="fixed inset-0 bg-black/50" x-on:click="$wire.showAddDialog = false"></div>
-        <div class="relative mx-auto my-8 max-w-2xl rounded-lg bg-background p-6 shadow-lg border">
+        <div class="app-modal-panel relative mx-auto my-8 max-w-2xl rounded-lg bg-background p-6 shadow-lg border">
             <div class="mb-4">
                 <h2 class="text-lg font-semibold">Add Dispatch Entry</h2>
                 <p class="text-sm text-muted-foreground">Add a new bus dispatch entry for this day.</p>
@@ -422,7 +422,7 @@
         style="display: none;"
     >
         <div class="fixed inset-0 bg-black/50" x-on:click="$wire.showStatusDialog = false"></div>
-        <div class="relative mx-auto my-16 max-w-sm rounded-lg bg-background p-6 shadow-lg border">
+        <div class="app-modal-panel relative mx-auto my-16 max-w-sm rounded-lg bg-background p-6 shadow-lg border">
             <div class="mb-4">
                 <h2 class="text-lg font-semibold">
                     {{ $statusTo ? 'Mark ' . ucwords(str_replace('_', ' ', $statusTo)) : 'Update Status' }}
@@ -503,7 +503,7 @@
         style="display: none;"
     >
         <div class="fixed inset-0 bg-black/50" x-on:click="$wire.showDriverEventDialog = false"></div>
-        <div class="relative mx-auto my-16 max-w-md rounded-lg bg-background p-6 shadow-lg border">
+        <div class="app-modal-panel relative mx-auto my-16 max-w-md rounded-lg bg-background p-6 shadow-lg border">
             <div class="mb-4">
                 <h2 class="text-lg font-semibold">
                     {{ strtoupper($driverEventSlot === 'driver1' ? 'D1' : 'D2') }} {{ $driverEventType === 'cutoff' ? 'Cut-off' : 'Arrival' }}
@@ -558,7 +558,7 @@
         style="display: none;"
     >
         <div class="fixed inset-0 bg-black/50" x-on:click="$wire.showEditDialog = false"></div>
-        <div class="relative mx-auto my-8 max-w-2xl rounded-lg bg-background p-6 shadow-lg border">
+        <div class="app-modal-panel relative mx-auto my-8 max-w-2xl rounded-lg bg-background p-6 shadow-lg border">
             <div class="mb-4">
                 <h2 class="text-lg font-semibold">Edit Dispatch Entry</h2>
                 <p class="text-sm text-muted-foreground">Update the dispatch entry details.</p>

@@ -3,8 +3,8 @@
 @section('title', 'Reports - BITSI Dispatch')
 
 @section('content')
-    <div class="flex h-full flex-1 flex-col gap-4 p-4">
-        <div class="flex flex-wrap items-center justify-between gap-4">
+    <div class="app-page flex h-full flex-1 flex-col gap-4 p-4">
+        <div class="app-toolbar flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold">Reports</h1>
                 <p class="text-sm text-muted-foreground">Dispatch reports and trip analytics</p>
@@ -12,7 +12,7 @@
         </div>
 
         <div class="rounded-xl border bg-card p-4 text-card-foreground shadow">
-            <div class="flex flex-wrap items-end justify-between gap-4">
+            <div class="app-toolbar flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <h2 class="text-base font-semibold">Dispatch Excel Template</h2>
                     <p class="text-sm text-muted-foreground">
@@ -23,8 +23,8 @@
                         @endif
                     </p>
                 </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <form action="{{ route('reports.templates.store') }}" method="POST" enctype="multipart/form-data" class="flex flex-wrap items-center gap-2">
+                <div class="app-filterbar flex flex-wrap items-center gap-2">
+                    <form action="{{ route('reports.templates.store') }}" method="POST" enctype="multipart/form-data" class="app-filterbar flex flex-wrap items-center gap-2">
                         @csrf
                         <input type="hidden" name="report_type" value="dispatch">
                         <input

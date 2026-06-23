@@ -31,7 +31,7 @@
     </button>
 
     <div x-show="showCustomExport" x-on:click.away="showCustomExport = false" x-transition
-        class="absolute top-full right-0 mt-1 z-50 rounded-lg border bg-card p-3 shadow-lg w-64">
+        class="app-mobile-dropdown absolute top-full right-0 mt-1 z-50 rounded-lg border bg-card p-3 shadow-lg w-64">
         <div class="space-y-2">
             <label class="text-xs font-medium text-muted-foreground">From</label>
             <input type="date" x-model="dateFrom" max="{{ now()->toDateString() }}"

@@ -20,8 +20,8 @@
         $date = $dispatchDay->service_date ?? '';
     @endphp
 
-    <div class="flex h-full flex-1 flex-col gap-4 p-4">
-        <div class="flex flex-wrap items-center justify-between gap-4">
+    <div class="app-page flex h-full flex-1 flex-col gap-4 p-4">
+        <div class="app-toolbar flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold">Daily Report</h1>
                 <p class="text-sm text-muted-foreground">Dispatch data for {{ $date }}</p>
@@ -103,7 +103,7 @@
                 <p class="text-sm text-muted-foreground">All entries for {{ $date }} ({{ count($entries) }} total)</p>
             </div>
             <div class="p-0">
-                <div class="overflow-x-auto">
+                <div class="app-table-scroll overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="border-b bg-muted/50">

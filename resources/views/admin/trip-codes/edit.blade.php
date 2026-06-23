@@ -3,7 +3,7 @@
 @section('title', "Edit {$tripCode->code} - BITSI Dispatch")
 
 @section('content')
-    <div class="flex h-full flex-1 flex-col gap-4 p-4">
+    <div class="app-page flex h-full flex-1 flex-col gap-4 p-4">
         <div class="mx-auto w-full max-w-2xl">
             <div class="rounded-xl border bg-card text-card-foreground shadow">
                 <div class="p-6">
