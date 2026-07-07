@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
         }),
     ],
     server: {
-        host: 'localhost',
+        host: '127.0.0.1',   // forces IPv4, no ambiguity
     },
     css: {
         postcss: {
