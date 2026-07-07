@@ -227,9 +227,9 @@
                                     </td>
                                     <td class="px-2 py-1.5 truncate" title="{{ $entry->route ?? '' }}">{{ $entry->route ?? '--' }}</td>
                                     <td class="px-2 py-1.5 text-[11px] leading-tight">
-                                        <div><span class="text-muted-foreground">S:</span> {{ $entry->scheduled_departure ? \Carbon\Carbon::parse($entry->scheduled_departure)->format('H:i:s') : '--' }}</div>
-                                        <div><span class="text-muted-foreground">D:</span> {{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i:s') : '--' }}</div>
-                                        <div><span class="text-muted-foreground">A:</span> {{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i:s') : '--' }}</div>
+                                        <div><span class="text-muted-foreground tooltip">Scheduled: </span> {{ $entry->scheduled_departure ? \Carbon\Carbon::parse($entry->scheduled_departure)->format('H:i:s') : '--' }}</div>
+                                        <div><span class="text-muted-foreground">Delay:</span> {{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i:s') : '--' }}</div>
+                                        <div><span class="text-muted-foreground">Arrival:</span> {{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i:s') : '--' }}</div>
                                     </td>
                                     <td class="px-2 py-1.5 text-[11px] leading-tight">
                                         <div class="truncate">{{ $entry->driver->name ?? '--' }}</div>

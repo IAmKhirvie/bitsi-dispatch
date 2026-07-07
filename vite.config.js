@@ -12,6 +12,9 @@ export default defineConfig(({ mode }) => ({
             refresh: true,
         }),
     ],
+    server: {
+        host: 'localhost',
+    },
     css: {
         postcss: {
             plugins: [tailwindcss, autoprefixer],
