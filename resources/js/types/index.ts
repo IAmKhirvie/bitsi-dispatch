@@ -118,6 +118,9 @@ export interface DispatchEntry {
     scheduled_departure: string | null;
     actual_departure: string | null;
     actual_arrival: string | null;
+    delayed_at: string | null;
+    cancelled_at: string | null;
+    breakdown_at: string | null;
     direction: 'SB' | 'NB' | null;
     status: string;
     remarks: string | null;

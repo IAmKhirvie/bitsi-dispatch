@@ -186,7 +186,13 @@ function setEntryStatus(entry: DispatchEntry, status: string) {
 
     // Optimistic UI update - instantly show new status for immediate feedback
     const previousStatus = entry.status;
+    const previousDelayedAt = entry.delayed_at;
     entry.status = status;
+
+    // Set delayed_at on the frontend so the delay counter shows immediately
+    if (status === 'delayed' && !entry.delayed_at) {
+        entry.delayed_at = new Date().toISOString();
+    }
 
     router.patch(`/dispatch/${props.dispatchDay.id}/entries/${entry.id}/status`, { status }, {
         preserveState: true,
@@ -194,6 +200,7 @@ function setEntryStatus(entry: DispatchEntry, status: string) {
         onError: () => {
             // Revert on error
             entry.status = previousStatus;
+            entry.delayed_at = previousDelayedAt;
         },
     });
 }
@@ -210,6 +217,20 @@ const statusLabels: Record<string, string> = Object.fromEntries(
 function formatTime(time: string | null): string {
     if (!time) return '--';
     return time.substring(0, 5);
+}
+
+function formatDelay(entry: DispatchEntry): string {
+    if (entry.status !== 'delayed' || !entry.delayed_at) return '--';
+    const delayedTime = new Date(entry.delayed_at).getTime();
+    const now = Date.now();
+    const diffMs = now - delayedTime;
+    if (diffMs <= 0) return '--';
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
 }
 
 const entries = computed(() => props.dispatchDay?.entries || []);
@@ -574,7 +595,7 @@ const directionStyle = (dir: string) => DIRECTION_STYLES[dir] ?? {};
                                     v-for="(entry, index) in paginatedEntries"
                                     :key="entry.id"
                                     class="border-b hover:bg-muted/30 transition-colors"
-                                    v-memo="[entry.id, entry.status, entry.actual_departure, entry.actual_arrival, entry.updated_at, index, currentPage, perPage]"
+                                    v-memo="[entry.id, entry.status, entry.actual_departure, entry.actual_arrival, entry.delayed_at, entry.updated_at, index, currentPage, perPage]"
                                 >
                                     <td class="whitespace-nowrap px-3 py-1.5 text-muted-foreground">{{ (currentPage - 1) * perPage + index + 1 }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5 font-medium">{{ entry.brand || '--' }}</td>
@@ -586,7 +607,14 @@ const directionStyle = (dir: string) => DIRECTION_STYLES[dir] ?? {};
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ entry.arrival_terminal || '--' }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ formatTime(entry.scheduled_departure) }}</td>
                                     <td class="whitespace-nowrap px-3 py-1.5">{{ formatTime(entry.actual_departure) }}</td>
-                                    <td class="whitespace-nowrap px-3 py-1.5">{{ formatTime(entry.actual_arrival) }}</td>
+                                    <td class="whitespace-nowrap px-3 py-1.5">
+                                        <template v-if="entry.status === 'delayed'">
+                                            <span class="text-amber-600 dark:text-amber-400 font-medium" :title="'Delayed since ' + (entry.delayed_at ? new Date(entry.delayed_at).toLocaleString() : '')">
+                                                {{ formatDelay(entry) }}
+                                            </span>
+                                        </template>
+                                        <template v-else>{{ formatTime(entry.actual_arrival) }}</template>
+                                    </td>
                                     <td class="whitespace-nowrap px-3 py-1.5">
                                         <span v-if="entry.direction" class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium" :style="directionStyle(entry.direction)">
                                             {{ entry.direction }}
