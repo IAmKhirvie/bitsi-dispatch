@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
+import TermsModal from '@/components/TermsModal.vue';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 const form = useForm({
     name: '',
@@ -15,7 +18,16 @@ const form = useForm({
     password_confirmation: '',
 });
 
+const agreedToTerms = ref(false);
+const showTermsModal = ref(false);
+const termsError = ref('');
+
 const submit = () => {
+    if (!agreedToTerms.value) {
+        termsError.value = 'You must agree to the Terms and Conditions and Privacy Policy.';
+        return;
+    }
+    termsError.value = '';
     form.post(route('register'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
@@ -68,6 +80,36 @@ const submit = () => {
                     <InputError :message="form.errors.password_confirmation" />
                 </div>
 
+                <!-- Terms and Privacy Policy checkbox -->
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-start gap-2">
+                        <Checkbox
+                            id="terms"
+                            v-model:checked="agreedToTerms"
+                            class="mt-0.5"
+                        />
+                        <Label for="terms" class="text-sm font-normal leading-relaxed">
+                            I have read and agree to the
+                            <button
+                                type="button"
+                                class="underline underline-offset-2 hover:text-foreground font-medium text-foreground"
+                                @click="showTermsModal = true"
+                            >
+                                Terms and Conditions
+                            </button>
+                            and
+                            <button
+                                type="button"
+                                class="underline underline-offset-2 hover:text-foreground font-medium text-foreground"
+                                @click="showTermsModal = true"
+                            >
+                                Privacy Policy
+                            </button>
+                        </Label>
+                    </div>
+                    <p v-if="termsError" class="text-sm text-destructive">{{ termsError }}</p>
+                </div>
+
                 <Button type="submit" class="mt-2 w-full" tabindex="5" :disabled="form.processing">
                     <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
                     Create account
@@ -79,5 +121,8 @@ const submit = () => {
                 <TextLink :href="route('login')" class="underline underline-offset-4" tabindex="6">Log in</TextLink>
             </div>
         </form>
+
+        <!-- Terms and Privacy Policy Modal -->
+        <TermsModal v-model:open="showTermsModal" />
     </AuthBase>
 </template>
