@@ -8,9 +8,7 @@
                 data-size="lg"
                 class="peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 h-12 text-sm group-data-[collapsible=icon]:!p-0"
             >
-                <div class="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                    <img src="/bicol_isarog_logo.png" alt="Bicol Isarog Logo" class="size-5 fill-current text-white dark:text-black" style="background: transparent;" />
-                </div>
+                <img src="/bicol_isarog_logo.png" alt="Bicol Isarog Logo" class="h-15 w-20 fill-current text-white dark:text-black" style="background: transparent; mix-blend-mode: multiply;" />
                 <div class="ml-1 grid flex-1 text-left text-sm">
                     <span class="mb-0.5 truncate font-semibold leading-none">BITSI Dispatch</span>
                 </div>

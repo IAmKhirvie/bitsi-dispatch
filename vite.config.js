@@ -12,6 +12,9 @@ export default defineConfig(({ mode }) => ({
             refresh: true,
         }),
     ],
+    server: {
+        host: '127.0.0.1',   // forces IPv4, no ambiguity
+    },
     css: {
         postcss: {
             plugins: [tailwindcss, autoprefixer],

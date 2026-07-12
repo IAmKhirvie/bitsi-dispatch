@@ -54,7 +54,7 @@
         x-show="showCustomExport"
         x-on:click.away="showCustomExport = false"
         x-transition
-        class="absolute right-0 top-full z-50 mt-1 w-64 rounded-lg border bg-card p-3 shadow-lg"
+        class="app-mobile-dropdown absolute right-0 top-full z-50 mt-1 w-64 rounded-lg border bg-card p-3 shadow-lg"
     >
         <div class="space-y-2">
             <label class="text-xs font-medium text-muted-foreground">From</label>

@@ -11,7 +11,7 @@
     @enderror
 </div>
 
-<div class="grid grid-cols-2 gap-4">
+<div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div class="space-y-2">
         <label for="phone" class="text-sm font-medium leading-none">Phone</label>
         <input id="phone" name="phone" type="text" value="{{ old('phone', $isEdit ? $driver->phone : '') }}" placeholder="09XX XXX XXXX" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />

@@ -1,7 +1,7 @@
 @php use App\Enums\SmsStatus; @endphp
 
-<div class="flex h-full flex-1 flex-col gap-4 p-4">
-    <div class="flex flex-wrap items-center justify-between gap-4">
+<div class="app-page flex h-full flex-1 flex-col gap-4 p-4">
+    <div class="app-toolbar flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold">SMS Logs</h1>
             <p class="text-sm text-muted-foreground">Monitor SMS delivery and retry failed messages</p>
@@ -25,7 +25,7 @@
                 </button>
                 {{-- Custom date range popup --}}
                 <div x-show="showCustomExport" x-on:click.away="showCustomExport = false" x-transition
-                    class="absolute top-full right-0 mt-1 z-50 rounded-lg border bg-card p-3 shadow-lg w-64">
+                    class="app-mobile-dropdown absolute top-full right-0 mt-1 z-50 rounded-lg border bg-card p-3 shadow-lg w-64">
                     <div class="space-y-2">
                         <label class="text-xs font-medium text-muted-foreground">From</label>
                         <input type="date" x-model="dateFrom" max="{{ now()->toDateString() }}"
@@ -100,7 +100,7 @@
     </div>
 
     {{-- Filters --}}
-    <div class="flex flex-wrap items-center gap-3">
+    <div class="app-filterbar flex flex-wrap items-center gap-3">
         <div class="relative flex-1 min-w-[200px] max-w-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input
@@ -123,7 +123,7 @@
     {{-- Table --}}
     <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
         <div class="p-0">
-            <div class="overflow-x-auto">
+            <div class="app-table-scroll overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
@@ -215,7 +215,7 @@
     {{-- Create Modal --}}
     @if ($showCreateModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80" wire:click="closeModals">
-            <div class="relative w-full max-w-md rounded-lg border bg-background p-6 shadow-lg" wire:click.stop>
+            <div class="app-modal-panel relative w-full max-w-md rounded-lg border bg-background p-6 shadow-lg" wire:click.stop>
                 <div class="mb-4 flex items-center justify-between">
                     <h2 class="text-lg font-semibold">Add SMS Log</h2>
                     <button wire:click="closeModals" class="rounded-sm opacity-70 hover:opacity-100">
@@ -262,7 +262,7 @@
     {{-- Edit Modal --}}
     @if ($showEditModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80" wire:click="closeModals">
-            <div class="relative w-full max-w-md rounded-lg border bg-background p-6 shadow-lg" wire:click.stop>
+            <div class="app-modal-panel relative w-full max-w-md rounded-lg border bg-background p-6 shadow-lg" wire:click.stop>
                 <div class="mb-4 flex items-center justify-between">
                     <h2 class="text-lg font-semibold">Edit SMS Log</h2>
                     <button wire:click="closeModals" class="rounded-sm opacity-70 hover:opacity-100">
@@ -313,7 +313,7 @@
         @endphp
         @if ($log)
             <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80" wire:click="closeModals">
-                <div class="relative w-full max-w-md rounded-lg border bg-background p-6 shadow-lg" wire:click.stop>
+                <div class="app-modal-panel relative w-full max-w-md rounded-lg border bg-background p-6 shadow-lg" wire:click.stop>
                     <div class="mb-4 flex items-center justify-between">
                         <h2 class="text-lg font-semibold">SMS Log Details</h2>
                         <button wire:click="closeModals" class="rounded-sm opacity-70 hover:opacity-100">
@@ -369,7 +369,7 @@
     {{-- Delete Modal --}}
     @if ($showDeleteModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80" wire:click="closeModals">
-            <div class="relative w-full max-w-sm rounded-lg border bg-background p-6 shadow-lg" wire:click.stop>
+            <div class="app-modal-panel relative w-full max-w-sm rounded-lg border bg-background p-6 shadow-lg" wire:click.stop>
                 <div class="mb-4">
                     <h2 class="text-lg font-semibold">Delete SMS Log</h2>
                     <p class="text-sm text-muted-foreground mt-1">Are you sure you want to delete this SMS log? This action cannot be undone.</p>

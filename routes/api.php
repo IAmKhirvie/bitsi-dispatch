@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('v1')->group(function () {
+Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     // Driver Attendance Endpoints
     Route::post('/driver/check-in', [DriverAttendanceController::class, 'checkIn']);
     Route::post('/driver/check-out', [DriverAttendanceController::class, 'checkOut']);

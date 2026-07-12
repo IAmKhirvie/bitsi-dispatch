@@ -19,7 +19,7 @@
     @enderror
 </div>
 
-<div class="grid grid-cols-2 gap-4">
+<div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div class="space-y-2">
         <label for="password" class="text-sm font-medium leading-none">Password</label>
         <input id="password" name="password" type="password" {{ $isEdit ? '' : 'required' }} placeholder="{{ $isEdit ? 'Leave blank to keep current' : '' }}" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
@@ -33,7 +33,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-2 gap-4">
+<div class="app-form-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div class="space-y-2">
         <label for="role" class="text-sm font-medium leading-none">Role</label>
         <select id="role" name="role" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">

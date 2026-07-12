@@ -3,8 +3,8 @@
 @section('title', 'Trash · ' . $label . ' - BITSI Dispatch')
 
 @section('content')
-<div class="flex h-full flex-1 flex-col gap-4 p-4" x-data="{ confirmOpen: null, confirmEmpty: false }">
-    <div class="flex flex-wrap items-center justify-between gap-4">
+<div class="app-page flex h-full flex-1 flex-col gap-4 p-4" x-data="{ confirmOpen: null, confirmEmpty: false }">
+    <div class="app-toolbar flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
             <a href="{{ route('admin.trash.overview') }}"
                class="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground" title="Back">
@@ -44,7 +44,7 @@
 
     {{-- Table --}}
     <div class="rounded-lg border bg-card">
-        <div class="overflow-x-auto">
+        <div class="app-table-scroll overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b bg-muted/50">

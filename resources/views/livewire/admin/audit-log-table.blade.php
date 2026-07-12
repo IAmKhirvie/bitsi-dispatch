@@ -1,5 +1,5 @@
-<div class="flex h-full flex-1 flex-col gap-4 p-4">
-    <div class="flex flex-wrap items-center justify-between gap-4">
+<div class="app-page flex h-full flex-1 flex-col gap-4 p-4">
+    <div class="app-toolbar flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold">Audit Logs</h1>
             <p class="text-sm text-muted-foreground">Track who changed what and when</p>
@@ -22,7 +22,7 @@
             </button>
             {{-- Custom date range popup --}}
             <div x-show="showCustomExport" x-on:click.away="showCustomExport = false" x-transition
-                class="absolute top-full right-0 mt-1 z-50 rounded-lg border bg-card p-3 shadow-lg w-64">
+                class="app-mobile-dropdown absolute top-full right-0 mt-1 z-50 rounded-lg border bg-card p-3 shadow-lg w-64">
                 <div class="space-y-2">
                     <label class="text-xs font-medium text-muted-foreground">From</label>
                     <input type="date" x-model="dateFrom" max="{{ now()->toDateString() }}"
@@ -46,7 +46,7 @@
     </div>
 
     {{-- Filters --}}
-    <div class="flex flex-wrap items-center gap-3">
+    <div class="app-filterbar flex flex-wrap items-center gap-3">
         <div class="relative flex-1 min-w-[200px] max-w-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input
@@ -76,7 +76,7 @@
     {{-- Table --}}
     <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
         <div class="p-0">
-            <div class="overflow-x-auto">
+            <div class="app-table-scroll overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">

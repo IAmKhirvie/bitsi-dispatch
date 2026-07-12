@@ -1,12 +1,12 @@
 @php use App\Enums\Direction; @endphp
 
-<div class="flex h-full flex-1 flex-col gap-4 p-4">
-    <div class="flex flex-wrap items-center justify-between gap-4">
+<div class="app-page flex h-full flex-1 flex-col gap-4 p-4">
+    <div class="app-toolbar flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold">Trip Codes</h1>
             <p class="text-sm text-muted-foreground">Manage trip code definitions and routes</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="app-toolbar-actions flex items-center gap-3">
             <x-export-buttons resource="trip-codes" />
             <a href="{{ route('admin.trip-codes.create') }}"
                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
@@ -24,7 +24,7 @@
     @endif
 
     {{-- Filters --}}
-    <div class="flex flex-wrap items-center gap-3">
+    <div class="app-filterbar flex flex-wrap items-center gap-3">
         <div class="relative flex-1 min-w-[200px] max-w-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input
@@ -55,7 +55,7 @@
     {{-- Table --}}
     <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
         <div class="p-0">
-            <div class="overflow-x-auto">
+            <div class="app-mobile-table app-table-scroll overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
@@ -72,12 +72,12 @@
                     <tbody>
                         @forelse ($tripCodes as $tc)
                             <tr class="border-b last:border-0 hover:bg-muted/30 transition-colors {{ $tc->trashed() ? 'opacity-60' : '' }}">
-                                <td class="px-4 py-3 font-semibold">{{ $tc->code }}</td>
-                                <td class="px-4 py-3">{{ $tc->operator }}</td>
-                                <td class="px-4 py-3">{{ $tc->origin_terminal }} - {{ $tc->destination_terminal }}</td>
-                                <td class="px-4 py-3">{{ $tc->bus_type?->label() ?? $tc->bus_type }}</td>
-                                <td class="px-4 py-3">{{ $tc->scheduled_departure_time ? Str::substr($tc->scheduled_departure_time, 0, 5) : '--' }}</td>
-                                <td class="px-4 py-3">
+                                <td data-label="Code" class="px-4 py-3 font-semibold">{{ $tc->code }}</td>
+                                <td data-label="Operator" class="px-4 py-3">{{ $tc->operator }}</td>
+                                <td data-label="Route" class="px-4 py-3">{{ $tc->origin_terminal }} - {{ $tc->destination_terminal }}</td>
+                                <td data-label="Bus Type" class="px-4 py-3">{{ $tc->bus_type?->label() ?? $tc->bus_type }}</td>
+                                <td data-label="Departure" class="px-4 py-3">{{ $tc->scheduled_departure_time ? Str::substr($tc->scheduled_departure_time, 0, 5) : '--' }}</td>
+                                <td data-label="Direction" class="px-4 py-3">
                                     @php
                                         $tcDir = $tc->direction instanceof \App\Enums\Direction
                                             ? $tc->direction
@@ -87,12 +87,12 @@
                                         {{ $tcDir?->value ?? ($tc->direction ?: '--') }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3">
+                                <td data-label="Status" class="px-4 py-3">
                                     <button wire:click="toggleActive({{ $tc->id }})" class="cursor-pointer" title="Toggle active">
                                         <x-status-badge :status="$tc->is_active ? 'active' : 'inactive'" :label="$tc->is_active ? 'Active' : 'Inactive'" />
                                     </button>
                                 </td>
-                                <td class="px-4 py-3">
+                                <td data-label="Actions" class="px-4 py-3">
                                     <div class="flex items-center gap-2">
                                         @if ($tc->trashed())
                                             <button

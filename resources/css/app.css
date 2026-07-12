@@ -988,6 +988,9 @@ video {
 .w-24 {
   width: 6rem;
 }
+.w-26 {
+  width: 8rem;
+}
 .w-3 {
   width: 0.75rem;
 }
@@ -4119,4 +4122,184 @@ html {
 
 .\[\&_svg\]\:shrink-0 svg {
   flex-shrink: 0;
+}
+
+/* Mobile UX helpers for the Blade/Livewire application shell. */
+.app-page {
+  width: 100%;
+  min-width: 0;
+}
+
+.app-toolbar {
+  width: 100%;
+  min-width: 0;
+}
+
+.app-toolbar-actions,
+.app-filterbar {
+  width: 100%;
+}
+
+.app-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-table-scroll::after {
+  content: "Swipe table";
+  display: none;
+  padding: 0.5rem 0.75rem 0.75rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+}
+
+.app-modal-panel {
+  max-height: calc(100svh - 2rem);
+  overflow-y: auto;
+}
+
+@media (max-width: 767px) {
+  .app-header {
+    height: auto;
+    min-height: 4rem;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .app-shell-search {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  .app-shell-search select {
+    width: 6.5rem;
+  }
+
+  .app-breadcrumbs {
+    display: none;
+  }
+
+  .app-flash-stack {
+    left: 0.75rem;
+    right: 0.75rem;
+    top: 0.75rem;
+    max-width: none;
+    width: auto;
+  }
+
+  .app-page {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .app-toolbar {
+    align-items: stretch;
+  }
+
+  .app-toolbar > div,
+  .app-toolbar-actions,
+  .app-filterbar > *,
+  .app-filterbar select,
+  .app-filterbar button,
+  .app-filterbar a,
+  .app-filterbar input {
+    width: 100%;
+    max-width: none;
+  }
+
+  .app-toolbar > .app-toolbar-actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .app-toolbar > .app-toolbar-actions > *,
+  .app-toolbar > .app-toolbar-actions form,
+  .app-toolbar > .app-toolbar-actions a,
+  .app-toolbar > .app-toolbar-actions button,
+  .app-toolbar > .app-toolbar-actions input,
+  .app-toolbar > .app-toolbar-actions select {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .app-filterbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .app-form-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .app-form-grid > .col-span-2,
+  .app-form-grid > .col-span-3 {
+    grid-column: auto;
+  }
+
+  .app-table-scroll::after {
+    display: block;
+  }
+
+  .app-mobile-table table,
+  .app-mobile-table thead,
+  .app-mobile-table tbody,
+  .app-mobile-table tr,
+  .app-mobile-table th,
+  .app-mobile-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .app-mobile-table thead {
+    display: none;
+  }
+
+  .app-mobile-table tr {
+    margin: 0.75rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    background: hsl(var(--card));
+    overflow: hidden;
+  }
+
+  .app-mobile-table td {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid hsl(var(--border));
+    word-break: break-word;
+  }
+
+  .app-mobile-table td:last-child {
+    border-bottom: 0;
+  }
+
+  .app-mobile-table td::before {
+    content: attr(data-label);
+    color: hsl(var(--muted-foreground));
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .app-mobile-table td[data-label=""]::before {
+    display: none;
+  }
+
+  .app-modal-panel {
+    width: calc(100vw - 1rem);
+    margin: 0.5rem auto;
+    padding: 1rem;
+  }
+
+  .app-mobile-dropdown {
+    left: 0;
+    right: 0;
+    width: min(calc(100vw - 2rem), 20rem);
+  }
 }

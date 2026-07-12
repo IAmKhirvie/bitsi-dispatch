@@ -132,7 +132,10 @@ class DriverNotificationController extends Controller
             $time = $entry->scheduled_departure ?? 'TBD';
             $route = $entry->route ?? ($entry->tripCode?->route_display ?? 'TBD');
             $bus = $entry->vehicle?->bus_number ?? 'TBD';
-            $status = strtoupper($entry->status ?? 'SCHEDULED');
+            $statusValue = $entry->status instanceof \BackedEnum
+                ? $entry->status->value
+                : (string) ($entry->status ?? 'SCHEDULED');
+            $status = strtoupper($statusValue);
 
             $lines[] = "{$tripNum}. {$time} - {$route}";
             $lines[] = "   Bus: {$bus} | Status: {$status}";

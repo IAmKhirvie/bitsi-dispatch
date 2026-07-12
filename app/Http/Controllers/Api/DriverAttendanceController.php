@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\DispatchEntry;
 use App\Models\Driver;
 use App\Models\DriverAttendance;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class DriverAttendanceController extends Controller
@@ -18,6 +18,10 @@ class DriverAttendanceController extends Controller
      */
     public function checkIn(Request $request): JsonResponse
     {
+        if ($response = $this->authorizeMobileRequest($request)) {
+            return $response;
+        }
+
         $validated = $request->validate([
             'dispatch_entry_id' => 'required|exists:dispatch_entries,id',
             'time' => 'nullable|date_format:H:i',
@@ -33,6 +37,13 @@ class DriverAttendanceController extends Controller
             ]);
         }
 
+        $entry = $this->getAssignedEntry($driver, (int) $validated['dispatch_entry_id']);
+        if (!$entry) {
+            throw ValidationException::withMessages([
+                'dispatch_entry_id' => ['This trip is not assigned to the authenticated driver.'],
+            ]);
+        }
+
         $date = today()->toDateString();
         $time = $validated['time'] ?? now()->format('H:i:s');
 
@@ -40,7 +51,7 @@ class DriverAttendanceController extends Controller
         $attendance = DriverAttendance::firstOrCreate(
             [
                 'driver_id' => $driver->id,
-                'dispatch_entry_id' => $validated['dispatch_entry_id'],
+                'dispatch_entry_id' => $entry->id,
                 'attendance_date' => $date,
             ],
             ['status' => 'pending']
@@ -69,6 +80,10 @@ class DriverAttendanceController extends Controller
      */
     public function checkOut(Request $request): JsonResponse
     {
+        if ($response = $this->authorizeMobileRequest($request)) {
+            return $response;
+        }
+
         $validated = $request->validate([
             'dispatch_entry_id' => 'required|exists:dispatch_entries,id',
             'time' => 'nullable|date_format:H:i',
@@ -82,11 +97,18 @@ class DriverAttendanceController extends Controller
             ]);
         }
 
+        $entry = $this->getAssignedEntry($driver, (int) $validated['dispatch_entry_id']);
+        if (!$entry) {
+            throw ValidationException::withMessages([
+                'dispatch_entry_id' => ['This trip is not assigned to the authenticated driver.'],
+            ]);
+        }
+
         $date = today()->toDateString();
         $time = $validated['time'] ?? now()->format('H:i:s');
 
         $attendance = DriverAttendance::where('driver_id', $driver->id)
-            ->where('dispatch_entry_id', $validated['dispatch_entry_id'])
+            ->where('dispatch_entry_id', $entry->id)
             ->where('attendance_date', $date)
             ->first();
 
@@ -118,6 +140,10 @@ class DriverAttendanceController extends Controller
      */
     public function mySchedule(Request $request): JsonResponse
     {
+        if ($response = $this->authorizeMobileRequest($request)) {
+            return $response;
+        }
+
         $driver = $this->getDriverFromRequest($request);
 
         if (!$driver) {
@@ -157,6 +183,10 @@ class DriverAttendanceController extends Controller
      */
     public function myAttendance(Request $request): JsonResponse
     {
+        if ($response = $this->authorizeMobileRequest($request)) {
+            return $response;
+        }
+
         $driver = $this->getDriverFromRequest($request);
 
         if (!$driver) {
@@ -196,6 +226,33 @@ class DriverAttendanceController extends Controller
 
         return Driver::where('phone', $phone)
             ->where('is_active', true)
+            ->first();
+    }
+
+    protected function authorizeMobileRequest(Request $request): ?JsonResponse
+    {
+        $expected = config('services.mobile.attendance_token');
+
+        if (!$expected) {
+            return response()->json(['error' => 'mobile attendance api disabled'], 503);
+        }
+
+        $token = $request->bearerToken() ?: $request->header('X-Mobile-Token');
+
+        if (! hash_equals((string) $expected, (string) $token)) {
+            return response()->json(['error' => 'unauthorized'], 401);
+        }
+
+        return null;
+    }
+
+    protected function getAssignedEntry(Driver $driver, int $entryId): ?DispatchEntry
+    {
+        return DispatchEntry::whereKey($entryId)
+            ->where(function ($query) use ($driver) {
+                $query->where('driver_id', $driver->id)
+                    ->orWhere('driver2_id', $driver->id);
+            })
             ->first();
     }
 }

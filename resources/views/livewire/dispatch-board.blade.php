@@ -1,4 +1,4 @@
-<div class="flex h-full flex-1 flex-col gap-4 p-4" wire:poll.10s>
+<div class="app-page flex h-full flex-1 flex-col gap-4 p-4" wire:poll.10s>
     @php
         $statusClasses = [
             'scheduled' => 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
@@ -23,12 +23,12 @@
     @endphp
 
     {{-- Header with date picker --}}
-    <div class="flex flex-wrap items-center justify-between gap-4">
+    <div class="app-toolbar flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold">Dispatch Board</h1>
             <p class="text-sm text-muted-foreground">Manage daily bus dispatch operations</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="app-toolbar-actions flex items-center gap-3">
             <div class="relative">
                 <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 <input
@@ -142,7 +142,7 @@
             @endif
 
             <div class="p-0">
-                <div class="overflow-x-auto">
+                <div class="app-table-scroll overflow-x-auto">
                     <table class="min-w-[1120px] w-full text-xs table-fixed">
                         <thead>
                             <tr class="border-b bg-muted/50">
@@ -170,7 +170,7 @@
                                         {!! $sortIcon('direction') !!}
                                     </button>
                                 </th>
-                                <th class="w-36 px-2 py-2 text-left">
+                                <th class="w-26 px-2 py-2 text-left">
                                     <button type="button" wire:click="sortBy('route')" class="{{ $sortHeaderClass }}">
                                         Route
                                         {!! $sortIcon('route') !!}
@@ -227,9 +227,9 @@
                                     </td>
                                     <td class="px-2 py-1.5 truncate" title="{{ $entry->route ?? '' }}">{{ $entry->route ?? '--' }}</td>
                                     <td class="px-2 py-1.5 text-[11px] leading-tight">
-                                        <div><span class="text-muted-foreground">S:</span> {{ $entry->scheduled_departure ? \Carbon\Carbon::parse($entry->scheduled_departure)->format('H:i:s') : '--' }}</div>
-                                        <div><span class="text-muted-foreground">D:</span> {{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i:s') : '--' }}</div>
-                                        <div><span class="text-muted-foreground">A:</span> {{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i:s') : '--' }}</div>
+                                        <div><span class="text-muted-foreground tooltip">Scheduled: </span> {{ $entry->scheduled_departure ? \Carbon\Carbon::parse($entry->scheduled_departure)->format('H:i:s') : '--' }}</div>
+                                        <div><span class="text-muted-foreground">Departure:</span> {{ $entry->actual_departure ? \Carbon\Carbon::parse($entry->actual_departure)->format('H:i:s') : '--' }}</div>
+                                        <div><span class="text-muted-foreground">Arrival:</span> {{ $entry->actual_arrival ? \Carbon\Carbon::parse($entry->actual_arrival)->format('H:i:s') : '--' }}</div>
                                     </td>
                                     <td class="px-2 py-1.5 text-[11px] leading-tight">
                                         <div class="truncate">{{ $entry->driver->name ?? '--' }}</div>
@@ -260,7 +260,7 @@
                                                         type="button"
                                                         wire:click="openStatusDialog({{ $entry->id }}, 'departed')"
                                                         class="rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-blue-700"
-                                                        title="Mark departed (stamps time + KMR out)"
+                                                        title="Bus leaves the terminal – records actual departure time and KMR"
                                                     >Depart</button>
                                                 @endif
                                                 @if (in_array($entryStatus, ['departed', 'on_route', 'delayed']))
@@ -268,7 +268,7 @@
                                                         type="button"
                                                         wire:click="openStatusDialog({{ $entry->id }}, 'arrived')"
                                                         class="rounded bg-green-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-green-700"
-                                                        title="Mark arrived (stamps time + KMR in)"
+                                                        title="Bus reaches destination – records actual arrival time and KMR"
                                                     >Arrive</button>
                                                 @endif
                                                 @if (in_array($entryStatus, ['scheduled', 'departed', 'on_route']))
@@ -276,6 +276,7 @@
                                                         type="button"
                                                         wire:click="openStatusDialog({{ $entry->id }}, 'delayed')"
                                                         class="rounded bg-orange-500 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-orange-600"
+                                                        title="Bus is running late – records the delay time and reason"
                                                     >Delay</button>
                                                 @endif
                                                 @if (in_array($entryStatus, ['scheduled', 'departed', 'on_route', 'delayed']))
@@ -283,7 +284,7 @@
                                                         type="button"
                                                         wire:click="openStatusDialog({{ $entry->id }}, 'breakdown')"
                                                         class="rounded bg-yellow-500 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-yellow-600"
-                                                        title="Mark bus as under repair; trip details remain editable"
+                                                        title="Bus has a mechanical issue – marks for repair, trip can be resumed later"
                                                     >Breakdown</button>
                                                 @endif
                                                 @if (in_array($entryStatus, ['scheduled', 'departed', 'delayed']))
@@ -291,6 +292,7 @@
                                                         type="button"
                                                         wire:click="openStatusDialog({{ $entry->id }}, 'cancelled')"
                                                         class="rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-red-700"
+                                                        title="Cancel this trip – removes from schedule, records cancellation time and reason"
                                                     >Cancel</button>
                                                 @endif
                                                 @if ($entryStatus === 'cancelled')
@@ -298,6 +300,7 @@
                                                         type="button"
                                                         wire:click="transitionStatus({{ $entry->id }}, 'scheduled')"
                                                         class="rounded bg-gray-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-gray-700"
+                                                        title="Restore the trip to 'scheduled' status"
                                                     >Reschedule</button>
                                                 @endif
                                                 @if ($entryStatus === 'breakdown')
@@ -305,17 +308,18 @@
                                                         type="button"
                                                         wire:click="transitionStatus({{ $entry->id }}, 'scheduled')"
                                                         class="rounded bg-gray-600 px-1.5 py-0.5 text-[10px] font-medium text-white hover:bg-gray-700"
+                                                        title="Reset the trip to 'scheduled' status (bus repaired)"
                                                     >Reset</button>
                                                 @endif
                                             </div>
                                             <div class="mt-1 flex flex-wrap gap-1">
                                                 @if ($entry->driver_id)
-                                                    <button type="button" wire:click="openDriverEventDialog({{ $entry->id }}, 'driver1', 'arrived')" class="rounded border px-1.5 py-0.5 text-[10px] hover:bg-muted">D1 Arr</button>
-                                                    <button type="button" wire:click="openDriverEventDialog({{ $entry->id }}, 'driver1', 'cutoff')" class="rounded border px-1.5 py-0.5 text-[10px] hover:bg-muted">D1 Cut</button>
+                                                    <button type="button" wire:click="openDriverEventDialog({{ $entry->id }}, 'driver1', 'arrived')" class="rounded border px-1.5 py-0.5 text-[10px] hover:bg-muted" title="Record Driver 1 arrival at terminal">D1 Arr</button>
+                                                    <button type="button" wire:click="openDriverEventDialog({{ $entry->id }}, 'driver1', 'cutoff')" class="rounded border px-1.5 py-0.5 text-[10px] hover:bg-muted" title="End Driver 1 duty (cut‑off)">D1 Cut</button>
                                                 @endif
                                                 @if ($entry->driver2_id)
-                                                    <button type="button" wire:click="openDriverEventDialog({{ $entry->id }}, 'driver2', 'arrived')" class="rounded border px-1.5 py-0.5 text-[10px] hover:bg-muted">D2 Arr</button>
-                                                    <button type="button" wire:click="openDriverEventDialog({{ $entry->id }}, 'driver2', 'cutoff')" class="rounded border px-1.5 py-0.5 text-[10px] hover:bg-muted">D2 Cut</button>
+                                                    <button type="button" wire:click="openDriverEventDialog({{ $entry->id }}, 'driver2', 'arrived')" class="rounded border px-1.5 py-0.5 text-[10px] hover:bg-muted" title="Record Driver 2 arrival at terminal">D2 Arr</button>
+                                                    <button type="button" wire:click="openDriverEventDialog({{ $entry->id }}, 'driver2', 'cutoff')" class="rounded border px-1.5 py-0.5 text-[10px] hover:bg-muted" title="End Driver 2 duty (cut‑off)">D2 Cut</button>
                                                 @endif
                                             </div>
                                         </div>
@@ -326,7 +330,7 @@
                                             <button
                                                 wire:click="openEditDialog({{ $entry->id }})"
                                                 class="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                                                title="Edit"
+                                                title="Edit entry details"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                                             </button>
@@ -334,7 +338,7 @@
                                                 wire:click="deleteEntry({{ $entry->id }})"
                                                 wire:confirm="Are you sure you want to delete this entry?"
                                                 class="rounded p-1 text-muted-foreground hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900 dark:hover:text-red-400"
-                                                title="Delete"
+                                                title="Delete this entry permanently"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                                             </button>
@@ -385,7 +389,7 @@
         style="display: none;"
     >
         <div class="fixed inset-0 bg-black/50" x-on:click="$wire.showAddDialog = false"></div>
-        <div class="relative mx-auto my-8 max-w-2xl rounded-lg bg-background p-6 shadow-lg border">
+        <div class="app-modal-panel relative mx-auto my-8 max-w-2xl rounded-lg bg-background p-6 shadow-lg border">
             <div class="mb-4">
                 <h2 class="text-lg font-semibold">Add Dispatch Entry</h2>
                 <p class="text-sm text-muted-foreground">Add a new bus dispatch entry for this day.</p>
@@ -422,18 +426,50 @@
         style="display: none;"
     >
         <div class="fixed inset-0 bg-black/50" x-on:click="$wire.showStatusDialog = false"></div>
-        <div class="relative mx-auto my-16 max-w-sm rounded-lg bg-background p-6 shadow-lg border">
+        <div class="app-modal-panel relative mx-auto my-16 max-w-sm rounded-lg bg-background p-6 shadow-lg border">
             <div class="mb-4">
                 <h2 class="text-lg font-semibold">
                     {{ $statusTo ? 'Mark ' . ucwords(str_replace('_', ' ', $statusTo)) : 'Update Status' }}
                 </h2>
                 <p class="text-sm text-muted-foreground">
-                    {{ $statusEntryLabel ?: 'Dispatch entry' }} — records a dispatch event with timestamp and notes.
+                    @switch($statusTo)
+                        @case('departed')
+                            This bus is leaving the terminal. Recording the actual departure time and KMR reading.
+                            @break
+                        @case('arrived')
+                            This bus has reached its destination. Recording the actual arrival time and KMR reading.
+                            @break
+                        @case('delayed')
+                            The bus is running late. Record the time the delay was noticed and the reason.
+                            @break
+                        @case('cancelled')
+                            This trip is being cancelled. Record the cancellation time and reason.
+                            @break
+                        @case('breakdown')
+                            The bus has broken down. Mark it for repair; the trip can be resumed later.
+                            @break
+                        @default
+                            {{ $statusEntryLabel ?: 'Dispatch entry' }} — records a dispatch event with timestamp and notes.
+                    @endswitch
                 </p>
             </div>
             <form wire:submit.prevent="confirmStatusDialog" class="space-y-4">
                 <div>
-                    <label class="mb-1 block text-sm font-medium">Event time</label>
+                    <label class="mb-1 block text-sm font-medium">
+                        @if ($statusTo === 'departed')
+                            Departure time
+                        @elseif ($statusTo === 'arrived')
+                            Arrival time
+                        @elseif ($statusTo === 'delayed')
+                            Delay noticed at
+                        @elseif ($statusTo === 'cancelled')
+                            Cancellation time
+                        @elseif ($statusTo === 'breakdown')
+                            Breakdown time
+                        @else
+                            Event time
+                        @endif
+                    </label>
                     <input type="datetime-local" step="1" wire:model="statusOccurredAt" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
                     @error('statusOccurredAt') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                 </div>
@@ -503,7 +539,7 @@
         style="display: none;"
     >
         <div class="fixed inset-0 bg-black/50" x-on:click="$wire.showDriverEventDialog = false"></div>
-        <div class="relative mx-auto my-16 max-w-md rounded-lg bg-background p-6 shadow-lg border">
+        <div class="app-modal-panel relative mx-auto my-16 max-w-md rounded-lg bg-background p-6 shadow-lg border">
             <div class="mb-4">
                 <h2 class="text-lg font-semibold">
                     {{ strtoupper($driverEventSlot === 'driver1' ? 'D1' : 'D2') }} {{ $driverEventType === 'cutoff' ? 'Cut-off' : 'Arrival' }}
@@ -558,7 +594,7 @@
         style="display: none;"
     >
         <div class="fixed inset-0 bg-black/50" x-on:click="$wire.showEditDialog = false"></div>
-        <div class="relative mx-auto my-8 max-w-2xl rounded-lg bg-background p-6 shadow-lg border">
+        <div class="app-modal-panel relative mx-auto my-8 max-w-2xl rounded-lg bg-background p-6 shadow-lg border">
             <div class="mb-4">
                 <h2 class="text-lg font-semibold">Edit Dispatch Entry</h2>
                 <p class="text-sm text-muted-foreground">Update the dispatch entry details.</p>

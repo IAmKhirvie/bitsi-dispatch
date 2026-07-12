@@ -23,7 +23,7 @@
     {{-- Date Range Filter --}}
     <div class="mt-4 rounded-xl border bg-card text-card-foreground shadow">
         <div class="p-6">
-            <div class="flex flex-wrap items-end gap-4">
+            <div class="app-filterbar flex flex-wrap items-end gap-4">
                 <div class="space-y-2">
                     <label for="date_from" class="text-sm font-medium leading-none">From Date</label>
                     <div class="relative">
@@ -118,7 +118,7 @@
             <p class="text-sm text-muted-foreground">Trip counts per {{ $reportType === 'daily' ? 'day' : ($reportType === 'weekly' ? 'week' : 'month') }} within the selected range</p>
         </div>
         <div class="p-0">
-            <div class="overflow-x-auto">
+            <div class="app-table-scroll overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">

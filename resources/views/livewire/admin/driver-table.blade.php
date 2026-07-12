@@ -1,12 +1,12 @@
 @php use App\Enums\DriverStatus; @endphp
 
-<div class="flex h-full flex-1 flex-col gap-4 p-4">
-    <div class="flex flex-wrap items-center justify-between gap-4">
+<div class="app-page flex h-full flex-1 flex-col gap-4 p-4">
+    <div class="app-toolbar flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold">Drivers</h1>
             <p class="text-sm text-muted-foreground">Manage bus drivers and their status</p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="app-toolbar-actions flex items-center gap-3">
             <x-export-buttons resource="drivers" />
             <a href="{{ route('admin.drivers.create') }}"
                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
@@ -29,7 +29,7 @@
     @endif
 
     {{-- Filters --}}
-    <div class="flex flex-wrap items-center gap-3">
+    <div class="app-filterbar flex flex-wrap items-center gap-3">
         <div class="relative flex-1 min-w-[200px] max-w-sm">
             <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input
@@ -60,7 +60,7 @@
     {{-- Table --}}
     <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
         <div class="p-0">
-            <div class="overflow-x-auto">
+            <div class="app-mobile-table app-table-scroll overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b bg-muted/50">
@@ -76,8 +76,8 @@
                     <tbody>
                         @forelse ($drivers as $driver)
                             <tr class="border-b last:border-0 hover:bg-muted/30 transition-colors {{ $driver->trashed() ? 'opacity-60' : '' }}">
-                                <td class="px-4 py-3 font-medium">{{ $driver->name }}</td>
-                                <td class="px-4 py-3">
+                                <td data-label="Name" class="px-4 py-3 font-medium">{{ $driver->name }}</td>
+                                <td data-label="Phone" class="px-4 py-3">
                                     <div class="flex items-center gap-1">
                                         @if ($driver->phone)
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
@@ -85,17 +85,17 @@
                                         {{ $driver->phone ?? '--' }}
                                     </div>
                                 </td>
-                                <td class="px-4 py-3">{{ $driver->license_number ?? '--' }}</td>
-                                <td class="px-4 py-3">
+                                <td data-label="ID Number" class="px-4 py-3">{{ $driver->license_number ?? '--' }}</td>
+                                <td data-label="Active" class="px-4 py-3">
                                     <button wire:click="toggleActive({{ $driver->id }})" class="cursor-pointer" title="Toggle active">
                                         <x-status-badge :status="$driver->is_active ? 'active' : 'inactive'" :label="$driver->is_active ? 'Active' : 'Inactive'" />
                                     </button>
                                 </td>
-                                <td class="px-4 py-3">
+                                <td data-label="Status" class="px-4 py-3">
                                     @php $driverStatus = $driver->status ?? DriverStatus::Available; @endphp
                                     <x-status-badge :status="$driverStatus->value" :label="$driverStatus->label()" />
                                 </td>
-                                <td class="px-4 py-3">
+                                <td data-label="Quick Status" class="px-4 py-3">
                                     <div class="flex items-center gap-1">
                                         @foreach (DriverStatus::cases() as $s)
                                             @php
@@ -118,7 +118,7 @@
                                         @endforeach
                                     </div>
                                 </td>
-                                <td class="px-4 py-3">
+                                <td data-label="Actions" class="px-4 py-3">
                                     <div class="flex items-center gap-2">
                                         @if ($driver->trashed())
                                             <button
