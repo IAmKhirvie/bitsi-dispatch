@@ -7,13 +7,11 @@ import {
     DialogOverlay,
     DialogPortal,
     useForwardPropsEmits,
-    type DialogContentEmits,
-    type DialogContentProps,
 } from 'radix-vue';
 import { computed, type HTMLAttributes } from 'vue';
 
-const props = defineProps<DialogContentProps & { class?: HTMLAttributes['class'] }>();
-const emits = defineEmits<DialogContentEmits>();
+const props = defineProps<{ class?: HTMLAttributes['class'] }>();
+const emits = defineEmits();
 
 const delegatedProps = computed(() => {
     const { class: _, ...delegated } = props;

@@ -14,7 +14,7 @@
         <!-- Dark mode init (before CSS to prevent flash) -->
         <script>
             (function() {
-                const theme = localStorage.getItem('theme') || 'system';
+                const theme = localStorage.getItem('appearance') || 'light';
                 function applyTheme(theme) {
                     if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                         document.documentElement.classList.add('dark');
@@ -26,7 +26,7 @@
                 
                 // Listen for system theme changes
                 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-                    if (localStorage.getItem('theme') === 'system') {
+                    if (localStorage.getItem('appearance') === 'system') {
                         applyTheme('system');
                     }
                 });
@@ -34,7 +34,7 @@
         </script>
 
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/js/app.ts'])
 
         <!-- Styles -->
         @stack('styles')

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
@@ -14,7 +14,7 @@
         <!-- Dark mode init (before CSS to prevent flash) -->
         <script>
             (function() {
-                const theme = localStorage.getItem('theme') || 'system';
+                const theme = localStorage.getItem('appearance') || 'light';
                 if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                     document.documentElement.classList.add('dark');
                 } else {
@@ -24,7 +24,7 @@
         </script>
 
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/js/app.ts'])
 
         <!-- Styles -->
         @livewireStyles
@@ -36,8 +36,8 @@
                     <div class="flex flex-col items-center gap-4">
                         {{-- Logo --}}
                         <a href="{{ route('home') }}" class="flex flex-col items-center gap-2 font-medium">
-                            <div class="mb-1 flex h-9 w-9 items-center justify-center rounded-md">
-                                <img src="/bicol_isarog_logo.png" alt="Bicol Isarog Logo" class="size-9 fill-current text-[var(--foreground)] dark:text-white" style="background: transparent;" />
+                        <div class="mb-1 flex items-center justify-center rounded-md">
+                            <img src="/bicol_isarog_logo.png" alt="Bicol Isarog Logo" class="h-24 w-auto fill-current text-[var(--foreground)] dark:text-white" style="background: transparent;" />
                             </div>
                             <span class="sr-only">@yield('title')</span>
                         </a>

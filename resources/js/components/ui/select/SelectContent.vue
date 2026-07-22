@@ -5,16 +5,14 @@ import {
     SelectPortal,
     SelectViewport,
     useForwardPropsEmits,
-    type SelectContentEmits,
-    type SelectContentProps,
 } from 'radix-vue';
 import { computed, type HTMLAttributes } from 'vue';
 
 const props = withDefaults(
-    defineProps<SelectContentProps & { class?: HTMLAttributes['class'] }>(),
+    defineProps<{ class?: HTMLAttributes['class'] }>(),
     { position: 'popper' },
 );
-const emits = defineEmits<SelectContentEmits>();
+const emits = defineEmits();
 
 const delegatedProps = computed(() => {
     const { class: _, ...delegated } = props;

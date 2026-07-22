@@ -4,19 +4,16 @@ import {
     DropdownMenuContent,
     DropdownMenuPortal,
     useForwardPropsEmits,
-    type DropdownMenuContentEmits,
-    type DropdownMenuContentProps,
 } from 'radix-vue';
 import { computed, type HTMLAttributes } from 'vue';
 
-const props = withDefaults(defineProps<DropdownMenuContentProps & { class?: HTMLAttributes['class'] }>(), {
+const props = withDefaults(defineProps<{ class?: HTMLAttributes['class'] }>(), {
     sideOffset: 4,
 });
-const emits = defineEmits<DropdownMenuContentEmits>();
+const emits = defineEmits();
 
 const delegatedProps = computed(() => {
     const { class: _, ...delegated } = props;
-
     return delegated;
 });
 

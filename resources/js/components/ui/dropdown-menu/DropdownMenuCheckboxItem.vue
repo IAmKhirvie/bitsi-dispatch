@@ -5,17 +5,14 @@ import {
     DropdownMenuCheckboxItem,
     DropdownMenuItemIndicator,
     useForwardPropsEmits,
-    type DropdownMenuCheckboxItemEmits,
-    type DropdownMenuCheckboxItemProps,
 } from 'radix-vue';
 import { computed, type HTMLAttributes } from 'vue';
 
-const props = defineProps<DropdownMenuCheckboxItemProps & { class?: HTMLAttributes['class'] }>();
-const emits = defineEmits<DropdownMenuCheckboxItemEmits>();
+const props = defineProps<{ class?: HTMLAttributes['class'] }>();
+const emits = defineEmits();
 
 const delegatedProps = computed(() => {
     const { class: _, ...delegated } = props;
-
     return delegated;
 });
 

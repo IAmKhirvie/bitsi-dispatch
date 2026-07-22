@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
     plugins: [
         vue(),
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/css/app.css', 'resources/js/app.ts'],
             refresh: true,
         }),
     ],
@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => ({
         // Enable sourcemaps in dev only
         sourcemap: mode !== 'production',
         // Reduce CSS/JS chunk sizes
-        cssMinify: 'lightningcss',
+        cssMinify: 'esbuild',
         minify: 'esbuild',
         // Rollup-specific optimizations
         rollupOptions: {

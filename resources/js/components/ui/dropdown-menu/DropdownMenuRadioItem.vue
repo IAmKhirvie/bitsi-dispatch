@@ -5,18 +5,14 @@ import {
     DropdownMenuItemIndicator,
     DropdownMenuRadioItem,
     useForwardPropsEmits,
-    type DropdownMenuRadioItemEmits,
-    type DropdownMenuRadioItemProps,
 } from 'radix-vue';
 import { computed, type HTMLAttributes } from 'vue';
 
-const props = defineProps<DropdownMenuRadioItemProps & { class?: HTMLAttributes['class'] }>();
-
-const emits = defineEmits<DropdownMenuRadioItemEmits>();
+const props = defineProps<{ class?: HTMLAttributes['class'] }>();
+const emits = defineEmits();
 
 const delegatedProps = computed(() => {
     const { class: _, ...delegated } = props;
-
     return delegated;
 });
 

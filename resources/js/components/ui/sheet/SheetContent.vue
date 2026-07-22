@@ -7,13 +7,11 @@ import {
     DialogOverlay,
     DialogPortal,
     useForwardPropsEmits,
-    type DialogContentEmits,
-    type DialogContentProps,
 } from 'radix-vue';
 import { computed, type HTMLAttributes } from 'vue';
 import { sheetVariants, type SheetVariants } from '.';
 
-interface SheetContentProps extends DialogContentProps {
+interface SheetContentProps {
     class?: HTMLAttributes['class'];
     side?: SheetVariants['side'];
 }
@@ -23,12 +21,10 @@ defineOptions({
 });
 
 const props = defineProps<SheetContentProps>();
-
-const emits = defineEmits<DialogContentEmits>();
+const emits = defineEmits();
 
 const delegatedProps = computed(() => {
     const { class: _, side, ...delegated } = props;
-
     return delegated;
 });
 
